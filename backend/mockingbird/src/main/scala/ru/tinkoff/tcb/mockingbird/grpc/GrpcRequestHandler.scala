@@ -22,13 +22,14 @@ import ru.tinkoff.tcb.mockingbird.model.GProxyResponse
 import ru.tinkoff.tcb.mockingbird.model.PersistentState
 import ru.tinkoff.tcb.mockingbird.model.Scope
 import ru.tinkoff.tcb.protocol.log.*
+import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 import ru.tinkoff.tcb.utils.transformation.json.*
 
 trait GrpcRequestHandler {
   def exec(bytes: Array[Byte]): RIO[WLD & RequestContext, Array[Byte]]
 }
 
-class GrpcRequestHandlerImpl(stateDAO: PersistentStateDAO[Task], stubResolver: GrpcStubResolver)
+class GrpcRequestHandlerImpl(stateDAO: PersistentStateDAO[Task], stubResolver: GrpcStubResolver, implicit val jsSandbox: GraalJsSandbox)
     extends GrpcRequestHandler {
   override def exec(bytes: Array[Byte]): RIO[WLD & RequestContext, Array[Byte]] =
     for {
@@ -97,8 +98,8 @@ class GrpcRequestHandlerImpl(stateDAO: PersistentStateDAO[Task], stubResolver: G
 }
 
 object GrpcRequestHandlerImpl {
-  val live: URLayer[PersistentStateDAO[Task] & GrpcStubResolver, GrpcRequestHandlerImpl] =
-    ZLayer.fromFunction(new GrpcRequestHandlerImpl(_, _))
+  val live: URLayer[PersistentStateDAO[Task] & GrpcStubResolver & GraalJsSandbox, GrpcRequestHandlerImpl] =
+    ZLayer.fromFunction(new GrpcRequestHandlerImpl(_, _, _))
 }
 
 object GrpcRequestHandler {
