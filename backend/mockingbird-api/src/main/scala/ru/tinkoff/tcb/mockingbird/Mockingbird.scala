@@ -20,6 +20,7 @@ import sttp.client4.httpclient.zio.HttpClientZioBackend
 import tofu.logging.Logging
 import tofu.logging.impl.ZUniversalLogging
 import zio.managed.*
+
 import ru.tinkoff.tcb.mockingbird.api.AdminApiHandler
 import ru.tinkoff.tcb.mockingbird.api.AdminHttp
 import ru.tinkoff.tcb.mockingbird.api.MetricsHttp
@@ -139,7 +140,9 @@ object Mockingbird extends scala.App {
             scopedBackend <- HttpClientZioBackend.scopedUsingClient(httpClient)
           } yield scopedBackend
         },
-        (ZLayer.service[ServerConfig].project(_.sandbox) ++ ZLayer.fromZIO(ZIO.attempt(readStr("prelude.js")).map(Option(_)))) >>> GraalJsSandbox.live,
+        (ZLayer.service[ServerConfig].project(_.sandbox) ++ ZLayer.fromZIO(
+          ZIO.attempt(readStr("prelude.js")).map(Option(_))
+        )) >>> GraalJsSandbox.live,
         mongoLayer,
         aesEncoder,
         collection(_.stub) >>> HttpStubDAOImpl.live,
@@ -187,7 +190,8 @@ object Mockingbird extends scala.App {
             mongoLayer,
             collection(_.state) >>> PersistentStateDAOImpl.live,
             collection(_.grpcStub) >>> GrpcStubDAOImpl.live,
-            (ZLayer.service[ServerConfig].project(_.sandbox) ++ ZLayer.fromZIO(ZIO.attempt(readStr("prelude.js")).map(Option(_)))) >>> GraalJsSandbox.live,
+            (ZLayer.service[ServerConfig].project(_.sandbox) ++ ZLayer
+              .fromZIO(ZIO.attempt(readStr("prelude.js")).map(Option(_)))) >>> GraalJsSandbox.live,
             GrpcStubResolverImpl.live,
             GrpcRequestHandlerImpl.live
           )

@@ -10,7 +10,13 @@ import net.ceedubs.ficus.readers.EnumerationReader.*
 
 final case class JsSandboxConfig(allowedClasses: Set[String] = Set())
 
-final case class ServerConfig(interface: String, port: Int, allowedOrigins: Seq[String], healthCheckRoute: Option[String], sandbox: JsSandboxConfig)
+final case class ServerConfig(
+    interface: String,
+    port: Int,
+    allowedOrigins: Seq[String],
+    healthCheckRoute: Option[String],
+    sandbox: JsSandboxConfig
+)
 
 final case class SecurityConfig(secret: String)
 
