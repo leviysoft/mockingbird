@@ -1,9 +1,1 @@
--J-Xms1536m
--J-Xmx1536m
--J-XX:+AlwaysPreTouch
--J-XX:ReservedCodeCacheSize=128M
--J-XX:MaxMetaspaceSize=512M
--J-Xss2m
--J-XX:+TieredCompilation
--J-XX:+UseParallelGC
 -Dsbt.io.implicit.relative.glob.conversion=allow
