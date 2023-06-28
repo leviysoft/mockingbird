@@ -60,6 +60,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      SBT_OPTS: "-Xms2048m -Xmx2048m -XX:+AlwaysPreTouch -XX:ReservedCodeCacheSize=128M -XX:MaxMetaspaceSize=512M -Xss2m -XX:+TieredCompilation -XX:+UseParallelGC"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -153,6 +156,7 @@ jobs:
 
     env:
       CI: true
+      SBT_OPTS: "-Xms1024m -Xmx1024m -XX:+AlwaysPreTouch -XX:ReservedCodeCacheSize=128M -XX:MaxMetaspaceSize=512M -Xss2m -XX:+TieredCompilation -XX:+UseParallelGC"
 
     steps:
       - uses: actions/checkout@v4
@@ -167,8 +171,8 @@ jobs:
 
       - uses: graalvm/setup-graalvm@v1
         with:
-          version: '22.3.1'
           java-version: '17'
+          distribution: 'graalvm'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
