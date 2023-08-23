@@ -101,7 +101,7 @@ jobs:
         with:
           context: ./backend/mockingbird-api/target/docker/stage
           push: true
-          tags: ghcr.io/tinkoff/mockingbird:${{ steps.get-ref.outputs.tag }}
+          tags: ghcr.io/leviysoft/mockingbird:${{ steps.get-ref.outputs.tag }}
         if: ${{ github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') }}
 
       - name: Publish layers
@@ -168,5 +168,5 @@ jobs:
         with:
           context: ./backend/mockingbird-native/target/docker/stage
           push: true
-          tags: ghcr.io/tinkoff/mockingbird:${{ steps.get-ref.outputs.tag }}-native
+          tags: ghcr.io/leviysoft/mockingbird:${{ steps.get-ref.outputs.tag }}-native
         if: ${{ github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') }}
