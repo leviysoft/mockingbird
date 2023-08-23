@@ -1,9 +1,6 @@
 package ru.tinkoff.tcb.mockingbird
 
 import scalapb.zio_grpc.RequestContext
-import scalapb.zio_grpc.Server
-import scalapb.zio_grpc.ServerLayer
-import scalapb.zio_grpc.ServiceList
 import scalapb.zio_grpc.server.ZServerCallHandler
 
 import com.linecorp.armeria.client.ClientFactory
@@ -171,13 +168,9 @@ object Mockingbird extends scala.App {
 
   def port: Int = 9000
 
-  def services: ServiceList[Any] = ServiceList.empty
-
   val builder: ServerBuilder[?] = ServerBuilder.forPort(port)
 
-  def serverLive: ZLayer[Any, Throwable, Server] = ServerLayer.fromServiceList(builder, services)
-
-  val registry: UIO[Unit] = for {
+  val runGRPCServer: UIO[Unit] = for {
     runtime <- zio.ZIO.runtime[Any]
     handler = ZServerCallHandler.unaryCallHandler(
       runtime,
@@ -199,11 +192,12 @@ object Mockingbird extends scala.App {
       handler
     )
     _ = builder.fallbackHandlerRegistry(mutableRegistry)
+    _ = builder.build().start()
   } yield ()
 
   Unsafe.unsafe { implicit us =>
     wldRuntime.unsafe.run {
-      (registry *> zioLog.info(s"GRPC server started at port: $port") *> ZIO.scoped[Any](
+      (runGRPCServer *> zioLog.info(s"GRPC server started at port: $port") *> ZIO.scoped[Any](
         server.build *> ZIO.never
       ))
         .catchAll(ex => zioLog.errorCause(ex.getMessage, ex))
