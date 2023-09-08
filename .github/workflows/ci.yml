@@ -1,7 +1,11 @@
 name: CI
 
 on:
-  - push
+  workflow_call:
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   front-build:
