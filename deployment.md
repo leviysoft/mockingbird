@@ -32,6 +32,11 @@ mockingbird доступен в двух вариантах
 ```
 {
   "secrets": {
+    "server": {
+      "allowedOrigins": [
+        "*"
+      ]
+    },
     "mongodb": {
       "uri": "mongodb://.."
     },
