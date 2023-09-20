@@ -19,3 +19,4 @@ node_modules
 dist
 .fleet
 secrets.conf
+/backend/compose-test.yml

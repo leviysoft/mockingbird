@@ -1,0 +1,28 @@
+services:
+  mongo:
+    image: mongo
+    environment:
+      - MONGO_INITDB_DATABASE=mockingbird
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh mongo:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app-tier
+
+  mockingbird:
+    image: "${MOCKINGBIRD_IMAGE}"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      # Read the docs about secrets
+      - ./secrets-for-test.conf:/opt/mockingbird-native/conf/secrets.conf
+    command: -server -Xms256m -Xmx256m -XX:MaxDirectMemorySize=128m -Dconfig.file=/opt/mockingbird-native/qa.conf -Dlog.level=DEBUG -Dlog4j.formatMsgNoLookups=true
+    networks:
+      - app-tier
+networks:
+  app-tier:
+    driver: bridge
