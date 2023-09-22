@@ -6,8 +6,6 @@ import cats.tagless.autoFunctorK
 import com.github.dwickern.macros.NameOf.*
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.bson.BsonDocument
-import org.mongodb.scala.model.Filters.exists
-import org.mongodb.scala.model.IndexOptions
 import org.mongodb.scala.model.Indexes.*
 import simulacrum.typeclass
 
@@ -66,11 +64,12 @@ class HttpStubDAOImpl(collection: MongoCollection[BsonDocument])
     with HttpStubDAO[Task] {
   def createIndexes: Task[Unit] =
     createIndex(
-      ascending(nameOf[HttpStub](_.method), nameOf[HttpStub](_.path), nameOf[HttpStub](_.scope)),
-      IndexOptions().partialFilterExpression(exists(nameOf[HttpStub](_.path)))
-    ) *> createIndex(
-      ascending(nameOf[HttpStub](_.method), nameOf[HttpStub](_.pathPattern), nameOf[HttpStub](_.scope)),
-      IndexOptions().partialFilterExpression(exists(nameOf[HttpStub](_.pathPattern)))
+      ascending(
+        nameOf[HttpStub](_.method),
+        nameOf[HttpStub](_.path),
+        nameOf[HttpStub](_.scope),
+        nameOf[HttpStub](_.times)
+      ),
     ) *> createIndex(
       descending(nameOf[HttpStub](_.created))
     ) *> createIndex(
