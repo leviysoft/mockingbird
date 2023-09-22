@@ -52,7 +52,7 @@ final class StubResolver(stubDAO: HttpStubDAO[Task], stateDAO: PersistentStateDA
           )
         )
         condition0 = prop[HttpStub](_.method) === method &&
-          (prop[HttpStub](_.path) ==@ path || pathPatternExpr) &&
+          (prop[HttpStub](_.path) ==@ path || (prop[HttpStub](_.path).notExists && pathPatternExpr)) &&
           prop[HttpStub](_.scope) === scope
         condition = (scope == Scope.Countdown).fold(condition0 && prop[HttpStub](_.times) > Option(0), condition0)
         candidates0 <- stubDAO.findChunk(condition, 0, Int.MaxValue)
