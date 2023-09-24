@@ -9,6 +9,10 @@ on:
     tags:
       - '*'
 
+env:
+  MOCKINGBIRD_TEST_IMAGE_JVM: "ghcr.io/leviysoft/mockingbird:${{ github.run_number }}"
+  MOCKINGBIRD_TEST_IMAGE_NATIVE: "ghcr.io/leviysoft/mockingbird:${{ github.run_number }}-native"
+
 jobs:
   front-build:
     runs-on: ubuntu-latest
@@ -90,6 +94,14 @@ jobs:
           cd backend
           sbt "project mockingbird-api;clean;fixCheck;test;missinglinkCheck;Docker / stage;"
 
+      - name: Build docker image for test
+        uses: docker/build-push-action@v3
+        with:
+          context: ./backend/mockingbird-api/target/docker/stage
+          push: false
+          tags: ${{ env.MOCKINGBIRD_TEST_IMAGE_JVM }}
+        if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+
       - name: ZIP stages files
         uses: montudor/action-zip@v1
         with:
@@ -120,6 +132,19 @@ jobs:
           asset_name: layers.zip
           tag: ${{ github.ref_name }}
         if: ${{ github.ref_type == 'tag' }}
+
+      - name: Save docker image to file
+        run: |
+          docker save -o /tmp/image-jvm.tar ${{ env.MOCKINGBIRD_TEST_IMAGE_JVM }}
+          gzip /tmp/image-jvm.tar
+        if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+
+      - name: Upload image with JVM mockingbird
+        uses: actions/upload-artifact@v3
+        with:
+          name: image-jvm
+          path: /tmp/image-jvm.tar.gz
+        if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
 
   back-build-native:
     needs: [front-build]
@@ -165,6 +190,14 @@ jobs:
           cd backend
           sbt "project mockingbird-native;clean;fixCheck;test;GraalVMNativeImage / packageBin;Docker / stage;"
 
+      - name: Build docker image for test
+        uses: docker/build-push-action@v3
+        with:
+          context: ./backend/mockingbird-native/target/docker/stage
+          push: false
+          tags: ${{ env.MOCKINGBIRD_TEST_IMAGE_NATIVE }}
+        if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
@@ -180,3 +213,102 @@ jobs:
           push: true
           tags: ghcr.io/leviysoft/mockingbird:${{ steps.get-ref.outputs.tag }}-native
         if: ${{ github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') }}
+
+      - name: Save docker image to file
+        run: |
+          docker save -o /tmp/image-native.tar ${{ env.MOCKINGBIRD_TEST_IMAGE_NATIVE }}
+          gzip /tmp/image-native.tar
+        if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+
+      - name: Upload image with native mockingbird
+        uses: actions/upload-artifact@v3
+        with:
+          name: image-native
+          path: /tmp/image-native.tar.gz
+        if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+
+  test-jvm-image:
+    if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+    needs: [back-build]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: image-jvm
+          path: /tmp
+
+      - name: Load docker image
+        run: |
+          gzip -d /tmp/image-jvm.tar.gz
+          docker load --input /tmp/image-jvm.tar
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+          check-latest: true
+
+      - name: Test docker image
+        env:
+          MOCKINGBIRD_IMAGE: ${{ env.MOCKINGBIRD_TEST_IMAGE_JVM }}
+        run: |
+          cd backend
+          envsubst < compose-test.yml.jvm.tmpl > compose-test.yml
+          sbt "project examples; clean; fixCheck; test"
+
+  test-native-image:
+    if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+    needs: [back-build-native]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: image-native
+          path: /tmp
+
+      - name: Load docker image
+        run: |
+          gzip -d /tmp/image-native.tar.gz
+          docker load --input /tmp/image-native.tar
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+          check-latest: true
+
+      - name: Test docker image
+        env:
+          MOCKINGBIRD_IMAGE: ${{ env.MOCKINGBIRD_TEST_IMAGE_NATIVE }}
+        run: |
+          cd backend
+          envsubst < compose-test.yml.native.tmpl > compose-test.yml
+          sbt "project examples; clean; fixCheck; test"
+
+  test-example-dsl:
+    if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+          check-latest: true
+
+      - name: Run
+        run: |
+          cd backend
+          sbt "project edsl; clean; fixCheck; test"

@@ -190,9 +190,6 @@ val edsl = (project in file("edsl"))
   )
 
 val examples = (project in file("examples"))
-  .enablePlugins(
-    JavaAppPackaging
-  )
   .dependsOn(edsl)
   .settings(Settings.common)
   .settings(
