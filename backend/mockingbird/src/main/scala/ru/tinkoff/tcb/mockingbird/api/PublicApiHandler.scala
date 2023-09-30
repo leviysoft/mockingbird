@@ -151,40 +151,42 @@ final class PublicApiHandler(
       body: RequestBody
   )(uri: String, delay: Option[FiniteDuration], timeout: Option[FiniteDuration]): RIO[WLD, HttpStubResponse] = {
     val requestUri = uri"$uri".pipe(query.foldLeft(_) { case (u, (key, value)) => u.addParam(key, value) })
-    log.debug(s"Received headers: ${headers.keys.mkString(", ")}") *> basicRequest
-      .headers(headers -- proxyConfig.excludedRequestHeaders)
-      .method(Method(method.entryName), requestUri)
-      .pipe(rt =>
-        body match {
-          case AbsentRequestBody        => rt
-          case SimpleRequestBody(value) => rt.body(value)
-          case MultipartRequestBody(value) =>
-            rt.multipartBody[Any](
-              value.map(part =>
-                multipart(part.name, part.body)
-                  .pipe(newPart =>
-                    part.headers.foldLeft(newPart) { case (acc, header) =>
-                      acc.header(header.name, header.value, true)
-                    }
-                  )
+    for {
+      _ <- log.debug(s"Received headers: ${headers.keys.mkString(", ")}")
+      req = basicRequest
+        .headers(headers -- proxyConfig.excludedRequestHeaders)
+        .method(Method(method.entryName), requestUri)
+        .pipe(rt =>
+          body match {
+            case AbsentRequestBody        => rt
+            case SimpleRequestBody(value) => rt.body(value)
+            case MultipartRequestBody(value) =>
+              rt.multipartBody[Any](
+                value.map(part =>
+                  multipart(part.name, part.body)
+                    .pipe(newPart =>
+                      part.headers.foldLeft(newPart) { case (acc, header) =>
+                        acc.header(header.name, header.value, true)
+                      }
+                    )
+                )
               )
-            )
-        }
-      )
-      .response(asByteArrayAlways)
-      .readTimeout(timeout.getOrElse(1.minute.asScala))
-      .send(httpBackend)
-      .map { response =>
-        BinaryResponse(
-          response.code.code,
-          response.headers
-            .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
-            .map(h => h.name -> h.value)
-            .toMap,
-          response.body.coerce[ByteArray],
-          delay
+          }
         )
-      }
+        .response(asByteArrayAlways)
+      _ <- log.debug("Executing request: {}", req.toCurl).when(proxyConfig.logOutgoingRequests)
+      response <- req
+        .readTimeout(timeout.getOrElse(1.minute.asScala))
+        .send(httpBackend)
+    } yield BinaryResponse(
+      response.code.code,
+      response.headers
+        .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
+        .map(h => h.name -> h.value)
+        .toMap,
+      response.body.coerce[ByteArray],
+      delay
+    )
   }
 
   private def jsonProxyRequest(
@@ -202,43 +204,47 @@ final class PublicApiHandler(
     val requestUri = uri"$uri".pipe(query.foldLeft(_) { case (u, (key, value)) =>
       u.addParam(key, value)
     })
-    log.debug(s"Received headers: ${headers.keys.mkString(", ")}") *> basicRequest
-      .headers(headers -- proxyConfig.excludedRequestHeaders)
-      .method(Method(method.entryName), requestUri)
-      .pipe(rt =>
-        body match {
-          case AbsentRequestBody        => rt
-          case SimpleRequestBody(value) => rt.body(value)
-          case MultipartRequestBody(value) =>
-            rt.multipartBody[Any](
-              value.map(part =>
-                multipart(part.name, part.body)
-                  .pipe(newPart =>
-                    part.headers.foldLeft(newPart) { case (acc, header) => acc.header(header.name, header.value, true) }
-                  )
+    for {
+      _ <- log.debug(s"Received headers: ${headers.keys.mkString(", ")}")
+      req = basicRequest
+        .headers(headers -- proxyConfig.excludedRequestHeaders)
+        .method(Method(method.entryName), requestUri)
+        .pipe(rt =>
+          body match {
+            case AbsentRequestBody        => rt
+            case SimpleRequestBody(value) => rt.body(value)
+            case MultipartRequestBody(value) =>
+              rt.multipartBody[Any](
+                value.map(part =>
+                  multipart(part.name, part.body)
+                    .pipe(newPart =>
+                      part.headers.foldLeft(newPart) { case (acc, header) =>
+                        acc.header(header.name, header.value, true)
+                      }
+                    )
+                )
               )
-            )
-        }
-      )
-      .response(asJsonAlways[Json])
-      .readTimeout(timeout.getOrElse(1.minute.asScala))
-      .send(httpBackend)
-      .map { response =>
-        response.body match {
-          case Right(jsonResponse) =>
-            RawResponse(
-              response.code.code,
-              response.headers
-                .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
-                .map(h => h.name -> h.value)
-                .toMap,
-              jsonResponse.patch(data, patch).noSpaces,
-              delay
-            )
-          case Left(error) =>
-            RawResponse(500, Map(), error.body, delay)
-        }
-      }
+          }
+        )
+        .response(asJsonAlways[Json])
+      _ <- log.debug("Executing request: {}", req.toCurl).when(proxyConfig.logOutgoingRequests)
+      response <- req
+        .readTimeout(timeout.getOrElse(1.minute.asScala))
+        .send(httpBackend)
+    } yield response.body match {
+      case Right(jsonResponse) =>
+        RawResponse(
+          response.code.code,
+          response.headers
+            .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
+            .map(h => h.name -> h.value)
+            .toMap,
+          jsonResponse.patch(data, patch).noSpaces,
+          delay
+        )
+      case Left(error) =>
+        RawResponse(500, Map(), error.body, delay)
+    }
   }
 
   private def xmlProxyRequest(
@@ -257,43 +263,47 @@ final class PublicApiHandler(
     val requestUri = uri"$uri".pipe(query.foldLeft(_) { case (u, (key, value)) =>
       u.addParam(key, value)
     })
-    log.debug(s"Received headers: ${headers.keys.mkString(", ")}") *> basicRequest
-      .headers(headers -- proxyConfig.excludedRequestHeaders)
-      .method(Method(method.entryName), requestUri)
-      .pipe(rt =>
-        body match {
-          case AbsentRequestBody        => rt
-          case SimpleRequestBody(value) => rt.body(value)
-          case MultipartRequestBody(value) =>
-            rt.multipartBody[Any](
-              value.map(part =>
-                multipart(part.name, part.body)
-                  .pipe(newPart =>
-                    part.headers.foldLeft(newPart) { case (acc, header) => acc.header(header.name, header.value, true) }
-                  )
+    for {
+      _ <- log.debug(s"Received headers: ${headers.keys.mkString(", ")}")
+      req = basicRequest
+        .headers(headers -- proxyConfig.excludedRequestHeaders)
+        .method(Method(method.entryName), requestUri)
+        .pipe(rt =>
+          body match {
+            case AbsentRequestBody        => rt
+            case SimpleRequestBody(value) => rt.body(value)
+            case MultipartRequestBody(value) =>
+              rt.multipartBody[Any](
+                value.map(part =>
+                  multipart(part.name, part.body)
+                    .pipe(newPart =>
+                      part.headers.foldLeft(newPart) { case (acc, header) =>
+                        acc.header(header.name, header.value, true)
+                      }
+                    )
+                )
               )
-            )
-        }
-      )
-      .response(asXML)
-      .readTimeout(timeout.getOrElse(1.minute.asScala))
-      .send(httpBackend)
-      .map { response =>
-        response.body match {
-          case Right(xmlResponse) =>
-            RawResponse(
-              response.code.code,
-              response.headers
-                .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
-                .map(h => h.name -> h.value)
-                .toMap,
-              xmlResponse.patchFromValues(jData, xData, patch.map { case (k, v) => k.toZoom -> v }).toString(),
-              delay
-            )
-          case Left(error) =>
-            RawResponse(500, Map(), error, delay)
-        }
-      }
+          }
+        )
+        .response(asXML)
+      _ <- log.debug("Executing request: {}", req.toCurl).when(proxyConfig.logOutgoingRequests)
+      response <- req
+        .readTimeout(timeout.getOrElse(1.minute.asScala))
+        .send(httpBackend)
+    } yield response.body match {
+      case Right(xmlResponse) =>
+        RawResponse(
+          response.code.code,
+          response.headers
+            .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
+            .map(h => h.name -> h.value)
+            .toMap,
+          xmlResponse.patchFromValues(jData, xData, patch.map { case (k, v) => k.toZoom -> v }).toString(),
+          delay
+        )
+      case Left(error) =>
+        RawResponse(500, Map(), error, delay)
+    }
   }
 }
 

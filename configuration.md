@@ -23,6 +23,7 @@ Mockingbird конфигурируется посредством файла sec
       "excludedRequestHeaders": [..],
       "excludedResponseHeaders": [..],
       "insecureHosts": [..],
+      "logOutgoingRequests": false,
       "proxyServer": {
         "type": "http" | "socks",
         "type": "..",
@@ -87,14 +88,17 @@ healthCheckRoute - необязательный параметр, позволя
       "excludedResponseHeaders": ["transfer-encoding"],
       "insecureHosts": [
         "some.host"
-      ]
+      ],
+      "logOutgoingRequests": false
     }
   }
 }
 ```
 
 В поле insecureHosts можно указать список хостов, для которых не будет выполняться проверка сертификатов. Это может быть полезно
-для случаев развёртывания во внутренней инфраструктуре
+для случаев развёртывания во внутренней инфраструктуре.
+
+Флаг logOutgoingRequests позволяет включить логирование запросов к удаленному серверу, когда http заглушка работет в режиме прокси. Запрос пишется в лог в виде команды curl с заголовками и телом запроса.
 
 Так-же в этой секции можно указать настройки прокси сервера. Эти настройки влияют на ВСЕ http запросы, которые делаем mockingbird, т.е.:
 - запросы к внешнему серверу с proxy моках
