@@ -48,19 +48,26 @@ case class GrpcStub(
 object GrpcStub {
   private val indexRegex = "\\[([\\d]+)\\]".r
 
+  def getRootFields(className: String, definition: GrpcProtoDefinition): IO[ValidationError, List[GrpcField]] = {
+    val name = definition.`package`.map(p => className.stripPrefix(p ++ ".")).getOrElse(className)
+    for {
+      rootMessage <- ZIO.getOrFailWith(ValidationError(Vector(s"Root message '$className' not found")))(
+        definition.schemas.find(_.name == name)
+      )
+      rootFields <- rootMessage match {
+        case GrpcMessageSchema(_, fields, oneofs, _) =>
+          ZIO.succeed(fields ++ oneofs.map(_.flatMap(_.options)).getOrElse(List.empty))
+        case GrpcEnumSchema(_, _) =>
+          ZIO.fail(ValidationError(Vector(s"Enum cannot be a root message, but '$className' is")))
+      }
+    } yield rootFields
+  }
+
   def validateOptics(
       optic: JsonOptic,
-      className: String,
-      definition: GrpcProtoDefinition
+      definition: GrpcProtoDefinition,
+      rootFields: List[GrpcField]
   ): IO[ValidationError, Unit] = for {
-    rootMessage <- ZIO.getOrFailWith(ValidationError(Vector("Root message not found")))(
-      definition.schemas.find(_.name == className)
-    )
-    rootFields <- rootMessage match {
-      case GrpcMessageSchema(_, fields, oneofs, _) =>
-        ZIO.succeed(fields ++ oneofs.map(_.flatMap(_.options)).getOrElse(List.empty))
-      case GrpcEnumSchema(_, _) => ZIO.fail(ValidationError(Vector("Enum cannot be a root message")))
-    }
     fields <- Ref.make(rootFields)
     opticFields = optic.path.split("\\.").map {
       case indexRegex(x) => Left(x.toInt)

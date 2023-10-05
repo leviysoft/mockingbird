@@ -86,14 +86,28 @@ class GrpcStubResolverImpl(stubDAO: GrpcStubDAO[Task], stateDAO: PersistentState
     (stub, pairs.find(_._2.id == stub.id).map(_._1).get, states.headOption)
   }
 
-  private def parseJson(stub: GrpcStub, bytes: Array[Byte]): UIO[Option[(Json, SID[GrpcStub])]] =
+  private def parseJson(stub: GrpcStub, bytes: Array[Byte]): URIO[WLD, Option[(Json, SID[GrpcStub])]] =
     ZIO
       .blocking(
         stub.requestSchema.convertMessageToJson(bytes, stub.requestClass).map(json => (json, stub.id).some)
       )
-      .catchSome { case _: InvalidProtocolBufferException | ParsingFailure(_, _) =>
-        ZIO.none
+      .catchSome { case e @ (_: InvalidProtocolBufferException | ParsingFailure(_, _)) =>
+        log.infoCause(
+          "Ошибка разбора gRPC запроса {} для заглушки {}",
+          e,
+          stub.requestClass,
+          stub.id
+        ) *>
+          ZIO.none
       }
+      .tapError(e =>
+        log.errorCause(
+          "Ошибка разбора gRPC запроса {} для заглушки {}",
+          e,
+          stub.requestClass,
+          stub.id
+        )
+      )
       .orDie
 
   private def findStates(id: SID[GrpcStub], spec: StateSpec): RIO[WLD, Vector[PersistentState]] =
