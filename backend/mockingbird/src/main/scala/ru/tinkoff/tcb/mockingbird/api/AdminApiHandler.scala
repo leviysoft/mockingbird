@@ -436,7 +436,8 @@ final class AdminApiHandler(
       candidates = candidates0
         .filter(_.requestClass == body.requestClass)
         .filter(_.requestSchema == requestSchema)
-        .filter(_.requestPredicates.definition == body.state)
+        .filter(_.requestPredicates.definition == body.requestPredicates.definition)
+        .filter(_.state == body.state)
       _ <- ZIO.when(candidates.nonEmpty)(
         ZIO.fail(
           DuplicationError("Существует заглушка(-ки), полностью совпадающая по условиям и типу", candidates.map(_.id))
