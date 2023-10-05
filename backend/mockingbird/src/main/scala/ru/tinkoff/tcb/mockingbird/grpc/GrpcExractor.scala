@@ -110,7 +110,7 @@ object GrpcExractor {
     def convertMessageToJson(bytes: Array[Byte], className: String): Task[Json] =
       ZIO.fromEither {
         val message    = parseFrom(bytes, className)
-        val jsonString = JsonFormat.printer().print(message)
+        val jsonString = JsonFormat.printer().preservingProtoFieldNames().print(message)
         parse(jsonString)
       }
   }
