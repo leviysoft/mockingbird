@@ -108,11 +108,11 @@ object GrpcExractor {
     }
 
     def convertMessageToJson(bytes: Array[Byte], className: String): Task[Json] =
-      ZIO.fromEither {
-        val message    = parseFrom(bytes, className)
-        val jsonString = JsonFormat.printer().preservingProtoFieldNames().print(message)
-        parse(jsonString)
-      }
+      for {
+        message    <- ZIO.attempt(parseFrom(bytes, className))
+        jsonString <- ZIO.attempt(JsonFormat.printer().preservingProtoFieldNames().print(message))
+        js         <- ZIO.fromEither(parse(jsonString))
+      } yield js
   }
 
   implicit class FromDynamicSchema(private val dynamicSchema: DynamicSchema) extends AnyVal {
