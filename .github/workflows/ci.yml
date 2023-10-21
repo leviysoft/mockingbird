@@ -58,6 +58,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download frontend
         uses: actions/download-artifact@v3
@@ -129,6 +131,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download frontend
         uses: actions/download-artifact@v3
