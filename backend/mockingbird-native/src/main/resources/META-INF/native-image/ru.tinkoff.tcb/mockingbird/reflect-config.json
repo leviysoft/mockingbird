@@ -2826,5 +2826,9 @@
         ]
       }
     ]
+  },
+  {
+    "name": "com.sun.org.apache.xpath.internal.functions.FuncLocalPart",
+    "methods" : [{"name":"<init>","parameterTypes":[] }]
   }
 ]
