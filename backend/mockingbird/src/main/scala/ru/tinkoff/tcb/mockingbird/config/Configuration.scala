@@ -51,12 +51,19 @@ case class MongoCollections(
     destination: String
 )
 
+case class TracingConfig(
+    required: List[String] = List.empty,
+    incomingHeaders: Map[String, String] = Map.empty,
+    outcomingHeaders: Map[String, String] = Map.empty,
+)
+
 case class MockingbirdConfiguration(
     server: ServerConfig,
     security: SecurityConfig,
     mongo: MongoConfig,
     proxy: ProxyConfig,
-    event: EventConfig
+    event: EventConfig,
+    tracing: TracingConfig,
 )
 
 object MockingbirdConfiguration {
@@ -69,7 +76,8 @@ object MockingbirdConfiguration {
       config.as[SecurityConfig]("security"),
       config.as[MongoConfig]("db.mongo"),
       config.as[ProxyConfig]("proxy"),
-      config.as[EventConfig]("event")
+      config.as[EventConfig]("event"),
+      config.as[TracingConfig]("tracing"),
     )
 
   private lazy val conf = load()
@@ -79,4 +87,5 @@ object MockingbirdConfiguration {
   val mongo: ULayer[MongoConfig]       = ZLayer.succeed(conf.mongo)
   val proxy: ULayer[ProxyConfig]       = ZLayer.succeed(conf.proxy)
   val event: ULayer[EventConfig]       = ZLayer.succeed(conf.event)
+  val tracing: ULayer[TracingConfig]   = ZLayer.succeed(conf.tracing)
 }

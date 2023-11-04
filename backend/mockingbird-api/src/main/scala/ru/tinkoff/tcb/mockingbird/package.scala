@@ -2,6 +2,7 @@ package ru.tinkoff.tcb
 
 import ru.tinkoff.tcb.mockingbird.api.Tracing
 import ru.tinkoff.tcb.mockingbird.api.WLD
+import ru.tinkoff.tcb.mockingbird.config.MockingbirdConfiguration
 import ru.tinkoff.tcb.mockingbird.config.SecurityConfig
 import ru.tinkoff.tcb.utils.crypto.AES
 import ru.tinkoff.tcb.utils.crypto.SyncAES
@@ -9,7 +10,10 @@ import ru.tinkoff.tcb.utils.crypto.SyncAES
 package object mockingbird {
   val wldRuntime: Runtime[WLD] =
     Unsafe.unsafe { implicit uns =>
-      Runtime.unsafe.fromLayer(Tracing.live)
+      Runtime.unsafe.fromLayer(
+        MockingbirdConfiguration.tracing >>>
+          Tracing.live
+      )
     }
 
   val aesEncoder: URLayer[SecurityConfig, AES] =

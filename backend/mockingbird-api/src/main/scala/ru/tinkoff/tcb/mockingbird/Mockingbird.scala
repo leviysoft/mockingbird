@@ -98,6 +98,7 @@ object Mockingbird extends scala.App {
         MockingbirdConfiguration.mongo,
         MockingbirdConfiguration.proxy,
         MockingbirdConfiguration.event,
+        MockingbirdConfiguration.tracing,
         ZLayer.scoped {
           for {
             pc <- ZIO.service[ProxyConfig]
@@ -180,6 +181,7 @@ object Mockingbird extends scala.App {
           .provideSome[RequestContext](
             Tracing.live,
             MockingbirdConfiguration.mongo,
+            MockingbirdConfiguration.tracing,
             mongoLayer,
             collection(_.state) >>> PersistentStateDAOImpl.live,
             collection(_.grpcStub) >>> GrpcStubDAOImpl.live,
