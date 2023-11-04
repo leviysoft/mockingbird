@@ -4,7 +4,11 @@ import io.vertx.ext.web.Route
 import io.vertx.ext.web.Router
 import sttp.model.Header
 import sttp.model.StatusCode
+import sttp.tapir.model.ServerRequest
 import sttp.tapir.server.interceptor.RequestInterceptor
+import sttp.tapir.server.interceptor.RequestResult
+import sttp.tapir.server.interceptor.RequestResult.Failure
+import sttp.tapir.server.interceptor.RequestResult.Response
 import sttp.tapir.server.vertx.zio.VertxZioServerInterpreter
 import sttp.tapir.server.vertx.zio.VertxZioServerOptions
 import sttp.tapir.swagger.SwaggerUIOptions
@@ -50,7 +54,27 @@ final class PublicHttp(handler: PublicApiHandler) {
     VertxZioServerOptions
       .customiseInterceptors[WLD]
       .notAcceptableInterceptor(None)
-      .addInterceptor(RequestInterceptor.effect(_ => Tracing.init))
+      .addInterceptor(
+        RequestInterceptor.effect(r =>
+          for {
+            tracing <- ZIO.service[Tracing]
+            _       <- Tracing.init
+            _       <- tracing.fillWithHeaders(r.headers)
+          } yield ()
+        )
+      )
+      .addInterceptor(
+        RequestInterceptor.transformResult(new RequestInterceptor.RequestResultTransform[RIO[Tracing, *]] {
+          override def apply[B](request: ServerRequest, result: RequestResult[B]): RIO[Tracing, RequestResult[B]] =
+            for {
+              tracing <- ZIO.service[Tracing]
+              headers <- tracing.toHeaders()
+            } yield result match {
+              case fail @ Failure(_)  => fail
+              case Response(response) => Response(response.addHeaders(headers))
+            }
+        })
+      )
       .options
 
   val http: List[Router => Route] =

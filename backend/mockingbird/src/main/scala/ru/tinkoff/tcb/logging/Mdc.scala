@@ -5,13 +5,15 @@ import io.circe.Json
 import tofu.logging.Loggable
 import tofu.logging.LoggedValue
 import tofu.logging.derivation.loggable
+import tofu.logging.derivation.unembed
 
 import ru.tinkoff.tcb.utils.map.*
 
 @derive(loggable)
 final case class Mdc(
-    correlationId: Option[String] = None,
-    payload: Option[Map[String, LoggedValue]] = None
+    payload: Option[Map[String, LoggedValue]] = None,
+    @unembed
+    traceInfo: Map[String, String] = Map.empty
 ) {
   @inline def +?[T: Loggable](kv: (String, Option[T])): Mdc =
     copy(
@@ -22,7 +24,7 @@ final case class Mdc(
   @inline def +[T: Loggable](value: (String, T)): Mdc = $plus(value._1 -> Loggable[T].loggedValue(value._2))
   @inline def +(value: (String, LoggedValue)): Mdc    = copy(payload = Some((payload.getOrElse(Map.empty) + value)))
 
-  def setCorrelationId(value: String): Mdc = copy(correlationId = Some(value))
+  @inline def setTraceInfo(name: String, value: String): Mdc = copy(traceInfo = traceInfo + (name -> value))
 }
 
 object Mdc {

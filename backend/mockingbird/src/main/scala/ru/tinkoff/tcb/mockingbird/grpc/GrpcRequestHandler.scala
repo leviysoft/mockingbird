@@ -92,7 +92,12 @@ object GrpcRequestHandlerImpl {
 object GrpcRequestHandler {
   def exec(bytes: Array[Byte]): RIO[WLD & RequestContext & GrpcRequestHandler, Array[Byte]] =
     for {
+      _        <- Tracing.init
+      context  <- ZIO.service[RequestContext]
       service  <- ZIO.service[GrpcRequestHandler]
+      tracing  <- ZIO.service[Tracing]
+      _        <- tracing.fillWithGrpcMetadata(context.metadata)
+      _        <- tracing.putToGrpcMetadata(context.responseMetadata)
       response <- service.exec(bytes)
     } yield response
 }
