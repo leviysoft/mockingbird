@@ -77,7 +77,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
           check-latest: true
 
       - name: Install Protoc
@@ -152,7 +152,7 @@ jobs:
   back-build-native:
     needs: [front-build]
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     env:
       CI: true
@@ -171,7 +171,7 @@ jobs:
 
       - uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'graalvm'
           components: 'native-image'
           github-token: ${{ secrets.GITHUB_TOKEN }}
