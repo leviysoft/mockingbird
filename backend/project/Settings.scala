@@ -127,7 +127,7 @@ object Settings {
         },
         dockerExposedPorts := ports,
         dockerRepository := ciDockerRegistry.map(_ + "/tcb"),
-        dockerBaseImage := "eclipse-temurin:17-jre-focal",
+        dockerBaseImage := "eclipse-temurin:21-jre-jammy",
         dockerCommands := dockerCommands.value.patch(
           8,
           Seq(
@@ -153,7 +153,7 @@ object Settings {
       ports: List[Int],
       user: String = "mockingbird",
       userId: Option[String] = Some("2048"),
-      imageName: String = "ubuntu:20.04"
+      imageName: String = "ubuntu:22.04"
   ): Project => Project = { prj: Project =>
     import com.typesafe.sbt.packager.docker.DockerChmodType
     import com.typesafe.sbt.packager.docker.{Cmd, DockerPermissionStrategy}
