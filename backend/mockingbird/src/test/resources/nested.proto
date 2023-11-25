@@ -9,6 +9,13 @@ message GetStocksRequest {
 }
 
 message GetStocksResponse {
+  enum StockKinds {
+    SK_UNKNOWN = 0;
+    SK_GROWTH = 1;
+    SK_INCOME = 2;
+    SK_VALUE = 3;
+    SK_BLUE_CHIP = 4;
+  }
   message Stock {
     int64 quantity = 1;
     string name = 2;

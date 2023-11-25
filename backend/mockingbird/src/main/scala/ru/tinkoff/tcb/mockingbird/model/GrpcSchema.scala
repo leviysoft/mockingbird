@@ -105,7 +105,8 @@ case class GrpcMessageSchema(
     name: String,
     fields: List[GrpcField],
     oneofs: Option[List[GrpcOneOfSchema]] = None,
-    nested: Option[List[GrpcMessageSchema]] = None
+    nested: Option[List[GrpcMessageSchema]] = None,
+    nestedEnums: Option[List[GrpcEnumSchema]] = None,
 ) extends GrpcRootMessage
 
 object GrpcMessageSchema {

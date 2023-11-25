@@ -39,7 +39,7 @@ object GrpcExractor {
 
   def addSchemaToRegistry(schema: GrpcRootMessage, registry: DynamicSchema.Builder): Unit =
     schema match {
-      case GrpcMessageSchema(name, fields, oneofs, nested) =>
+      case GrpcMessageSchema(name, fields, oneofs, nested, nestedEnums) =>
         val builder = MessageDefinition
           .newBuilder(name)
         fields.foreach {
@@ -65,6 +65,19 @@ object GrpcExractor {
               nestedBuilder.addField(f.label.entryName, f.typeName, f.name, f.order)
           }
           builder.addMessageDefinition(nestedBuilder.build())
+        }
+        nestedEnums.getOrElse(List.empty).foreach { nst =>
+          val nestedBuilder = EnumDefinition.newBuilder(nst.name)
+          nst.values.foreach { case (name, number) =>
+            ignore(
+              nestedBuilder
+                .addValue(
+                  name.asString,
+                  number.asInt
+                )
+            )
+          }
+          builder.addEnumDefinition(nestedBuilder.build())
         }
 
         ignore(registry.addMessageDefinition(builder.build()))
@@ -119,12 +132,7 @@ object GrpcExractor {
     def toGrpcProtoDefinition: GrpcProtoDefinition = {
       val descriptor: DescriptorProtos.FileDescriptorProto = dynamicSchema.getFileDescriptorSet.getFile(0)
       val namespace                                        = descriptor.hasPackage.option(descriptor.getPackage)
-      val enums = descriptor.getEnumTypeList.asScala.map { enum =>
-        GrpcEnumSchema(
-          enum.getName,
-          enum.getValueList.asScala.map(i => (i.getName.coerce[FieldName], i.getNumber.coerce[FieldNumber])).toMap
-        )
-      }.toList
+      val enums = descriptor.getEnumTypeList.asScala.map(enum2enumScheme).toList
       val messages = descriptor.getMessageTypeList.asScala
         .filter(!_.getOptions.getMapEntry)
         .map(message2messageSchema)
@@ -137,11 +145,18 @@ object GrpcExractor {
     }
   }
 
+  private def enum2enumScheme(enumProto: DescriptorProtos.EnumDescriptorProto): GrpcEnumSchema =
+    GrpcEnumSchema(
+      enumProto.getName,
+      enumProto.getValueList.asScala.map(i => (i.getName.coerce[FieldName], i.getNumber.coerce[FieldNumber])).toMap
+    )
+
   private def message2messageSchema(message: DescriptorProtos.DescriptorProto): GrpcMessageSchema = {
     val (fields, oneofs) = message.getFieldList.asScala.toList
       .partition(f => !f.hasOneofIndex || isProto3OptionalField(f, message.getOneofDeclList.asScala.map(_.getName).toSet))
 
-    val nested = message.getNestedTypeList.asScala.toList
+    val nestedEnums = message.getEnumTypeList().asScala.toList
+    val nested      = message.getNestedTypeList.asScala.toList
 
     GrpcMessageSchema(
       message.getName,
@@ -174,6 +189,10 @@ object GrpcExractor {
       },
       nested
         .map(message2messageSchema) match {
+        case Nil  => None
+        case list => Some(list)
+      },
+      nestedEnums.map(enum2enumScheme) match {
         case Nil  => None
         case list => Some(list)
       }
