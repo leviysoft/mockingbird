@@ -10,4 +10,4 @@ addSbtPlugin("org.scalameta"  % "sbt-native-image"    % "0.3.1")
 addSbtPlugin("com.github.sbt" % "sbt-dynver"          % "5.0.1")
 
 libraryDependencies +=
-  "com.thesamet.scalapb.zio-grpc" %% "zio-grpc-codegen" % "0.6.0-test4"
+  "com.thesamet.scalapb.zio-grpc" %% "zio-grpc-codegen" % "0.6.0-test8"

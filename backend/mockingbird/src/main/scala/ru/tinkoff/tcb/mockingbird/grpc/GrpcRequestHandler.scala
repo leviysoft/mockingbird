@@ -62,7 +62,7 @@ class GrpcRequestHandlerImpl(stubResolver: GrpcStubResolver) extends GrpcRequest
       endpoint: String,
       bytes: Array[Byte]
   ): RIO[RequestContext, Array[Byte]] = {
-    val mc: ZManagedChannel[Any] = ZManagedChannel(
+    val mc: ZManagedChannel = ZManagedChannel(
       ManagedChannelBuilder.forTarget(endpoint).usePlaintext(),
     )
 
