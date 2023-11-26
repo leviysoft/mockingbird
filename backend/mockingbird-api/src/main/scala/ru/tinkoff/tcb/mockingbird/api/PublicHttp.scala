@@ -39,7 +39,8 @@ final class PublicHttp(handler: PublicApiHandler) {
         "api" :: "mockingbird" :: "swagger" :: Nil,
         "docs.yaml",
         Nil,
-        useRelativePaths = false
+        useRelativePaths = false,
+        showExtensions = false
       )
     ).fromEndpoints[RIO[WLD, *]](
       endpointsWithString ++ endpointsWithMultipart,

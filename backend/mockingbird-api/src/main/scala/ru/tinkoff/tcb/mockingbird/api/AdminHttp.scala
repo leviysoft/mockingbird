@@ -100,7 +100,8 @@ final class AdminHttp(config: ServerConfig, handler: AdminApiHandler) {
         "api" :: "internal" :: "mockingbird" :: "swagger" :: Nil,
         "docs.yaml",
         Nil,
-        useRelativePaths = false
+        useRelativePaths = false,
+        showExtensions = false
       )
     ).fromEndpoints[RIO[WLD, *]](allEndpoints, "Mockingbird", BuildInfo.version)
 
