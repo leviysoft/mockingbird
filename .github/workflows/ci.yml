@@ -125,12 +125,6 @@ jobs:
           tags: ${{ env.MOCKINGBIRD_TEST_IMAGE_JVM }}
         if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
 
-      - name: ZIP stages files
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -r layers.zip ./backend/mockingbird-api/target/docker/stage
-        if: ${{ github.ref_type == 'tag' }}
-
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
@@ -146,15 +140,6 @@ jobs:
           push: true
           tags: ghcr.io/leviysoft/mockingbird:${{ steps.get-ref.outputs.tag }}
         if: ${{ github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') }}
-
-      - name: Publish layers
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: layers.zip
-          asset_name: layers.zip
-          tag: ${{ github.ref_name }}
-        if: ${{ github.ref_type == 'tag' }}
 
       - name: Save docker image to file
         run: |
