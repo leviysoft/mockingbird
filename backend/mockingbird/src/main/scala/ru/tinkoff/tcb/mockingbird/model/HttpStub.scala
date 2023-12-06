@@ -16,6 +16,7 @@ import ru.tinkoff.tcb.bson.annotation.BsonKey
 import ru.tinkoff.tcb.bson.derivation.bsonDecoder
 import ru.tinkoff.tcb.bson.derivation.bsonEncoder
 import ru.tinkoff.tcb.circe.bson.*
+import ru.tinkoff.tcb.mockingbird.model.StubCode
 import ru.tinkoff.tcb.predicatedsl.Keyword
 import ru.tinkoff.tcb.protocol.bson.*
 import ru.tinkoff.tcb.protocol.json.*
@@ -87,6 +88,24 @@ object HttpStub extends CallbackChecker {
       case _ => Vector.empty
     }
 
+  private val responseCodes204and304: Rule[HttpStub] = stub =>
+    stub.response match {
+      case StubCode(rc) if rc == 204 || rc == 304 =>
+        stub.response match {
+          case EmptyResponse(_, _, _) => Vector.empty
+          case _ =>
+            Vector(s"Коды ответов 204 и 304 могут использоваться только с mode '${HttpStubResponse.modes(nameOfType[EmptyResponse])}'")
+        }
+      case _ => Vector.empty
+    }
+
+  private val possibleHttpCodes: Rule[HttpStub] = stub =>
+    stub.response match {
+      case StubCode(code) if code < 100 || code >= 600 =>
+        Vector(s"Разрешенные коды ответов находятся в интервале 100 ... 599")
+      case _ => Vector.empty
+    }
+
   def validationRules(destinations: Set[SID[DestinationConfiguration]]): Rule[HttpStub] =
     Vector(
       pathOrPattern,
@@ -94,6 +113,8 @@ object HttpStub extends CallbackChecker {
       stateNonEmpty,
       persistNonEmpty,
       timesGreaterZero,
-      jsonProxyReq
+      jsonProxyReq,
+      responseCodes204and304,
+      possibleHttpCodes,
     ).reduce(_ |+| _)
 }

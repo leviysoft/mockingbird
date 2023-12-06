@@ -46,6 +46,7 @@ sealed trait HttpStubResponse {
 
 object HttpStubResponse {
   val modes: Map[String, String] = Map(
+    nameOfType[EmptyResponse]     -> "no_body",
     nameOfType[RawResponse]       -> "raw",
     nameOfType[JsonResponse]      -> "json",
     nameOfType[XmlResponse]       -> "xml",
@@ -61,6 +62,15 @@ object HttpStubResponse {
   val jsonBody: Property[HttpStubResponse, Json] = JsonResponse.prism >> JsonResponse.body
 
   val xmlBody: Property[HttpStubResponse, Node] = XmlResponse.prism >> XmlResponse.body
+}
+
+@derive(decoder, encoder)
+final case class EmptyResponse(
+    code: Int,
+    headers: Map[String, String],
+    delay: Option[FiniteDuration]
+) extends HttpStubResponse {
+  val isTemplate: Boolean = false
 }
 
 @derive(decoder, encoder)
@@ -185,6 +195,7 @@ final case class XmlProxyResponse(
 object StubCode {
   def unapply(stub: HttpStubResponse): Option[Int] =
     stub match {
+      case EmptyResponse(code, _, _)      => Some(code)
       case RawResponse(code, _, _, _)     => Some(code)
       case JsonResponse(code, _, _, _, _) => Some(code)
       case XmlResponse(code, _, _, _, _)  => Some(code)
