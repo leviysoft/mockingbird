@@ -9,6 +9,7 @@ import sttp.tapir.Schema
 import sttp.tapir.SchemaType
 
 import ru.tinkoff.tcb.mockingbird.model.BinaryResponse
+import ru.tinkoff.tcb.mockingbird.model.EmptyResponse
 import ru.tinkoff.tcb.mockingbird.model.HttpStubResponse
 import ru.tinkoff.tcb.mockingbird.model.JsonProxyResponse
 import ru.tinkoff.tcb.mockingbird.model.JsonResponse
@@ -35,6 +36,7 @@ package object codec {
         case JsonResponse(_, _, body, _, _) => body.noSpaces.getBytes(StandardCharsets.UTF_8)
         case XmlResponse(_, _, body, _, _)  => body.asString.getBytes(StandardCharsets.UTF_8)
         case BinaryResponse(_, _, body, _)  => body.asArray
+        case EmptyResponse(_, _, _)         => Array.empty
         /**
          * все *ProxyResponse преобразуются в RawResponse внутри [[PublicApiHandler]] (методы *proxyRequest)
          */
