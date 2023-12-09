@@ -10,6 +10,15 @@ ThisBuild / evictionErrorLevel := Level.Debug
 
 ThisBuild / conflictManager := ConflictManager.latestRevision
 
+val nettyOverrides = Seq(
+  "netty-buffer",
+  "netty-codec-haproxy",
+  "netty-common",
+  "netty-transport",
+  "netty-transport-classes-epoll",
+  "netty-transport-native-epoll"
+).map("io.netty" % _ % "4.1.100.Final")
+
 val utils = (project in file("utils"))
   .settings(Settings.common)
   .settings(
@@ -111,7 +120,8 @@ lazy val `mockingbird-api` = (project in file("mockingbird-api"))
     Compile / packageDoc / mappings := Seq(),
     run / fork := true,
     run / javaOptions += "-Dconfig.resource=local.conf",
-    Compile / unmanagedResourceDirectories += file("../frontend/dist")
+    Compile / unmanagedResourceDirectories += file("../frontend/dist"),
+    dependencyOverrides ++= nettyOverrides,
   )
   .settings(
     addCommandAlias(
@@ -153,6 +163,7 @@ lazy val `mockingbird-native` = (project in file("mockingbird-native"))
     nativeImageInstalled := true,
     nativeImageAgentMerge := true,
     run / javaOptions += "-Dconfig.resource=local.conf",
+    dependencyOverrides ++= nettyOverrides,
   )
   .settings(
     addCommandAlias(
