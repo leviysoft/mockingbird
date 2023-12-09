@@ -8,6 +8,8 @@ ThisBuild / concurrentRestrictions += Tags.limit(missinglinkConflictsTag, 1)
 
 ThisBuild / evictionErrorLevel := Level.Debug
 
+ThisBuild / conflictManager := ConflictManager.latestRevision
+
 val utils = (project in file("utils"))
   .settings(Settings.common)
   .settings(
