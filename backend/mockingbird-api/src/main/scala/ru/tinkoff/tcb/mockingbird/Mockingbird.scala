@@ -13,8 +13,8 @@ import org.mongodb.scala.MongoClient
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.MongoDatabase
 import org.mongodb.scala.bson.BsonDocument
-import sttp.client3.SttpBackendOptions
-import sttp.client3.armeria.zio.ArmeriaZioBackend
+import sttp.client4.BackendOptions as SttpBackendOptions
+import sttp.client4.armeria.zio.ArmeriaZioBackend
 import tofu.logging.Logging
 import tofu.logging.impl.ZUniversalLogging
 import zio.managed.*

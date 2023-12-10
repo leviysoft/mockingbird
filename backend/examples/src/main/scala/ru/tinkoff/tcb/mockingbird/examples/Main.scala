@@ -8,7 +8,7 @@ import java.nio.file.StandardOpenOption.CREATE
 import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
 import java.nio.file.StandardOpenOption.WRITE
 
-import sttp.client3.*
+import sttp.client4.*
 import zio.cli.*
 import zio.interop.catz.*
 

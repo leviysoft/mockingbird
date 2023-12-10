@@ -31,7 +31,7 @@ object Dependencies {
     "dev.zio" %% "zio"                 % Versions.zio,
     "dev.zio" %% "zio-managed"         % Versions.zio,
     "dev.zio" %% "zio-interop-cats"    % "22.0.0.0",
-    "dev.zio" %% "zio-interop-twitter" % "21.2.0.2.1",
+    "dev.zio" %% "zio-interop-twitter" % "21.2.0.2.2",
     "dev.zio" %% "zio-test"            % Versions.zio % Test,
     "dev.zio" %% "zio-test-sbt"        % Versions.zio % Test
   )
@@ -99,4 +99,9 @@ object Dependencies {
     "glass-core",
     "glass-macro",
   ).map("tf.tofu" %% _ % Versions.glass)
+
+  lazy val logback = Seq(
+    "logback-core",
+    "logback-classic"
+  ).map("ch.qos.logback" % _ % "1.3.14")
 }

@@ -6,7 +6,8 @@ import com.dimafeng.testcontainers.DockerComposeContainer
 import com.dimafeng.testcontainers.ExposedService
 import com.dimafeng.testcontainers.scalatest.TestContainerForAll
 import org.testcontainers.containers.wait.strategy.Wait
-import sttp.client3.*
+import sttp.client4.*
+import sttp.client4.httpclient.HttpClientSyncBackend
 import sttp.model.StatusCode
 import sttp.model.Uri
 

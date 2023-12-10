@@ -1,6 +1,6 @@
 package ru.tinkoff.tcb.mockingbird.edsl
 
-import sttp.client3.*
+import sttp.client4.*
 import sttp.model.Uri
 import sttp.model.Uri.QuerySegment
 
@@ -13,7 +13,7 @@ package object interpreter {
       .addPath(req.path.split("/").filter(_.nonEmpty))
       .addQuerySegments(req.query.map { case (k, v) => QuerySegment.KeyValue(k, v) })
 
-  def buildRequest(host: Uri, m: HttpRequest): Request[String, Any] = {
+  def buildRequest(host: Uri, m: HttpRequest): Request[String] = {
     var req = m.body.fold(quickRequest)(quickRequest.body)
     req = m.headers.foldLeft(req) { case (r, (k, v)) => r.header(k, v, replaceExisting = true) }
     val url = makeUri(host, m)

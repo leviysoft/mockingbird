@@ -54,7 +54,8 @@ val mockingbird = (project in file("mockingbird"))
       Dependencies.refined,
       Dependencies.protobuf,
       Dependencies.tapirBase,
-      Dependencies.glass
+      Dependencies.glass,
+      Dependencies.logback
     ).flatten,
     libraryDependencies ++= Seq(
       "com.iheart"                    %% "ficus"               % "1.5.0",
@@ -64,8 +65,8 @@ val mockingbird = (project in file("mockingbird"))
       "tf.tofu"                       %% "derevo-circe"        % Versions.derevo,
       "org.webjars.npm"                % "swagger-ui-dist"     % "3.32.5",
       "eu.timepit"                    %% "fs2-cron-core"       % "0.2.2",
-      "com.softwaremill.sttp.client3" %% "armeria-backend-zio" % Versions.sttp,
-      "com.softwaremill.sttp.client3" %% "circe"               % Versions.sttp,
+      "com.softwaremill.sttp.client4" %% "armeria-backend-zio" % Versions.sttp,
+      "com.softwaremill.sttp.client4" %% "circe"               % Versions.sttp,
       "org.javassist"                  % "javassist"           % "3.29.2-GA", // Armeria dependency
       "org.apache.tika"                % "tika-core"           % "2.1.0",
       "io.scalaland"                  %% "chimney"             % "0.6.1",
@@ -75,8 +76,7 @@ val mockingbird = (project in file("mockingbird"))
       "com.github.os72"                % "protobuf-dynamic"    % "1.0.1",
       "com.github.geirolz"            %% "advxml-core"         % "2.5.1",
       "com.github.geirolz"            %% "advxml-xpath"        % "2.5.1",
-      "io.estatico"                   %% "newtype"             % "0.4.4",
-      "org.slf4j"                      % "slf4j-api"           % "1.7.30" % Provided
+      "io.estatico"                   %% "newtype"             % "0.4.4"
     ),
     Compile / unmanagedResourceDirectories += file("../frontend/dist")
   )
@@ -181,8 +181,8 @@ val edsl = (project in file("edsl"))
       Dependencies.refined,
     ).flatten,
     libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.client3" %% "armeria-backend-zio" % Versions.sttp,
-      "com.softwaremill.sttp.client3" %% "circe"               % Versions.sttp,
+      "com.softwaremill.sttp.client4" %% "armeria-backend-zio" % Versions.sttp,
+      "com.softwaremill.sttp.client4" %% "circe"               % Versions.sttp,
       "pl.muninn"                     %% "scala-md-tag"        % "0.2.3",
     ),
   )

@@ -8,9 +8,9 @@ import org.scalamock.scalatest.AsyncMockFactory
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.Informer
 import org.scalatest.matchers.should.Matchers
-import sttp.capabilities.WebSockets
-import sttp.client3.*
-import sttp.client3.testing.SttpBackendStub
+import sttp.client4.*
+import sttp.client4.httpclient.HttpClientFutureBackend
+import sttp.client4.testing.WebSocketBackendStub
 import sttp.model.Header
 import sttp.model.MediaType
 import sttp.model.Method.*
@@ -27,10 +27,10 @@ class AsyncScalaTestSuiteTest extends AsyncScalaTestSuite with Matchers with Asy
     override def name: String = ""
   }
 
-  var sttpbackend_ : SttpBackendStub[Future, WebSockets] =
+  var sttpbackend_ : WebSocketBackendStub[Future] =
     HttpClientFutureBackend.stub()
 
-  override private[interpreter] def sttpbackend: SttpBackend[Future, WebSockets] = sttpbackend_
+  override private[interpreter] def sttpbackend: WebSocketBackendStub[Future] = sttpbackend_
 
   override def baseUri: Uri = uri"http://some.domain.com:8090"
 
@@ -63,7 +63,7 @@ class AsyncScalaTestSuiteTest extends AsyncScalaTestSuite with Matchers with Asy
     val query   = Seq("service" -> "world")
 
     sttpbackend_ = HttpClientFutureBackend.stub().whenRequestMatchesPartial {
-      case RequestT(POST, uri, StringBody(`body`, _, _), hs, _, _, _)
+      case Request(POST, uri, StringBody(`body`, _, _), hs, _, _, _)
           if uri == uri"http://some.domain.com:8090/api/handler?service=world"
             && hs.exists(h => h.name == "x-token" && h.value == "asd5453qwe")
             && hs.exists(h => h.name == "Content-Type" && h.value == "application/json") =>
