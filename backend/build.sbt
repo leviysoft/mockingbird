@@ -199,6 +199,7 @@ val examples = (project in file("examples"))
       Dependencies.scalatest,
       Dependencies.scalamock,
       Dependencies.testContainers,
+      Dependencies.logback
     ).flatten,
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio-cli" % "0.5.0",
