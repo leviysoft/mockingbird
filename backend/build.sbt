@@ -12,13 +12,21 @@ ThisBuild / conflictManager := ConflictManager.latestRevision
 
 val nettyOverrides = Seq(
   "netty-buffer",
+  "netty-codec",
+  "netty-codec-dns",
   "netty-codec-haproxy",
+  "netty-codec-http",
+  "netty-codec-http2",
   "netty-common",
+  "netty-handler",
+  "netty-handler-proxy",
+  "netty-resolver",
+  "netty-resolver-dns",
   "netty-transport",
   "netty-transport-classes-epoll",
   "netty-transport-native-epoll",
   "netty-transport-native-unix-common"
-).map("io.netty" % _ % "4.1.100.Final")
+).map("io.netty" % _ % "4.1.87.Final")
 
 val utils = (project in file("utils"))
   .settings(Settings.common)
