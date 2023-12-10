@@ -16,7 +16,8 @@ val nettyOverrides = Seq(
   "netty-common",
   "netty-transport",
   "netty-transport-classes-epoll",
-  "netty-transport-native-epoll"
+  "netty-transport-native-epoll",
+  "netty-transport-native-unix-common"
 ).map("io.netty" % _ % "4.1.100.Final")
 
 val utils = (project in file("utils"))
