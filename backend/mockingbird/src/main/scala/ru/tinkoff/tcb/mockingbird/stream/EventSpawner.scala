@@ -8,7 +8,7 @@ import io.circe.Error as CirceError
 import io.circe.parser.parse
 import mouse.all.optionSyntaxMouse
 import mouse.boolean.*
-import sttp.client3.*
+import sttp.client4.{Backend as SttpBackend, *}
 import sttp.model.Method
 import zio.interop.catz.*
 import zio.interop.catz.implicits.*
@@ -36,13 +36,13 @@ import ru.tinkoff.tcb.utils.id.SID
 final class EventSpawner(
     eventConfig: EventConfig,
     fetcher: SDFetcher,
-    private val httpBackend: SttpBackend[Task, ?],
+    private val httpBackend: SttpBackend[Task],
     engine: ScenarioEngine,
     rm: ResourceManager
 ) {
   private val log = MDCLogging.`for`[WLD](this)
 
-  private def asStringBypass(bypassCodes: Set[Int]): ResponseAs[Either[String, String], Any] =
+  private def asStringBypass(bypassCodes: Set[Int]): ResponseAs[Either[String, String]] =
     asStringAlways("utf-8").mapWithMetadata { (s, m) =>
       if (m.isSuccess) Right(s) else if (bypassCodes(m.code.code)) Right("") else Left(s)
     }
@@ -164,7 +164,7 @@ object EventSpawner {
     for {
       config         <- ZIO.service[EventConfig]
       fetcher        <- ZIO.service[SDFetcher]
-      sttpClient     <- ZIO.service[SttpBackend[Task, Any]]
+      sttpClient     <- ZIO.service[SttpBackend[Task]]
       scenarioEngine <- ZIO.service[ScenarioEngine]
       rm             <- ZIO.service[ResourceManager]
     } yield new EventSpawner(config, fetcher, sttpClient, scenarioEngine, rm)

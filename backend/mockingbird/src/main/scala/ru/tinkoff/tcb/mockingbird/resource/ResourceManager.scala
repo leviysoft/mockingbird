@@ -4,7 +4,7 @@ import scala.annotation.nowarn
 import scala.util.control.NonFatal
 
 import mouse.option.*
-import sttp.client3.*
+import sttp.client4.{Backend as SttpBackend, *}
 import sttp.model.Method
 import zio.managed.*
 
@@ -19,7 +19,7 @@ import ru.tinkoff.tcb.mockingbird.model.SourceConfiguration
 import ru.tinkoff.tcb.utils.id.SID
 
 final class ResourceManager(
-    private val httpBackend: SttpBackend[Task, ?],
+    private val httpBackend: SttpBackend[Task],
     sourceDAO: SourceConfigurationDAO[Task],
     destinationDAO: DestinationConfigurationDAO[Task]
 ) {
@@ -114,7 +114,7 @@ final class ResourceManager(
 object ResourceManager {
   val live = ZLayer {
     for {
-      sttpClient <- ZIO.service[SttpBackend[Task, Any]]
+      sttpClient <- ZIO.service[SttpBackend[Task]]
       srcd       <- ZIO.service[SourceConfigurationDAO[Task]]
       destd      <- ZIO.service[DestinationConfigurationDAO[Task]]
     } yield new ResourceManager(sttpClient, srcd, destd)

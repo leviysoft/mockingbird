@@ -9,8 +9,8 @@ import kantan.xpath.Node as KNode
 import kantan.xpath.XmlSource
 import mouse.boolean.*
 import mouse.option.*
-import sttp.client3.*
-import sttp.client3.circe.*
+import sttp.client4.circe.*
+import sttp.client4.{Backend as SttpBackend, *}
 import sttp.model.Method
 import zio.interop.catz.core.*
 
@@ -62,7 +62,7 @@ final class ScenarioEngine(
     stateDAO: PersistentStateDAO[Task],
     resolver: ScenarioResolver,
     fetcher: SDFetcher,
-    private val httpBackend: SttpBackend[Task, ?]
+    private val httpBackend: SttpBackend[Task]
 ) extends CallbackEngine {
   private val log = MDCLogging.`for`[WLD](this)
 
@@ -222,7 +222,7 @@ object ScenarioEngine {
       psd        <- ZIO.service[PersistentStateDAO[Task]]
       resolver   <- ZIO.service[ScenarioResolver]
       fetcher    <- ZIO.service[SDFetcher]
-      sttpClient <- ZIO.service[SttpBackend[Task, Any]]
+      sttpClient <- ZIO.service[SttpBackend[Task]]
     } yield new ScenarioEngine(sd, psd, resolver, fetcher, sttpClient)
   }
 }

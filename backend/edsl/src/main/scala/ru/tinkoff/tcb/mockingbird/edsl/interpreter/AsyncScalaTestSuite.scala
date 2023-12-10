@@ -11,8 +11,8 @@ import mouse.boolean.*
 import org.scalactic.source
 import org.scalatest.Assertion
 import org.scalatest.funsuite.AsyncFunSuiteLike
-import sttp.capabilities.WebSockets
-import sttp.client3.*
+import sttp.client4.Backend as SttpBackend
+import sttp.client4.httpclient.HttpClientFutureBackend
 import sttp.model.Uri
 
 import ru.tinkoff.tcb.mockingbird.edsl.ExampleSet
@@ -33,11 +33,11 @@ import ru.tinkoff.tcb.mockingbird.edsl.model.ValueMatcher.*
  */
 trait AsyncScalaTestSuite extends AsyncFunSuiteLike {
 
-  type HttpResponseR = sttp.client3.Response[String]
+  type HttpResponseR = sttp.client4.Response[String]
 
   private val sttpbackend_ = HttpClientFutureBackend()
 
-  private[interpreter] def sttpbackend: SttpBackend[Future, WebSockets] = sttpbackend_
+  private[interpreter] def sttpbackend: SttpBackend[Future] = sttpbackend_
 
   /**
    * URI относительно которого будут разрешаться пути используемые в примерах

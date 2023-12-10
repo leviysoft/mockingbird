@@ -9,8 +9,8 @@ import io.circe.parser.parse
 import io.circe.syntax.*
 import io.estatico.newtype.ops.*
 import mouse.option.*
-import sttp.client3.*
-import sttp.client3.circe.*
+import sttp.client4.circe.*
+import sttp.client4.{Backend as SttpBackend, *}
 import sttp.model.Method
 import zio.interop.catz.core.*
 
@@ -54,7 +54,7 @@ final class PublicApiHandler(
     stateDAO: PersistentStateDAO[Task],
     resolver: StubResolver,
     engine: CallbackEngine,
-    private val httpBackend: SttpBackend[Task, ?],
+    private val httpBackend: SttpBackend[Task],
     proxyConfig: ProxyConfig
 ) {
   private val log = MDCLogging.`for`[WLD](this)
@@ -161,7 +161,7 @@ final class PublicApiHandler(
             case AbsentRequestBody        => rt
             case SimpleRequestBody(value) => rt.body(value)
             case MultipartRequestBody(value) =>
-              rt.multipartBody[Any](
+              rt.multipartBody(
                 value.map(part =>
                   multipart(part.name, part.body)
                     .pipe(newPart =>
@@ -214,7 +214,7 @@ final class PublicApiHandler(
             case AbsentRequestBody        => rt
             case SimpleRequestBody(value) => rt.body(value)
             case MultipartRequestBody(value) =>
-              rt.multipartBody[Any](
+              rt.multipartBody(
                 value.map(part =>
                   multipart(part.name, part.body)
                     .pipe(newPart =>
@@ -273,7 +273,7 @@ final class PublicApiHandler(
             case AbsentRequestBody        => rt
             case SimpleRequestBody(value) => rt.body(value)
             case MultipartRequestBody(value) =>
-              rt.multipartBody[Any](
+              rt.multipartBody(
                 value.map(part =>
                   multipart(part.name, part.body)
                     .pipe(newPart =>
@@ -314,7 +314,7 @@ object PublicApiHandler {
       ssd        <- ZIO.service[PersistentStateDAO[Task]]
       resolver   <- ZIO.service[StubResolver]
       engine     <- ZIO.service[ScenarioEngine]
-      sttpClient <- ZIO.service[SttpBackend[Task, Any]]
+      sttpClient <- ZIO.service[SttpBackend[Task]]
       proxyCfg   <- ZIO.service[ProxyConfig]
     } yield new PublicApiHandler(hsd, ssd, resolver, engine, sttpClient, proxyCfg)
   }

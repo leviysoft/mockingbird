@@ -8,9 +8,9 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FutureOutcome
 import org.scalatest.Informer
 import org.scalatest.matchers.should.Matchers
-import sttp.capabilities.WebSockets
-import sttp.client3.*
-import sttp.client3.testing.SttpBackendStub
+import sttp.client4.*
+import sttp.client4.httpclient.HttpClientFutureBackend
+import sttp.client4.testing.WebSocketBackendStub
 import sttp.model.Header
 import sttp.model.MediaType
 import sttp.model.Method.*
@@ -27,10 +27,10 @@ class AsyncScalaTestSuiteWholeTest
 
   val eset = new CatsFacts[HttpResponseR]()
 
-  var sttpbackend_ : SttpBackendStub[Future, WebSockets] =
+  var sttpbackend_ : WebSocketBackendStub[Future] =
     HttpClientFutureBackend.stub()
 
-  override private[interpreter] def sttpbackend: SttpBackend[Future, WebSockets] = sttpbackend_
+  override private[interpreter] def sttpbackend: WebSocketBackendStub[Future] = sttpbackend_
 
   override def baseUri: Uri = uri"https://localhost.example:9977"
 
