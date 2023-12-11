@@ -3,58 +3,6 @@
   "includes":[{
     "pattern":"(?!.*(\\.class)).*"
   }, {
-    "pattern":"\\QMETA-INF/com.linecorp.armeria.versions.properties\\E"
-  }, {
-    "pattern":"\\QMETA-INF/io.netty.versions.properties\\E"
-  }, {
-    "pattern":"\\QMETA-INF/maven/org.webjars/swagger-ui/pom.properties\\E"
-  }, {
-    "pattern":"\\QMETA-INF/native/libnetty_transport_native_kqueue_x86_64.dylib\\E"
-  }, {
-    "pattern":"\\QMETA-INF/native/libnetty_transport_native_kqueue_x86_64.jnilib\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/com.aayushatharva.brotli4j.service.BrotliNativeProvider\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/com.linecorp.armeria.client.ClientFactoryProvider\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/com.linecorp.armeria.common.FlagsProvider\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/com.linecorp.armeria.common.RequestContextStorageProvider\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/com.linecorp.armeria.common.SerializationFormatProvider\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/com.linecorp.armeria.internal.common.util.ExceptionClassifier\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/io.grpc.ServerProvider\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/io.vertx.core.spi.VerticleFactory\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/io.vertx.core.spi.VertxServiceProvider\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/java.net.spi.InetAddressResolverProvider\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/java.net.spi.URLStreamHandlerProvider\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/java.nio.channels.spi.AsynchronousChannelProvider\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/java.nio.channels.spi.SelectorProvider\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/javax.xml.parsers.DocumentBuilderFactory\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/javax.xml.parsers.SAXParserFactory\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/javax.xml.xpath.XPathFactory\\E"
-  }, {
-    "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
-  }, {
-    "pattern":"\\Qapplication.conf\\E"
-  }, {
     "pattern":"\\Qcats/data/Chain$.class\\E"
   }, {
     "pattern":"\\Qcats/effect/concurrent/Ref$SyncRef.class\\E"
@@ -79,49 +27,7 @@
   }, {
     "pattern":"\\Qfs2/internal/FreeC$.class\\E"
   }, {
-    "pattern":"\\Qjndi.properties\\E"
-  }, {
-    "pattern":"\\Qlibrary.properties\\E"
-  }, {
-    "pattern":"\\Qlocal.conf\\E"
-  }, {
-    "pattern":"\\Qlogback-test.scmo\\E"
-  }, {
-    "pattern":"\\Qlogback-test.xml\\E"
-  }, {
-    "pattern":"\\Qlogback.scmo\\E"
-  }, {
-    "pattern":"\\Qlogback.xml\\E"
-  }, {
-    "pattern":"\\QmimeByExtensions.txt\\E"
-  }, {
     "pattern":"\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"
-  }, {
-    "pattern":"\\Qout/assets/mainDefault.9170041b6c1f376a.chunk.js/\\E"
-  }, {
-    "pattern":"\\Qout/assets/mainDefault.9170041b6c1f376a.chunk.js\\E"
-  }, {
-    "pattern":"\\Qout/assets/mainDefault.b47f0033a82c3e71.chunk.css/\\E"
-  }, {
-    "pattern":"\\Qout/assets/mainDefault.b47f0033a82c3e71.chunk.css\\E"
-  }, {
-    "pattern":"\\Qout/assets/platform.d581239b0d2fed1a.js/\\E"
-  }, {
-    "pattern":"\\Qout/assets/platform.d581239b0d2fed1a.js\\E"
-  }, {
-    "pattern":"\\Qout/assets/platform.e084c00ed9dacbe2.css/\\E"
-  }, {
-    "pattern":"\\Qout/assets/platform.e084c00ed9dacbe2.css\\E"
-  }, {
-    "pattern":"\\Qout/assets/react.f4ea622ec65d164d.js/\\E"
-  }, {
-    "pattern":"\\Qout/assets/react.f4ea622ec65d164d.js\\E"
-  }, {
-    "pattern":"\\Qout/index.html/\\E"
-  }, {
-    "pattern":"\\Qout/index.html\\E"
-  }, {
-    "pattern":"\\Qreference.conf\\E"
   }, {
     "pattern":"\\Qru/tinkoff/tcb/logging/MDCLogging.class\\E"
   }, {
@@ -213,8 +119,6 @@
   }, {
     "pattern":"\\Qtofu/logging/zlogs/impl/UIOZLogging.class\\E"
   }, {
-    "pattern":"\\Qvertx-default-jul-logging.properties\\E"
-  }, {
     "pattern":"\\Qzio/App$$anon$1.class\\E"
   }, {
     "pattern":"\\Qzio/App.class\\E"
@@ -304,14 +208,6 @@
     "pattern":"\\Qzio/stream/ZStream.class\\E"
   }, {
     "pattern":"\\Qzio/stream/ZStreamPlatformSpecificConstructors.class\\E"
-  }, {
-    "pattern":"java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfc.nrm\\E"
-  }, {
-    "pattern":"java.base:\\Qjdk/internal/icu/impl/data/icudt72b/uprops.icu\\E"
-  }, {
-    "pattern":"java.base:\\Qsun/net/idn/uidna.spp\\E"
-  }, {
-    "pattern":"java.base:\\Qsun/net/www/content-types.properties\\E"
   }],
   "excludes":[{
     "pattern":"META-INF/native-image/com.oracle.svm/.*"
