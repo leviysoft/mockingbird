@@ -13,10 +13,19 @@
 },
 {
   "name":"io.netty.channel.DefaultFileRegion",
-  "fields":[
-    {"name":"file"}, 
-    {"name":"transferred"}
-  ]
+  "fields":[{"name":"file"}, {"name":"transferred"}]
+},
+{
+  "name":"io.netty.channel.kqueue.BsdSocket"
+},
+{
+  "name":"io.netty.channel.kqueue.KQueueEventArray"
+},
+{
+  "name":"io.netty.channel.kqueue.KQueueStaticallyReferencedJniMethods"
+},
+{
+  "name":"io.netty.channel.kqueue.Native"
 },
 {
   "name":"io.netty.channel.unix.Buffer"
@@ -50,10 +59,7 @@
 },
 {
   "name":"io.netty.handler.ssl.OpenSslSessionCache",
-  "methods":[
-    {"name":"getSession","parameterTypes":["long","byte[]"] }, 
-    {"name":"sessionCreated","parameterTypes":["long","long"] }
-  ]
+  "methods":[{"name":"getSession","parameterTypes":["long","byte[]"] }, {"name":"sessionCreated","parameterTypes":["long","long"] }]
 },
 {
   "name":"io.netty.handler.ssl.ReferenceCountedOpenSslClientContext$ExtendedTrustManagerVerifyCallback"
@@ -102,10 +108,7 @@
 },
 {
   "name":"io.netty.internal.tcnative.SSLTask",
-  "fields":[
-    {"name":"complete"}, 
-    {"name":"returnValue"}
-  ]
+  "fields":[{"name":"complete"}, {"name":"returnValue"}]
 },
 {
   "name":"java.io.FileDescriptor",
@@ -120,10 +123,7 @@
 },
 {
   "name":"java.lang.ClassLoader",
-  "methods":[
-    {"name":"getPlatformClassLoader","parameterTypes":[] }, 
-    {"name":"loadClass","parameterTypes":["java.lang.String"] }
-  ]
+  "methods":[{"name":"getPlatformClassLoader","parameterTypes":[] }, {"name":"loadClass","parameterTypes":["java.lang.String"] }]
 },
 {
   "name":"java.lang.Exception"
@@ -142,19 +142,11 @@
 },
 {
   "name":"java.lang.String",
-  "methods":[
-    {"name":"<init>","parameterTypes":["byte[]"] }, 
-    {"name":"getBytes","parameterTypes":[] }, 
-    {"name":"lastIndexOf","parameterTypes":["int"] }, 
-    {"name":"substring","parameterTypes":["int"] }
-  ]
+  "methods":[{"name":"<init>","parameterTypes":["byte[]"] }, {"name":"getBytes","parameterTypes":[] }, {"name":"lastIndexOf","parameterTypes":["int"] }, {"name":"substring","parameterTypes":["int"] }]
 },
 {
   "name":"java.lang.System",
-  "methods":[
-    {"name":"getProperty","parameterTypes":["java.lang.String"] }, 
-    {"name":"setProperty","parameterTypes":["java.lang.String","java.lang.String"] }
-  ]
+  "methods":[{"name":"getProperty","parameterTypes":["java.lang.String"] }, {"name":"setProperty","parameterTypes":["java.lang.String","java.lang.String"] }]
 },
 {
   "name":"java.net.InetSocketAddress",
@@ -165,14 +157,8 @@
 },
 {
   "name":"java.nio.Buffer",
-  "fields":[
-    {"name":"limit"}, 
-    {"name":"position"}
-  ],
-  "methods":[
-    {"name":"limit","parameterTypes":[] }, 
-    {"name":"position","parameterTypes":[] }
-  ]
+  "fields":[{"name":"limit"}, {"name":"position"}],
+  "methods":[{"name":"limit","parameterTypes":[] }, {"name":"position","parameterTypes":[] }]
 },
 {
   "name":"java.nio.DirectByteBuffer"
@@ -194,16 +180,7 @@
 },
 {
   "name":"sun.management.VMManagementImpl",
-  "fields":[
-    {"name":"compTimeMonitoringSupport"}, 
-    {"name":"currentThreadCpuTimeSupport"}, 
-    {"name":"objectMonitorUsageSupport"}, 
-    {"name":"otherThreadCpuTimeSupport"}, 
-    {"name":"remoteDiagnosticCommandsSupport"}, 
-    {"name":"synchronizerUsageSupport"}, 
-    {"name":"threadAllocatedMemorySupport"}, 
-    {"name":"threadContentionMonitoringSupport"}
-  ]
+  "fields":[{"name":"compTimeMonitoringSupport"}, {"name":"currentThreadCpuTimeSupport"}, {"name":"objectMonitorUsageSupport"}, {"name":"otherThreadCpuTimeSupport"}, {"name":"remoteDiagnosticCommandsSupport"}, {"name":"synchronizerUsageSupport"}, {"name":"threadAllocatedMemorySupport"}, {"name":"threadContentionMonitoringSupport"}]
 },
 {
   "name":"sun.nio.ch.FileChannelImpl",
