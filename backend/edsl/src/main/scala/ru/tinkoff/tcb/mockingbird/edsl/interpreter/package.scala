@@ -14,7 +14,8 @@ package object interpreter {
       .addQuerySegments(req.query.map { case (k, v) => QuerySegment.KeyValue(k, v) })
 
   def buildRequest(host: Uri, m: HttpRequest): Request[String] = {
-    var req = m.body.fold(quickRequest)(quickRequest.body)
+    val initialRequest = emptyRequest.response(asStringAlways)
+    var req = m.body.fold(initialRequest)(initialRequest.body)
     req = m.headers.foldLeft(req) { case (r, (k, v)) => r.header(k, v, replaceExisting = true) }
     val url = makeUri(host, m)
     m.method match {

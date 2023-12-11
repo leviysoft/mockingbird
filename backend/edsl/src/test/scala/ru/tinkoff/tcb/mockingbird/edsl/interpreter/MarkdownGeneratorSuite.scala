@@ -64,7 +64,6 @@ class MarkdownGeneratorSuite extends AnyFunSuite with Matchers {
            |curl \
            |  --request POST \
            |  --url '$host$path?${query.map { case (n, v) => s"$n=$v" }.mkString("&")}' \
-           |  --header 'Accept-Encoding: gzip, deflate' \
            |  --header 'x-token: asd5453qwe' \
            |  --header 'Content-Type: application/json' \
            |  --data-raw '$body'
@@ -151,7 +150,6 @@ class MarkdownGeneratorSuite extends AnyFunSuite with Matchers {
         |curl \
         |  --request GET \
         |  --url 'https://catfact.ninja/fact' \
-        |  --header 'Accept-Encoding: gzip, deflate' \
         |  --header 'X-CSRF-TOKEN: unEENxJqSLS02rji2GjcKzNLc0C0ySlWih9hSxwn'
         |
         |```
