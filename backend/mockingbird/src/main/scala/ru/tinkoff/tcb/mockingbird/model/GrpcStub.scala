@@ -78,11 +78,12 @@ object GrpcStub {
       case Right(fieldName) =>
         for {
           fs <- fields.get
+          pkgPrefix = definition.`package`.map(p => s".$p.").getOrElse(".")
           field <- ZIO.getOrFailWith(ValidationError(Vector(s"Field $fieldName not found")))(fs.find(_.name == fieldName))
           _ <-
             if (primitiveTypes.values.exists(_ == field.typeName)) fields.set(List.empty)
             else
-              definition.schemas.find(_.name == field.typeName) match {
+              definition.schemas.find(_.name == field.typeName.stripPrefix(pkgPrefix)) match {
                 case Some(message) =>
                   message match {
                     case GrpcMessageSchema(_, fs, oneofs, _, _) =>
