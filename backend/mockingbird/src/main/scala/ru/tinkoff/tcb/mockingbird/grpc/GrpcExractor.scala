@@ -39,63 +39,51 @@ object GrpcExractor {
 
   def addSchemaToRegistry(schema: GrpcRootMessage, registry: DynamicSchema.Builder): Unit =
     schema match {
-      case GrpcMessageSchema(name, fields, oneofs, nested, nestedEnums) =>
-        val builder = MessageDefinition
-          .newBuilder(name)
-        fields.foreach {
-          case f if f.label == GrpcLabel.Optional =>
-            val oneOfBuilder = builder.addOneof(s"_${f.name}")
-            oneOfBuilder.addField(f.typeName, f.name, f.order)
-          case f =>
-            builder.addField(f.label.entryName, f.typeName, f.name, f.order)
-        }
-        oneofs.getOrElse(List.empty).foreach { oneof =>
-          val oneOfBuilder = builder.addOneof(oneof.name)
-          oneof.options.foreach { of =>
-            oneOfBuilder.addField(of.typeName, of.name, of.order)
-          }
-        }
-        nested.getOrElse(List.empty).foreach { nst =>
-          val nestedBuilder = MessageDefinition.newBuilder(nst.name)
-          nst.fields.foreach {
-            case f if f.label == GrpcLabel.Optional =>
-              val oneOfBuilder = nestedBuilder.addOneof(s"_${f.name}")
-              oneOfBuilder.addField(f.typeName, f.name, f.order)
-            case f =>
-              nestedBuilder.addField(f.label.entryName, f.typeName, f.name, f.order)
-          }
-          builder.addMessageDefinition(nestedBuilder.build())
-        }
-        nestedEnums.getOrElse(List.empty).foreach { nst =>
-          val nestedBuilder = EnumDefinition.newBuilder(nst.name)
-          nst.values.foreach { case (name, number) =>
-            ignore(
-              nestedBuilder
-                .addValue(
-                  name.asString,
-                  number.asInt
-                )
-            )
-          }
-          builder.addEnumDefinition(nestedBuilder.build())
-        }
-
-        ignore(registry.addMessageDefinition(builder.build()))
-      case GrpcEnumSchema(name, values) =>
-        val builder = EnumDefinition
-          .newBuilder(name)
-        values.foreach { case (name, number) =>
-          ignore(
-            builder
-              .addValue(
-                name.asString,
-                number.asInt
-              )
-          )
-        }
-        val enumDefinition = builder.build()
-        ignore(registry.addEnumDefinition(enumDefinition))
+      case m: GrpcMessageSchema =>
+        ignore(registry.addMessageDefinition(buildMessageDefinition(m)))
+      case m: GrpcEnumSchema =>
+        ignore(registry.addEnumDefinition(buildEnumDefinition(m)))
     }
+
+  def buildMessageDefinition(gm: GrpcMessageSchema): MessageDefinition = {
+    val builder = MessageDefinition.newBuilder(gm.name)
+
+    gm.fields.foreach {
+      case f if f.label == GrpcLabel.Optional =>
+        val oneOfBuilder = builder.addOneof(s"_${f.name}")
+        oneOfBuilder.addField(f.typeName, f.name, f.order)
+      case f =>
+        builder.addField(f.label.entryName, f.typeName, f.name, f.order)
+    }
+
+    gm.oneofs.getOrElse(List.empty).foreach { oneof =>
+      val oneOfBuilder = builder.addOneof(oneof.name)
+      oneof.options.foreach { of =>
+        oneOfBuilder.addField(of.typeName, of.name, of.order)
+      }
+    }
+
+    gm.nested
+      .getOrElse(List.empty)
+      .foreach(
+        buildMessageDefinition andThen builder.addMessageDefinition
+      )
+
+    gm.nestedEnums
+      .getOrElse(List.empty)
+      .foreach(
+        buildEnumDefinition andThen builder.addEnumDefinition
+      )
+
+    builder.build()
+  }
+
+  def buildEnumDefinition(ge: GrpcEnumSchema): EnumDefinition =
+    ge.values
+      .foldLeft(EnumDefinition.newBuilder(ge.name)) { case (builder, (name, number)) =>
+        builder.addValue(name.asString, number.asInt)
+      }
+      .build()
 
   implicit class FromGrpcProtoDefinition(private val definition: GrpcProtoDefinition) extends AnyVal {
     def toDynamicSchema: DynamicSchema = {
