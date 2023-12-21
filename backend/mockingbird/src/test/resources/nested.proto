@@ -23,6 +23,23 @@ message GetStocksResponse {
   message Stocks {
     repeated Stock stocks = 1;
   }
+  message Event {
+    enum Code {
+      C_OK = 0;
+      C_ERROR = 1;
+    }
+    message Data {
+      string value = 1;
+    }
+    message Error {
+      string info = 1;
+    }
+    Code code = 1;
+    oneof payload {
+      Data data = 4;
+      Error error = 100;
+    }
+  }
 }
 
 service StockService {

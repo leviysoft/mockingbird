@@ -30,6 +30,10 @@ object MappersSpec extends ZIOSpecDefault {
     ".GetStocksResponse.StockKinds",
     ".GetStocksResponse.Stock",
     ".GetStocksResponse.Stocks",
+    ".GetStocksResponse.Event",
+    ".GetStocksResponse.Event.Code",
+    ".GetStocksResponse.Event.Data",
+    ".GetStocksResponse.Event.Error",
   )
 
   override def spec: Spec[TestEnvironment & Scope, Any] =
@@ -48,13 +52,6 @@ object MappersSpec extends ZIOSpecDefault {
           protoDefinition      = schema.toGrpcProtoDefinition
           protoDefinitionAgain = protoDefinition.toDynamicSchema.toGrpcProtoDefinition
         } yield assertTrue(protoDefinition == protoDefinitionAgain)
-      },
-      test("Mappers from nested DynamicSchema to GrpcProtoDefinition and back are consistent") {
-        for {
-          content <- Utils.getProtoDescriptionFromResource("nested.proto")
-          schema          = DynamicSchema.parseFrom(content)
-          protoDefinition = schema.toGrpcProtoDefinition
-        } yield assertTrue(getAllTypes(protoDefinition) == allTypesInNested)
       },
       test("Mappers from nested DynamicSchema to GrpcProtoDefinition and back are consistent") {
         for {
