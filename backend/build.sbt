@@ -149,7 +149,7 @@ lazy val `mockingbird-native` = (project in file("mockingbird-native"))
     GraalVMNativeImage / graalVMNativeImageOptions ++= Seq(
       "-J-Xmx5632m", // Required to fit native-image runtime heap in Standard GitHub-hosted runners
       "-H:+StaticExecutableWithDynamicLibC",
-      "--gc=G1"
+      //"--gc=G1"
     ).filter(_ => dockerize.value),
     nativeImageInstalled := true,
     nativeImageAgentMerge := true,
