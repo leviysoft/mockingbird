@@ -161,7 +161,7 @@ jobs:
 
     env:
       CI: true
-      SBT_OPTS: "-Xms1024m -Xmx1024m -XX:+AlwaysPreTouch -XX:ReservedCodeCacheSize=192M -XX:MaxMetaspaceSize=512M -Xss2m -XX:+TieredCompilation -XX:+UseParallelGC"
+      SBT_OPTS: "-Xms1024m -Xmx1024m -XX:+AlwaysPreTouch -XX:ReservedCodeCacheSize=192M -XX:MaxMetaspaceSize=768M -Xss2m -XX:+TieredCompilation -XX:+UseParallelGC"
 
     steps:
       - uses: actions/checkout@v4
