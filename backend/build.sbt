@@ -76,7 +76,10 @@ val mockingbird = (project in file("mockingbird"))
       "com.github.os72"                % "protobuf-dynamic"    % "1.0.1",
       "com.github.geirolz"            %% "advxml-core"         % "2.5.1",
       "com.github.geirolz"            %% "advxml-xpath"        % "2.5.1",
-      "io.estatico"                   %% "newtype"             % "0.4.4"
+      "io.estatico"                   %% "newtype"             % "0.4.4",
+      "org.mozilla"                    % "rhino"               % "1.7.14",
+      "org.graalvm.js"                 % "js"                  % "23.0.2",
+      "org.slf4j"                      % "slf4j-api"           % "1.7.30" % Provided
     ),
     Compile / unmanagedResourceDirectories += file("../frontend/dist")
   )
@@ -146,7 +149,7 @@ lazy val `mockingbird-native` = (project in file("mockingbird-native"))
     GraalVMNativeImage / graalVMNativeImageOptions ++= Seq(
       "-J-Xmx5632m", // Required to fit native-image runtime heap in Standard GitHub-hosted runners
       "-H:+StaticExecutableWithDynamicLibC",
-      "--gc=G1"
+      //"--gc=G1"
     ).filter(_ => dockerize.value),
     nativeImageInstalled := true,
     nativeImageAgentMerge := true,
