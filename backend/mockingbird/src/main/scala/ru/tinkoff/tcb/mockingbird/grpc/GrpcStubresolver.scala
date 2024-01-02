@@ -1,6 +1,8 @@
 package ru.tinkoff.tcb.mockingbird.grpc
 
 import com.google.protobuf.InvalidProtocolBufferException
+import eu.timepit.refined.*
+import eu.timepit.refined.numeric.*
 import io.circe.Json
 import io.circe.ParsingFailure
 import mouse.option.*
@@ -42,7 +44,7 @@ class GrpcStubResolverImpl(stubDAO: GrpcStubDAO[Task], stateDAO: PersistentState
       .findChunk(
         prop[GrpcStub](_.methodName) === methodName &&
           prop[GrpcStub](_.scope) === scope &&
-          prop[GrpcStub](_.times) > Option(0),
+          prop[GrpcStub](_.times) > Option(refineMV[NonNegative](0)),
         0,
         Integer.MAX_VALUE
       )

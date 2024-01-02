@@ -18,6 +18,7 @@ import ru.tinkoff.tcb.mockingbird.model.FillResponse
 import ru.tinkoff.tcb.mockingbird.model.GProxyResponse
 import ru.tinkoff.tcb.mockingbird.model.PersistentState
 import ru.tinkoff.tcb.mockingbird.model.Scope
+import ru.tinkoff.tcb.protocol.log.*
 import ru.tinkoff.tcb.utils.transformation.json.*
 
 trait GrpcRequestHandler {

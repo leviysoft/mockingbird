@@ -5,10 +5,16 @@ import java.time.Instant
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.collection.*
+import eu.timepit.refined.numeric.*
 import io.circe.Json
+import io.circe.refined.*
 import mouse.boolean.*
+import sttp.tapir.codec.refined.*
 import sttp.tapir.derevo.schema
 
+import ru.tinkoff.tcb.bson.*
 import ru.tinkoff.tcb.bson.annotation.BsonKey
 import ru.tinkoff.tcb.bson.derivation.bsonDecoder
 import ru.tinkoff.tcb.bson.derivation.bsonEncoder
@@ -29,10 +35,10 @@ case class GrpcStub(
     @BsonKey("_id") id: SID[GrpcStub],
     scope: Scope,
     created: Instant,
-    service: String,
-    times: Option[Int],
+    service: String Refined NonEmpty,
+    times: Option[Int Refined NonNegative],
     methodName: String,
-    name: String,
+    name: String Refined NonEmpty,
     requestSchema: GrpcProtoDefinition,
     requestClass: String,
     responseSchema: GrpcProtoDefinition,

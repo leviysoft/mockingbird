@@ -41,6 +41,7 @@ import ru.tinkoff.tcb.mockingbird.model.SourceConfiguration
 import ru.tinkoff.tcb.mockingbird.model.XMLCallbackRequest
 import ru.tinkoff.tcb.mockingbird.model.XmlOutput
 import ru.tinkoff.tcb.mockingbird.stream.SDFetcher
+import ru.tinkoff.tcb.protocol.log.*
 import ru.tinkoff.tcb.utils.id.SID
 import ru.tinkoff.tcb.utils.transformation.json.*
 import ru.tinkoff.tcb.utils.transformation.string.*

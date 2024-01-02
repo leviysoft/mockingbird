@@ -1,6 +1,10 @@
 package ru.tinkoff.tcb.mockingbird.api
 
 import com.github.dwickern.macros.NameOf.*
+import eu.timepit.refined.*
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.collection.*
+import eu.timepit.refined.numeric.*
 import io.circe.Json
 import kantan.xpath.Node
 import mouse.boolean.*
@@ -52,9 +56,14 @@ final class StubResolver(stubDAO: HttpStubDAO[Task], stateDAO: PersistentStateDA
           )
         )
         condition0 = prop[HttpStub](_.method) === method &&
-          (prop[HttpStub](_.path) ==@ path || (prop[HttpStub](_.path).notExists && pathPatternExpr)) &&
+          (prop[HttpStub](_.path) ==@ Refined.unsafeApply[String, NonEmpty](path) || (prop[HttpStub](
+            _.path
+          ).notExists && pathPatternExpr)) &&
           prop[HttpStub](_.scope) === scope
-        condition = (scope == Scope.Countdown).fold(condition0 && prop[HttpStub](_.times) > Option(0), condition0)
+        condition = (scope == Scope.Countdown).fold(
+          condition0 && prop[HttpStub](_.times) > Option(refineMV[NonNegative](0)),
+          condition0
+        )
         candidates0 <- stubDAO.findChunk(condition, 0, Int.MaxValue)
         _ <- ZIO.when(candidates0.isEmpty)(
           log.info("Не найдены обработчики для запроса {} типа {}", path, scope) *> ZIO.fail(EarlyReturn)

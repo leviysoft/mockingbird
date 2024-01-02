@@ -7,9 +7,14 @@ import com.github.dwickern.macros.NameOf.*
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.collection.*
+import eu.timepit.refined.numeric.*
 import io.circe.Json
+import io.circe.refined.*
 import mouse.boolean.*
 import sttp.tapir.Schema.annotations.description
+import sttp.tapir.codec.refined.*
 import sttp.tapir.derevo.schema
 
 import ru.tinkoff.tcb.bson.annotation.BsonKey
@@ -36,14 +41,14 @@ final case class HttpStub(
     @description("Тип конфигурации")
     scope: Scope,
     @description("Количество возможных срабатываний. Имеет смысл только для scope=countdown")
-    times: Option[Int],
+    times: Option[Int Refined NonNegative],
     serviceSuffix: String,
     @description("Название мока")
-    name: String,
+    name: String Refined NonEmpty,
     @description("HTTP метод")
     method: HttpMethod,
     @description("Суффикс пути, по которому срабатывает мок")
-    path: Option[String],
+    path: Option[String Refined NonEmpty],
     pathPattern: Option[Regex],
     seed: Option[Json],
     @description("Предикат для поиска состояния")
@@ -73,9 +78,6 @@ object HttpStub extends CallbackChecker {
 
   private val persistNonEmpty: Rule[HttpStub] =
     _.persist.exists(_.isEmpty).valueOrZero(Vector("Спецификация persist не может быть пустой"))
-
-  private val timesGreaterZero: Rule[HttpStub] =
-    _.times.exists(_ <= 0).valueOrZero(Vector("times должно быть больше 0"))
 
   private val jsonProxyReq: Rule[HttpStub] = stub =>
     (stub.request, stub.response) match {
@@ -112,7 +114,6 @@ object HttpStub extends CallbackChecker {
       (h: HttpStub) => checkCallback(h.callback, destinations),
       stateNonEmpty,
       persistNonEmpty,
-      timesGreaterZero,
       jsonProxyReq,
       responseCodes204and304,
       possibleHttpCodes,

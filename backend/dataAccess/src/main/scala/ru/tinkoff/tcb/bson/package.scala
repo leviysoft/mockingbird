@@ -11,11 +11,14 @@ import scala.collection.mutable
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.FiniteDuration
 import scala.jdk.CollectionConverters.*
+import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 import scala.util.matching.Regex
 
 import alleycats.std.map.*
+import eu.timepit.refined.api.RefType
+import eu.timepit.refined.api.Validate
 import mouse.ignore
 import org.mongodb.scala.bson.*
 import org.mongodb.scala.bson.BsonNull
@@ -283,6 +286,19 @@ package object bson {
   implicit val regexBsonDecoder: BsonDecoder[Regex] =
     (value: BsonValue) => Try(value.asRegularExpression()).map(bre => new Regex(bre.getPattern))
 
+  implicit def refinedBsonDecoder[T, P, F[_, _]](implicit
+      base: BsonDecoder[T],
+      validate: Validate[T, P],
+      refType: RefType[F]
+  ): BsonDecoder[F[T, P]] =
+    (value: BsonValue) =>
+      base.fromBson(value).flatMap { decoded =>
+        refType.refine(decoded) match {
+          case Left(err)      => Failure(DeserializationError(err))
+          case Right(refined) => Success(refined)
+        }
+      }
+
   implicit val bsonValueBsonEncoder: BsonEncoder[BsonValue] =
     (value: BsonValue) => value
 
@@ -363,6 +379,12 @@ package object bson {
 
   implicit val regexBsonEncoder: BsonEncoder[Regex] =
     (value: Regex) => BsonRegularExpression(value)
+
+  implicit def refinedBsonEncoder[T, P, F[_, _]](implicit
+      base: BsonEncoder[T],
+      refType: RefType[F]
+  ): BsonEncoder[F[T, P]] =
+    base.beforeWrite(refType.unwrap)
 
   protected def merge(
       base: BsonValue,

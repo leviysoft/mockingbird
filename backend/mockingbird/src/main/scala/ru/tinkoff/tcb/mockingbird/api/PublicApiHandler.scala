@@ -39,6 +39,7 @@ import ru.tinkoff.tcb.mockingbird.model.SimpleRequestBody
 import ru.tinkoff.tcb.mockingbird.model.XmlProxyResponse
 import ru.tinkoff.tcb.mockingbird.scenario.CallbackEngine
 import ru.tinkoff.tcb.mockingbird.scenario.ScenarioEngine
+import ru.tinkoff.tcb.protocol.log.*
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.regex.*
 import ru.tinkoff.tcb.utils.transformation.json.*

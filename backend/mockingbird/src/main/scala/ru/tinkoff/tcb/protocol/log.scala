@@ -1,5 +1,6 @@
 package ru.tinkoff.tcb.protocol
 
+import eu.timepit.refined.api.RefType
 import sttp.model.Header
 import sttp.model.Part
 import tofu.logging.LogRenderer
@@ -19,4 +20,7 @@ object log {
   }
 
   implicit def partLoggable[T: Loggable]: Loggable[Part[T]] = loggable.instance[Part[T]]
+
+  implicit def refinedLoggable[T: Loggable, P, F[_, _]: RefType]: Loggable[F[T, P]] =
+    Loggable[T].contramap(RefType[F].unwrap)
 }
