@@ -2,6 +2,8 @@ package ru.tinkoff.tcb.mockingbird.api
 
 import java.nio.charset.StandardCharsets
 
+import eu.timepit.refined.*
+import eu.timepit.refined.api.Refined
 import sttp.model.Header
 import sttp.model.Method
 import sttp.model.StatusCode
@@ -11,6 +13,7 @@ import ru.tinkoff.tcb.mockingbird.api.input.*
 import ru.tinkoff.tcb.mockingbird.codec.*
 import ru.tinkoff.tcb.mockingbird.model.AbsentRequestBody
 import ru.tinkoff.tcb.mockingbird.model.EmptyResponse
+import ru.tinkoff.tcb.mockingbird.model.HttpStatusCodeRange
 import ru.tinkoff.tcb.mockingbird.model.HttpStubResponse
 import ru.tinkoff.tcb.mockingbird.model.MultipartRequestBody
 import ru.tinkoff.tcb.mockingbird.model.RequestBody
@@ -27,7 +30,7 @@ package object exec {
   private val codesWithoutContent = Set(
     StatusCode.NoContent,
     StatusCode.NotModified
-  ).map(_.code)
+  ).map(_.code).map(Refined.unsafeApply[Int, HttpStatusCodeRange])
 
   private val variants =
     oneOfVariantValueMatcher(binaryBody(RawBodyType.ByteArrayBody)[HttpStubResponse]) {
@@ -36,7 +39,7 @@ package object exec {
     }
 
   private val nocontentVariant =
-    oneOfVariantValueMatcher(emptyOutputAs[HttpStubResponse](EmptyResponse(204, Map.empty, None))) {
+    oneOfVariantValueMatcher(emptyOutputAs[HttpStubResponse](EmptyResponse(refineMV(204), Map.empty, None))) {
       case StubCode(rc) if codesWithoutContent.contains(rc) =>
         true
     }

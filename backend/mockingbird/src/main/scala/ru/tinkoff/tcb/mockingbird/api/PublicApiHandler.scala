@@ -4,6 +4,8 @@ import scala.concurrent.duration.FiniteDuration
 import scala.util.control.NonFatal
 import scala.xml.Node
 
+import eu.timepit.refined.*
+import eu.timepit.refined.api.Refined
 import io.circe.Json
 import io.circe.parser.parse
 import io.circe.syntax.*
@@ -26,6 +28,7 @@ import ru.tinkoff.tcb.mockingbird.model.AbsentRequestBody
 import ru.tinkoff.tcb.mockingbird.model.BinaryResponse
 import ru.tinkoff.tcb.mockingbird.model.ByteArray
 import ru.tinkoff.tcb.mockingbird.model.HttpMethod
+import ru.tinkoff.tcb.mockingbird.model.HttpStatusCodeRange
 import ru.tinkoff.tcb.mockingbird.model.HttpStub
 import ru.tinkoff.tcb.mockingbird.model.HttpStubResponse
 import ru.tinkoff.tcb.mockingbird.model.JsonProxyResponse
@@ -180,7 +183,7 @@ final class PublicApiHandler(
         .readTimeout(timeout.getOrElse(1.minute.asScala))
         .send(httpBackend)
     } yield BinaryResponse(
-      response.code.code,
+      Refined.unsafeApply[Int, HttpStatusCodeRange](response.code.code),
       response.headers
         .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
         .map(h => h.name -> h.value)
@@ -235,7 +238,7 @@ final class PublicApiHandler(
     } yield response.body match {
       case Right(jsonResponse) =>
         RawResponse(
-          response.code.code,
+          Refined.unsafeApply[Int, HttpStatusCodeRange](response.code.code),
           response.headers
             .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
             .map(h => h.name -> h.value)
@@ -244,7 +247,7 @@ final class PublicApiHandler(
           delay
         )
       case Left(error) =>
-        RawResponse(500, Map(), error.body, delay)
+        RawResponse(refineMV(500), Map(), error.body, delay)
     }
   }
 
@@ -294,7 +297,7 @@ final class PublicApiHandler(
     } yield response.body match {
       case Right(xmlResponse) =>
         RawResponse(
-          response.code.code,
+          Refined.unsafeApply[Int, HttpStatusCodeRange](response.code.code),
           response.headers
             .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
             .map(h => h.name -> h.value)
@@ -303,7 +306,7 @@ final class PublicApiHandler(
           delay
         )
       case Left(error) =>
-        RawResponse(500, Map(), error, delay)
+        RawResponse(refineMV(500), Map(), error, delay)
     }
   }
 }

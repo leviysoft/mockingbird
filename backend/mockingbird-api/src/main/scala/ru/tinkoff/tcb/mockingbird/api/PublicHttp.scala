@@ -93,15 +93,15 @@ final class PublicHttp(handler: PublicApiHandler) {
       .tap(_.delay.fold[UIO[Unit]](ZIO.unit)(fd => ZIO.sleep(Duration.fromScala(fd))))
       .map {
         case r @ EmptyResponse(sc, headers, _) =>
-          (headers.map { case (name, value) => Header(name, value) }.to(List), StatusCode(sc), r)
+          (headers.map { case (name, value) => Header(name, value) }.to(List), StatusCode(sc.value), r)
         case r @ RawResponse(sc, headers, _, _) =>
-          (headers.map { case (name, value) => Header(name, value) }.to(List), StatusCode(sc), r)
+          (headers.map { case (name, value) => Header(name, value) }.to(List), StatusCode(sc.value), r)
         case j @ JsonResponse(sc, headers, _, _, _) =>
-          (headers.map { case (name, value) => Header(name, value) }.to(List), StatusCode(sc), j)
+          (headers.map { case (name, value) => Header(name, value) }.to(List), StatusCode(sc.value), j)
         case x @ XmlResponse(sc, headers, _, _, _) =>
-          (headers.map { case (name, value) => Header(name, value) }.to(List), StatusCode(sc), x)
+          (headers.map { case (name, value) => Header(name, value) }.to(List), StatusCode(sc.value), x)
         case b @ BinaryResponse(sc, headers, _, _) =>
-          (headers.map { case (name, value) => Header(name, value) }.to(List), StatusCode(sc), b)
+          (headers.map { case (name, value) => Header(name, value) }.to(List), StatusCode(sc.value), b)
         case p @ ProxyResponse(_, _, _)         => (Nil, StatusCode.InternalServerError, p)
         case jp @ JsonProxyResponse(_, _, _, _) => (Nil, StatusCode.InternalServerError, jp)
         case xp @ XmlProxyResponse(_, _, _, _)  => (Nil, StatusCode.InternalServerError, xp)
