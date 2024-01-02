@@ -79,7 +79,7 @@ object Dependencies {
   ).map("com.dimafeng" %% _ % "0.41.0" % Test)
 
   lazy val refined = Seq(
-    "eu.timepit" %% "refined" % "0.9.28"
+    "eu.timepit" %% "refined" % "0.11.0"
   )
 
   lazy val protobuf = Seq(
