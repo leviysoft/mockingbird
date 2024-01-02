@@ -66,7 +66,7 @@ object UpdateScenarioRequest {
 case class ScenarioPatch(
     @BsonKey("_id") id: SID[Scenario],
     scope: Scope,
-    times: Option[Int] = Some(1),
+    times: Option[Int],
     service: String,
     name: String,
     source: SID[SourceConfiguration],

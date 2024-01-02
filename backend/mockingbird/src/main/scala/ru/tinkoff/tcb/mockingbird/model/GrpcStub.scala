@@ -1,7 +1,6 @@
 package ru.tinkoff.tcb.mockingbird.model
 
 import java.time.Instant
-import java.util.UUID
 
 import derevo.circe.decoder
 import derevo.circe.encoder
@@ -27,11 +26,11 @@ import ru.tinkoff.tcb.validation.Rule
 
 @derive(bsonDecoder, bsonEncoder, decoder, encoder, schema)
 case class GrpcStub(
-    @BsonKey("_id") id: SID[GrpcStub] = SID(UUID.randomUUID().toString),
+    @BsonKey("_id") id: SID[GrpcStub],
     scope: Scope,
     created: Instant,
     service: String,
-    times: Option[Int] = Some(1),
+    times: Option[Int],
     methodName: String,
     name: String,
     requestSchema: GrpcProtoDefinition,
@@ -42,7 +41,7 @@ case class GrpcStub(
     seed: Option[Json],
     state: Option[Map[JsonOptic, Map[Keyword.Json, Json]]],
     requestPredicates: JsonPredicate,
-    labels: Seq[String] = Seq.empty
+    labels: Seq[String]
 )
 
 object GrpcStub {

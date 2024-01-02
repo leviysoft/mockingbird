@@ -36,7 +36,7 @@ final case class HttpStub(
     @description("Тип конфигурации")
     scope: Scope,
     @description("Количество возможных срабатываний. Имеет смысл только для scope=countdown")
-    times: Option[Int] = Some(1),
+    times: Option[Int],
     serviceSuffix: String,
     @description("Название мока")
     name: String,
@@ -57,7 +57,7 @@ final case class HttpStub(
     @description("Спецификация колбека")
     callback: Option[Callback],
     @description("Тэги")
-    labels: Seq[String] = Seq.empty
+    labels: Seq[String]
 )
 
 object HttpStub extends CallbackChecker {

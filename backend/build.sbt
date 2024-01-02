@@ -69,7 +69,7 @@ val mockingbird = (project in file("mockingbird"))
       "com.softwaremill.sttp.client4" %% "circe"               % Versions.sttp,
       "org.javassist"                  % "javassist"           % "3.29.2-GA", // Armeria dependency
       "org.apache.tika"                % "tika-core"           % "2.1.0",
-      "io.scalaland"                  %% "chimney"             % "0.7.5",
+      "io.scalaland"                  %% "chimney"             % "0.8.5",
       "com.ironcorelabs"              %% "cats-scalatest"      % "3.0.8" % Test,
       "com.google.code.findbugs"       % "jsr305"              % "3.0.2" % Optional,
       "com.github.dwickern"           %% "scala-nameof"        % "4.0.0" % Provided,

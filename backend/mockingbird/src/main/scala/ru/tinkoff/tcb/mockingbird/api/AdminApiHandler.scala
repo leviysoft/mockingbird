@@ -449,7 +449,7 @@ final class AdminApiHandler(
       now            <- ZIO.clockWith(_.instant)
       stub = body
         .into[GrpcStub]
-        .enableDefaultValues
+        .withFieldComputed(_.id, _ => SID.random[GrpcStub])
         .withFieldConst(_.created, now)
         .withFieldComputed(_.times, _.times.map(_.value))
         .withFieldComputed(_.requestSchema, _ => requestSchema)
