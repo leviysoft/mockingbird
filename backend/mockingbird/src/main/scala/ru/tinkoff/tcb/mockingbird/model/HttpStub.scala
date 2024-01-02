@@ -7,6 +7,7 @@ import com.github.dwickern.macros.NameOf.*
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
+import eu.timepit.refined.*
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.*
 import eu.timepit.refined.numeric.*
@@ -92,19 +93,12 @@ object HttpStub extends CallbackChecker {
 
   private val responseCodes204and304: Rule[HttpStub] = stub =>
     stub.response match {
-      case StubCode(rc) if rc == 204 || rc == 304 =>
+      case StubCode(rc) if rc == refineMV[HttpStatusCodeRange](204) || rc == refineMV[HttpStatusCodeRange](304) =>
         stub.response match {
           case EmptyResponse(_, _, _) => Vector.empty
           case _ =>
             Vector(s"Коды ответов 204 и 304 могут использоваться только с mode '${HttpStubResponse.modes(nameOfType[EmptyResponse])}'")
         }
-      case _ => Vector.empty
-    }
-
-  private val possibleHttpCodes: Rule[HttpStub] = stub =>
-    stub.response match {
-      case StubCode(code) if code < 100 || code >= 600 =>
-        Vector(s"Разрешенные коды ответов находятся в интервале 100 ... 599")
       case _ => Vector.empty
     }
 
@@ -115,7 +109,6 @@ object HttpStub extends CallbackChecker {
       stateNonEmpty,
       persistNonEmpty,
       jsonProxyReq,
-      responseCodes204and304,
-      possibleHttpCodes,
+      responseCodes204and304
     ).reduce(_ |+| _)
 }

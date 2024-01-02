@@ -3,6 +3,8 @@ package ru.tinkoff.tcb.mockingbird
 import java.util.Base64
 import scala.util.Try
 
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.numeric.*
 import io.circe.Decoder
 import io.circe.Encoder
 import io.circe.KeyDecoder
@@ -111,4 +113,7 @@ package object model {
 
     implicit val secureStringRof: RootOptionFields[SecureString] = RootOptionFields.mk(Set.empty)
   }
+
+  type HttpStatusCodeRange = Interval.ClosedOpen[100, 600]
+  type HttpStatusCode      = Int Refined HttpStatusCodeRange
 }

@@ -15,6 +15,8 @@ import glass.macros.GenSubset
 import io.circe.Decoder
 import io.circe.Encoder
 import io.circe.Json
+import io.circe.refined.*
+import sttp.tapir.codec.refined.*
 import sttp.tapir.derevo.schema
 import sttp.tapir.generic.Configuration as TapirConfig
 
@@ -66,7 +68,7 @@ object HttpStubResponse {
 
 @derive(decoder, encoder)
 final case class EmptyResponse(
-    code: Int,
+    code: HttpStatusCode,
     headers: Map[String, String],
     delay: Option[FiniteDuration]
 ) extends HttpStubResponse {
@@ -75,7 +77,7 @@ final case class EmptyResponse(
 
 @derive(decoder, encoder)
 final case class RawResponse(
-    code: Int,
+    code: HttpStatusCode,
     headers: Map[String, String],
     body: String,
     delay: Option[FiniteDuration]
@@ -84,7 +86,7 @@ final case class RawResponse(
 }
 
 final case class JsonResponse(
-    code: Int,
+    code: HttpStatusCode,
     headers: Map[String, String],
     body: Json,
     delay: Option[FiniteDuration],
@@ -113,7 +115,7 @@ object JsonResponse {
 }
 
 final case class XmlResponse(
-    code: Int,
+    code: HttpStatusCode,
     headers: Map[String, String],
     body: XMLString,
     delay: Option[FiniteDuration],
@@ -151,7 +153,7 @@ object XmlResponse {
 
 @derive(decoder, encoder)
 final case class BinaryResponse(
-    code: Int,
+    code: HttpStatusCode,
     headers: Map[String, String],
     body: ByteArray,
     delay: Option[FiniteDuration]
@@ -193,7 +195,7 @@ final case class XmlProxyResponse(
 }
 
 object StubCode {
-  def unapply(stub: HttpStubResponse): Option[Int] =
+  def unapply(stub: HttpStubResponse): Option[HttpStatusCode] =
     stub match {
       case EmptyResponse(code, _, _)      => Some(code)
       case RawResponse(code, _, _, _)     => Some(code)
