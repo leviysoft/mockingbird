@@ -34,7 +34,7 @@ case class Scenario(
     @description("Тип конфигурации")
     scope: Scope,
     @description("Количество возможных срабатываний. Имеет смысл только для scope=countdown")
-    times: Option[Int] = Some(1),
+    times: Option[Int],
     service: String,
     @description("Имя сценария, отображается в логах, полезно для отладки")
     name: String,
@@ -54,7 +54,7 @@ case class Scenario(
     @description("Спецификация колбека")
     callback: Option[Callback],
     @description("Тэги")
-    labels: Seq[String] = Seq.empty
+    labels: Seq[String]
 )
 
 object Scenario extends CallbackChecker {
