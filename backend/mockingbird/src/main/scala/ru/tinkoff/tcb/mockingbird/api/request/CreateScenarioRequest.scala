@@ -33,7 +33,7 @@ case class CreateScenarioRequest(
     scope: Scope,
     @description("Количество возможных срабатываний. Имеет смысл только для scope=countdown")
     times: Option[Int Refined NonNegative] = Some(refineMV(1)),
-    service: String,
+    service: String Refined NonEmpty,
     @description("Имя сценария, отображается в логах, полезно для отладки")
     name: String Refined NonEmpty,
     @description("Имя источника событий")

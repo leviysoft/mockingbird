@@ -6,7 +6,7 @@ import derevo.derive
 import eu.timepit.refined.*
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.*
-import eu.timepit.refined.numeric.NonNegative
+import eu.timepit.refined.numeric.*
 import io.circe.Json
 import io.circe.refined.*
 import sttp.tapir.Schema.annotations.description
@@ -37,7 +37,7 @@ case class UpdateScenarioRequest(
     scope: Scope,
     @description("Количество возможных срабатываний. Имеет смысл только для scope=countdown")
     times: Option[Int Refined NonNegative] = Some(refineMV(1)),
-    service: String,
+    service: String Refined NonEmpty,
     @description("Имя сценария, отображается в логах, полезно для отладки")
     name: String Refined NonEmpty,
     @description("Имя источника событий")
@@ -66,9 +66,9 @@ object UpdateScenarioRequest {
 case class ScenarioPatch(
     @BsonKey("_id") id: SID[Scenario],
     scope: Scope,
-    times: Option[Int],
-    service: String,
-    name: String,
+    times: Option[Int Refined NonNegative],
+    service: String Refined NonEmpty,
+    name: String Refined NonEmpty,
     source: SID[SourceConfiguration],
     seed: Option[Json],
     input: ScenarioInput,

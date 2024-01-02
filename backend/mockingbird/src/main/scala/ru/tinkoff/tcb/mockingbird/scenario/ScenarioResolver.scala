@@ -1,5 +1,7 @@
 package ru.tinkoff.tcb.mockingbird.scenario
 
+import eu.timepit.refined.*
+import eu.timepit.refined.numeric.*
 import io.circe.Json
 import kantan.xpath.Node as KNode
 import mouse.boolean.*
@@ -34,7 +36,10 @@ class ScenarioResolver(scenarioDAO: ScenarioDAO[Task], stateDAO: PersistentState
     (for {
       _ <- log.info("Поиск сценариев для источника {} типа {}", source, scope)
       condition0 = prop[Scenario](_.source) === source && prop[Scenario](_.scope) === scope
-      condition  = (scope == Scope.Countdown).fold(condition0 && prop[Scenario](_.times) > Option(0), condition0)
+      condition = (scope == Scope.Countdown).fold(
+        condition0 && prop[Scenario](_.times) > Option(refineMV[NonNegative](0)),
+        condition0
+      )
       scenarios0 <- scenarioDAO.findChunk(condition, 0, Int.MaxValue)
       _ <- ZIO.when(scenarios0.isEmpty)(
         log.info("Не найдены обработчики для источника {} типа {}", source, scope) *>

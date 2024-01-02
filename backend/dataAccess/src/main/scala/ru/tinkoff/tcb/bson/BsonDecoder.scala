@@ -3,7 +3,6 @@ package ru.tinkoff.tcb.bson
 import scala.annotation.implicitNotFound
 import scala.util.Try
 
-import org.bson.BsonInvalidOperationException
 import org.mongodb.scala.bson.*
 import simulacrum.typeclass
 
@@ -31,7 +30,7 @@ object BsonDecoder {
       Try(
         pf.applyOrElse[BsonValue, T](
           value,
-          bv => throw new BsonInvalidOperationException(s"Can't decode $bv")
+          bv => throw DeserializationError(s"Can't decode $bv")
         )
       )
 

@@ -2,6 +2,10 @@ package ru.tinkoff.tcb.mockingbird.api
 
 import scala.util.control.NonFatal
 
+import eu.timepit.refined.*
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.collection.*
+import eu.timepit.refined.numeric.*
 import io.circe.Json
 import io.circe.parser.parse
 import io.scalaland.chimney.dsl.*
@@ -80,10 +84,10 @@ final class AdminApiHandler(
       service = service1.orElse(service2).get
       candidates0 <- stubDAO.findChunk(
         prop[HttpStub](_.method) === body.method &&
-          (if (body.path.isDefined) prop[HttpStub](_.path) === body.path.map(_.value)
+          (if (body.path.isDefined) prop[HttpStub](_.path) === body.path
            else prop[HttpStub](_.pathPattern) === body.pathPattern) &&
           prop[HttpStub](_.scope) === body.scope &&
-          prop[HttpStub](_.times) > Option(0),
+          prop[HttpStub](_.times) > Option(refineMV[NonNegative](0)),
         0,
         Int.MaxValue
       )
@@ -99,9 +103,6 @@ final class AdminApiHandler(
         .into[HttpStub]
         .withFieldComputed(_.id, _ => SID.random[HttpStub])
         .withFieldConst(_.created, now)
-        .withFieldComputed(_.name, _.name.value)
-        .withFieldComputed(_.path, _.path.map(_.value))
-        .withFieldComputed(_.times, _.times.map(_.value))
         .withFieldConst(_.serviceSuffix, service.suffix)
         .transform
       destinations <- fetcher.getDestinations
@@ -125,7 +126,7 @@ final class AdminApiHandler(
       candidates0 <- scenarioDAO.findChunk(
         prop[Scenario](_.source) === body.source &&
           prop[Scenario](_.scope) === body.scope &&
-          prop[HttpStub](_.times) > Option(0),
+          prop[HttpStub](_.times) > Option(refineMV[NonNegative](0)),
         0,
         Int.MaxValue
       )
@@ -144,8 +145,6 @@ final class AdminApiHandler(
         .into[Scenario]
         .withFieldComputed(_.id, _ => SID.random[Scenario])
         .withFieldConst(_.created, now)
-        .withFieldComputed(_.times, _.times.map(_.value))
-        .withFieldComputed(_.name, _.name.value)
         .transform
       sources <- fetcher.getSources
       sourceNames = sources.map(_.name).toSet
@@ -226,7 +225,9 @@ final class AdminApiHandler(
       labels: List[String]
   ): RIO[WLD, Vector[HttpStub]] = {
     var queryDoc =
-      prop[HttpStub](_.scope) =/= Scope.Countdown.asInstanceOf[Scope] || prop[HttpStub](_.times) > Option(0)
+      prop[HttpStub](_.scope) =/= Scope.Countdown.asInstanceOf[Scope] || prop[HttpStub](_.times) > Option(
+        refineMV[NonNegative](0)
+      )
     if (query.isDefined) {
       val qs = query.get
       val q = prop[HttpStub](_.id) === SID[HttpStub](qs).asInstanceOf[SID[HttpStub]] ||
@@ -251,7 +252,9 @@ final class AdminApiHandler(
       labels: List[String]
   ): RIO[WLD, Vector[Scenario]] = {
     var queryDoc =
-      prop[Scenario](_.scope) =/= Scope.Countdown.asInstanceOf[Scope] || prop[Scenario](_.times) > Option(0)
+      prop[Scenario](_.scope) =/= Scope.Countdown.asInstanceOf[Scope] || prop[Scenario](_.times) > Option(
+        refineMV[NonNegative](0)
+      )
     if (query.isDefined) {
       val qs = query.get
       val q = prop[Scenario](_.id) === SID[Scenario](qs).asInstanceOf[SID[Scenario]] ||
@@ -260,8 +263,9 @@ final class AdminApiHandler(
         prop[Scenario](_.destination).regex(qs, "i")
       queryDoc = queryDoc && q
     }
-    if (service.isDefined) {
-      queryDoc = queryDoc && (prop[Scenario](_.service) === service.get)
+    val refService = service.flatMap(refineV[NonEmpty](_).toOption)
+    if (refService.isDefined) {
+      queryDoc = queryDoc && (prop[Scenario](_.service) === refService.get)
     }
     if (labels.nonEmpty) {
       queryDoc = queryDoc && (prop[Scenario](_.labels).containsAll(labels))
@@ -302,10 +306,10 @@ final class AdminApiHandler(
       candidates0 <- stubDAO.findChunk(
         where(_._id =/= id) &&
           prop[HttpStub](_.method) === body.method &&
-          (if (body.path.isDefined) prop[HttpStub](_.path) === body.path.map(_.value)
+          (if (body.path.isDefined) prop[HttpStub](_.path) === body.path
            else prop[HttpStub](_.pathPattern) === body.pathPattern) &&
           prop[HttpStub](_.scope) === body.scope &&
-          prop[HttpStub](_.times) > Option(0),
+          prop[HttpStub](_.times) > Option(refineMV[NonNegative](0)),
         0,
         Int.MaxValue
       )
@@ -320,9 +324,6 @@ final class AdminApiHandler(
       stubPatch = body
         .into[StubPatch]
         .withFieldConst(_.id, id)
-        .withFieldComputed(_.times, _.times.map(_.value))
-        .withFieldComputed(_.name, _.name.value)
-        .withFieldComputed(_.path, _.path.map(_.value))
         .transform
       stub = stubPatch
         .into[HttpStub]
@@ -351,7 +352,7 @@ final class AdminApiHandler(
         where(_._id =/= id) &&
           prop[Scenario](_.source) === body.source &&
           prop[Scenario](_.scope) === body.scope &&
-          prop[HttpStub](_.times) > Option(0),
+          prop[HttpStub](_.times) > Option(refineMV[NonNegative](0)),
         0,
         Int.MaxValue
       )
@@ -369,8 +370,6 @@ final class AdminApiHandler(
       scenarioPatch = body
         .into[ScenarioPatch]
         .withFieldConst(_.id, id)
-        .withFieldComputed(_.times, _.times.map(_.value))
-        .withFieldComputed(_.name, _.name.value)
         .transform
       scenario = scenarioPatch
         .into[Scenario]
@@ -383,7 +382,7 @@ final class AdminApiHandler(
       vr        = Scenario.validationRules(sourceNames, destNames)(scenario)
       _   <- ZIO.when(vr.nonEmpty)(ZIO.fail(ValidationError(vr)))
       res <- scenarioDAO.patch(scenarioPatch)
-      _   <- labelDAO.ensureLabels(body.service, scenario.labels.to(Vector))
+      _   <- labelDAO.ensureLabels(body.service.value, scenario.labels.to(Vector))
     } yield if (res.successful) OperationResult("success", scenario.id) else OperationResult("nothing inserted")
 
   def getLabels(service: String): RIO[WLD, Vector[String]] =
@@ -395,7 +394,9 @@ final class AdminApiHandler(
       service: Option[String],
       labels: List[String]
   ): RIO[WLD, Vector[GrpcStub]] = {
-    var queryDoc = prop[GrpcStub](_.scope) =/= Scope.Countdown.asInstanceOf[Scope] || prop[GrpcStub](_.times) > Option(0)
+    var queryDoc = prop[GrpcStub](_.scope) =/= Scope.Countdown.asInstanceOf[Scope] || prop[GrpcStub](_.times) > Option(
+      refineMV[NonNegative](0)
+    )
     if (query.isDefined) {
       val qs = query.get
       val q = prop[GrpcStub](_.id) === SID[GrpcStub](qs).asInstanceOf[SID[GrpcStub]] ||
@@ -403,8 +404,9 @@ final class AdminApiHandler(
         prop[GrpcStub](_.methodName).regex(qs, "i")
       queryDoc = queryDoc && q
     }
-    if (service.isDefined) {
-      queryDoc = queryDoc && (prop[GrpcStub](_.service) === service.get)
+    val refService = service.flatMap(refineV[NonEmpty](_).toOption)
+    if (refService.isDefined) {
+      queryDoc = queryDoc && (prop[GrpcStub](_.service) === refService.get)
     }
     if (labels.nonEmpty) {
       queryDoc = queryDoc && (prop[GrpcStub](_.labels).containsAll(labels))
@@ -451,14 +453,13 @@ final class AdminApiHandler(
         .into[GrpcStub]
         .withFieldComputed(_.id, _ => SID.random[GrpcStub])
         .withFieldConst(_.created, now)
-        .withFieldComputed(_.times, _.times.map(_.value))
         .withFieldComputed(_.requestSchema, _ => requestSchema)
         .withFieldComputed(_.responseSchema, _ => responseSchema)
         .transform
       vr = GrpcStub.validationRules(stub)
       _   <- ZIO.when(vr.nonEmpty)(ZIO.fail(ValidationError(vr)))
       res <- grpcStubDAO.insert(stub)
-      _   <- labelDAO.ensureLabels(stub.service, stub.labels.to(Vector))
+      _   <- labelDAO.ensureLabels(stub.service.value, stub.labels.to(Vector))
     } yield if (res > 0) OperationResult("success", stub.id) else OperationResult("nothing inserted")
   }
 
@@ -472,7 +473,7 @@ final class AdminApiHandler(
     )
 
   def fetchSourceConfigurations(
-      service: Option[String]
+      service: Option[String Refined NonEmpty]
   ): RIO[WLD, Vector[SourceDTO]] = {
     var queryDoc = BsonDocument()
     if (service.isDefined) {
@@ -595,7 +596,7 @@ final class AdminApiHandler(
     } yield OperationResult("success", None)
 
   def fetchDestinationConfigurations(
-      service: Option[String]
+      service: Option[String Refined NonEmpty]
   ): RIO[WLD, Vector[DestinationDTO]] = {
     var queryDoc = BsonDocument()
     if (service.isDefined) {

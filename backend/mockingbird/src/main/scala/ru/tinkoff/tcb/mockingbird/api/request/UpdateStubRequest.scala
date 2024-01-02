@@ -67,10 +67,10 @@ object UpdateStubRequest {
 case class StubPatch(
     @BsonKey("_id") id: SID[HttpStub],
     scope: Scope,
-    times: Option[Int],
-    name: String,
+    times: Option[Int Refined NonNegative],
+    name: String Refined NonEmpty,
     method: HttpMethod,
-    path: Option[String],
+    path: Option[String Refined NonEmpty],
     pathPattern: Option[Regex],
     seed: Option[Json],
     state: Option[Map[JsonOptic, Map[Keyword.Json, Json]]],

@@ -1,4 +1,4 @@
-package ru.tinkoff.tcb.bson.derivation
+package ru.tinkoff.tcb.bson
 
 case class DeserializationError(message: String, cause: Throwable) extends RuntimeException(message, cause) {
   def this(message: String) = this(message, null)

@@ -6,9 +6,14 @@ import com.github.dwickern.macros.NameOf.*
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.collection.*
+import eu.timepit.refined.numeric.*
 import io.circe.Json
+import io.circe.refined.*
 import mouse.boolean.*
 import sttp.tapir.Schema.annotations.description
+import sttp.tapir.codec.refined.*
 import sttp.tapir.derevo.schema
 
 import ru.tinkoff.tcb.bson.annotation.BsonKey
@@ -34,10 +39,10 @@ case class Scenario(
     @description("Тип конфигурации")
     scope: Scope,
     @description("Количество возможных срабатываний. Имеет смысл только для scope=countdown")
-    times: Option[Int],
-    service: String,
+    times: Option[Int Refined NonNegative],
+    service: String Refined NonEmpty,
     @description("Имя сценария, отображается в логах, полезно для отладки")
-    name: String,
+    name: String Refined NonEmpty,
     @description("Имя источника событий")
     source: SID[SourceConfiguration],
     seed: Option[Json],
@@ -78,9 +83,6 @@ object Scenario extends CallbackChecker {
     (s: Scenario) =>
       s.destination.map(destinations).getOrElse(true) !? Vector(s"${s.destination.getOrElse("")} не настроен")
 
-  private val timesGreaterZero: Rule[Scenario] =
-    _.times.exists(_ <= 0).valueOrZero(Vector("times должно быть больше 0"))
-
   private val stateNonEmpty: Rule[Scenario] =
     _.state.exists(_.isEmpty).valueOrZero(Vector("Предикат state не может быть пустым"))
 
@@ -96,7 +98,6 @@ object Scenario extends CallbackChecker {
       (s: Scenario) => checkCallback(s.callback, destinations),
       checkSourceId(sources),
       checkDestinationId(destinations),
-      timesGreaterZero,
       stateNonEmpty,
       persistNonEmpty
     ).reduce(_ |+| _)

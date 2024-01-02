@@ -1,6 +1,8 @@
 package ru.tinkoff.tcb.mockingbird.stream
 
 import eu.timepit.fs2cron.awakeEveryCron
+import eu.timepit.refined.*
+import eu.timepit.refined.numeric.*
 import fs2.Stream
 import tofu.logging.Logging
 import tofu.logging.impl.ZUniversalLogging
@@ -35,11 +37,15 @@ final class EphemeralCleaner(stubDAO: HttpStubDAO[Task], scenarioDAO: ScenarioDA
       )
       _ <- log.info("Purging expired scenarios: {} deleted", deleted2)
       deleted3 <- stubDAO.delete(
-        prop[HttpStub](_.scope) === Scope.Countdown.asInstanceOf[Scope] && prop[HttpStub](_.times) <= Option(0)
+        prop[HttpStub](_.scope) === Scope.Countdown.asInstanceOf[Scope] && prop[HttpStub](_.times) <= Option(
+          refineMV[NonNegative](0)
+        )
       )
       _ <- log.info("Purging countdown stubs: {} deleted", deleted3)
       deleted4 <- scenarioDAO.delete(
-        prop[Scenario](_.scope) === Scope.Countdown.asInstanceOf[Scope] && prop[Scenario](_.times) <= Option(0)
+        prop[Scenario](_.scope) === Scope.Countdown.asInstanceOf[Scope] && prop[Scenario](_.times) <= Option(
+          refineMV[NonNegative](0)
+        )
       )
       _ <- log.info("Purging countdown scenarios: {} deleted", deleted4)
     } yield deleted
