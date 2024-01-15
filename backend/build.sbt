@@ -38,6 +38,17 @@ val dataAccess = (project in file("dataAccess"))
     publish := {}
   )
 
+lazy val `tapir-kyo` = (project in file("tapir-kyo"))
+  .settings(Settings.common)
+  .settings(scalacOptions ~= (_.filterNot(_.startsWith("-Yimports"))))
+  .settings(
+    name := "tapir-kyo",
+    libraryDependencies ++= Seq(
+      "io.getkyo" %% "kyo-core" % "0.8.2",
+      "com.softwaremill.sttp.tapir" %% "tapir-core" % Versions.tapir
+    )
+  )
+
 val mockingbird = (project in file("mockingbird"))
   .aggregate(utils, circeUtils, dataAccess)
   .dependsOn(utils, circeUtils, dataAccess)
@@ -226,6 +237,7 @@ val root = (project in file("."))
     utils,
     circeUtils,
     dataAccess,
+    `tapir-kyo`,
     mockingbird,
     `mockingbird-api`,
     `mockingbird-native`,
