@@ -8,6 +8,8 @@ ThisBuild / concurrentRestrictions += Tags.limit(missinglinkConflictsTag, 1)
 
 ThisBuild / evictionErrorLevel := Level.Debug
 
+ThisBuild / semanticdbEnabled := true
+
 val utils = (project in file("utils"))
   .settings(Settings.common)
   .settings(
@@ -113,11 +115,11 @@ lazy val `mockingbird-api` = (project in file("mockingbird-api"))
   .settings(
     addCommandAlias(
       "fixCheck",
-      "scalafixEnable; scalafixAll --check; scalafmtCheck"
+      "scalafixAll --check; scalafmtCheck"
     ),
     addCommandAlias(
       "lintAll",
-      "scalafixEnable; scalafixAll; scalafmtAll"
+      "scalafixAll; scalafmtAll"
     )
   )
 
@@ -150,11 +152,11 @@ lazy val `mockingbird-native` = (project in file("mockingbird-native"))
   .settings(
     addCommandAlias(
       "fixCheck",
-      "scalafixEnable; scalafixAll --check; scalafmtCheck"
+      "scalafixAll --check; scalafmtCheck"
     ),
     addCommandAlias(
       "lintAll",
-      "scalafixEnable; scalafixAll; scalafmtAll"
+      "scalafixAll; scalafmtAll"
     )
   )
 
@@ -200,11 +202,11 @@ val examples = (project in file("examples"))
   .settings(
     addCommandAlias(
       "fixCheck",
-      "scalafixEnable; scalafixAll --check; scalafmtCheck"
+      "scalafixAll --check; scalafmtCheck"
     ),
     addCommandAlias(
       "lintAll",
-      "scalafixEnable; scalafixAll; scalafmtAll"
+      "scalafixAll; scalafmtAll"
     )
   )
 
