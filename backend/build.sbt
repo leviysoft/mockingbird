@@ -113,11 +113,11 @@ lazy val `mockingbird-api` = (project in file("mockingbird-api"))
   .settings(
     addCommandAlias(
       "fixCheck",
-      "scalafixAll --check; scalafmtCheck"
+      "scalafixEnable; scalafixAll --check; scalafmtCheck"
     ),
     addCommandAlias(
       "lintAll",
-      "scalafixAll; scalafmtAll"
+      "scalafixEnable; scalafixAll; scalafmtAll"
     )
   )
 
@@ -150,11 +150,11 @@ lazy val `mockingbird-native` = (project in file("mockingbird-native"))
   .settings(
     addCommandAlias(
       "fixCheck",
-      "scalafixAll --check; scalafmtCheck"
+      "scalafixEnable; scalafixAll --check; scalafmtCheck"
     ),
     addCommandAlias(
       "lintAll",
-      "scalafixAll; scalafmtAll"
+      "scalafixEnable; scalafixAll; scalafmtAll"
     )
   )
 
@@ -200,11 +200,11 @@ val examples = (project in file("examples"))
   .settings(
     addCommandAlias(
       "fixCheck",
-      "scalafixAll --check; scalafmtCheck"
+      "scalafixEnable; scalafixAll --check; scalafmtCheck"
     ),
     addCommandAlias(
       "lintAll",
-      "scalafixAll; scalafmtAll"
+      "scalafixEnable; scalafixAll; scalafmtAll"
     )
   )
 

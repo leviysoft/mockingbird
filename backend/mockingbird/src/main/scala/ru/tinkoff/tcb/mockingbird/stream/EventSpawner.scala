@@ -3,8 +3,8 @@ package ru.tinkoff.tcb.mockingbird.stream
 import scala.util.control.NonFatal
 
 import fs2.Stream
-import io.circe.DecodingFailure
 import io.circe.Error as CirceError
+import io.circe.DecodingFailure
 import io.circe.parser.parse
 import mouse.all.optionSyntaxMouse
 import mouse.boolean.*

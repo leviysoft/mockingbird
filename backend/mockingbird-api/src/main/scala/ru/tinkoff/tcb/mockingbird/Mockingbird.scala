@@ -1,8 +1,5 @@
 package ru.tinkoff.tcb.mockingbird
 
-import scalapb.zio_grpc.RequestContext
-import scalapb.zio_grpc.server.ZServerCallHandler
-
 import com.linecorp.armeria.client.ClientFactory
 import com.linecorp.armeria.client.WebClient
 import com.linecorp.armeria.client.encoding.DecodingClient
@@ -13,6 +10,8 @@ import org.mongodb.scala.MongoClient
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.MongoDatabase
 import org.mongodb.scala.bson.BsonDocument
+import scalapb.zio_grpc.RequestContext
+import scalapb.zio_grpc.server.ZServerCallHandler
 import sttp.client4.BackendOptions as SttpBackendOptions
 import sttp.client4.armeria.zio.ArmeriaZioBackend
 import tofu.logging.Logging
