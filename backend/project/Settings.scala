@@ -66,9 +66,6 @@ object Settings {
     ),
     addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
     addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.2" cross CrossVersion.full),
-    ThisBuild / scalafixDependencies ++= Seq(
-      "org.typelevel" %% "simulacrum-scalafix" % Versions.simulacrum
-    ),
     missinglinkExcludedDependencies ++= Seq(
       moduleFilter(organization = "ch.qos.logback", name = "logback-core" | "logback-classic"),
       // missinglink некорректно обрабатывает scope optional
