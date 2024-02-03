@@ -92,7 +92,7 @@ jobs:
         -Xms2048m 
         -Xmx2048m 
         -XX:+AlwaysPreTouch 
-        -XX:ReservedCodeCacheSize=192M 
+        -XX:ReservedCodeCacheSize=256M 
         -Xss2m 
         -XX:+TieredCompilation 
         -XX:+UseParallelGC
