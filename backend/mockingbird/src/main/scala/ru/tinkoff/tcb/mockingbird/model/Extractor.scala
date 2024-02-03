@@ -48,7 +48,7 @@ object XmlExtractor {
  *   Путь внутри CDATA
  */
 @derive(decoder, encoder)
-case class XMLCDataExtractor(prefix: Xpath, path: Xpath) extends XmlExtractor {
+final case class XMLCDataExtractor(prefix: Xpath, path: Xpath) extends XmlExtractor {
   def apply(node: Node): Either[XPathError, Json] =
     node
       .evalXPath[String](prefix.toXPathExpr)
@@ -64,7 +64,7 @@ case class XMLCDataExtractor(prefix: Xpath, path: Xpath) extends XmlExtractor {
  *   Путь внутри CDATA
  */
 @derive(decoder, encoder)
-case class JsonCDataExtractor(prefix: Xpath, path: JsonOptic) extends XmlExtractor {
+final case class JsonCDataExtractor(prefix: Xpath, path: JsonOptic) extends XmlExtractor {
   def apply(node: Node): Either[XPathError, Json] =
     node.evalXPath[Json](prefix.toXPathExpr).map(path.get)
 }

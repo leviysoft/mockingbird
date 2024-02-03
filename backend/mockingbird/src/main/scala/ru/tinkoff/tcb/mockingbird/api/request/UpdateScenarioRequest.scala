@@ -32,7 +32,7 @@ import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.id.SID
 
 @derive(decoder, encoder, schema)
-case class UpdateScenarioRequest(
+final case class UpdateScenarioRequest(
     @description("Тип конфигурации")
     scope: Scope,
     @description("Количество возможных срабатываний. Имеет смысл только для scope=countdown")
@@ -63,7 +63,7 @@ object UpdateScenarioRequest {
 }
 
 @derive(bsonEncoder)
-case class ScenarioPatch(
+final case class ScenarioPatch(
     @BsonKey("_id") id: SID[Scenario],
     scope: Scope,
     times: Option[Int Refined NonNegative],

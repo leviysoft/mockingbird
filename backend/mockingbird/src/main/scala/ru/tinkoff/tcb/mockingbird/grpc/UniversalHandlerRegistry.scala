@@ -4,13 +4,13 @@ import io.grpc.HandlerRegistry
 import io.grpc.ServerCallHandler
 import io.grpc.ServerMethodDefinition
 
-case class UniversalHandlerRegistry0(method: ServerMethodDefinition[?, ?]) extends HandlerRegistry {
+final case class UniversalHandlerRegistry0(method: ServerMethodDefinition[?, ?]) extends HandlerRegistry {
 
   override def lookupMethod(methodName: String, authority: String): ServerMethodDefinition[?, ?] =
     method
 }
 
-case class UniversalHandlerRegistry(handler: ServerCallHandler[Array[Byte], Array[Byte]]) extends HandlerRegistry {
+final case class UniversalHandlerRegistry(handler: ServerCallHandler[Array[Byte], Array[Byte]]) extends HandlerRegistry {
 
   override def lookupMethod(methodName: String, authority: String): ServerMethodDefinition[Array[Byte], Array[Byte]] = {
     val methodNameArray = methodName.split("/")

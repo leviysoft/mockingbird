@@ -16,7 +16,7 @@ import ru.tinkoff.tcb.protocol.schema.*
 import ru.tinkoff.tcb.utils.id.SID
 
 @derive(decoder, encoder, schema)
-case class CreateSourceConfigurationRequest(
+final case class CreateSourceConfigurationRequest(
     @description("Уникальное название конфигурации")
     name: SID[SourceConfiguration],
     @description("Описание конфигурации")

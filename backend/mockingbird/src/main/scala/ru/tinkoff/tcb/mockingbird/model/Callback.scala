@@ -44,7 +44,7 @@ object Callback {
 }
 
 @derive(decoder, encoder)
-case class MessageCallback(
+final case class MessageCallback(
     destination: SID[DestinationConfiguration],
     output: ScenarioOutput,
     callback: Option[Callback],
@@ -52,7 +52,7 @@ case class MessageCallback(
 ) extends Callback
 
 @derive(decoder, encoder)
-case class HttpCallback(
+final case class HttpCallback(
     request: CallbackRequest,
     responseMode: Option[CallbackResponseMode],
     persist: Option[Map[JsonOptic, Json]],

@@ -85,7 +85,7 @@ final class EventSpawner(
       reInit = triggers.exists(sp => sp.code.forall(_ == response.code.code) && sp.checkBody(response.body.merge))
       body <- ZIO
         .fromEither(response.body)
-        .mapError(err =>
+        .mapError[Exception](err =>
           (if (reInit) SourceFault(_) else EventProcessingError(_))(
             s"Запрос на ${req.url.asString} завершился ошибкой ($err)"
           )
@@ -110,7 +110,7 @@ final class EventSpawner(
             (for {
               _ <- Tracing.init
               res <- fetch(sourceConf.request, sourceConf.reInitTriggers.map(_.toVector).orEmpty)
-                .mapError(SpawnError(sourceConf.name, _))
+                .mapError[Exception](SpawnError(sourceConf.name, _))
               neRes = res.filter(_.nonEmpty)
               _ <- ZIO.when(neRes.nonEmpty)(log.info(s"Отправлено в обработку: ${neRes.length}"))
               _ <- ZIO

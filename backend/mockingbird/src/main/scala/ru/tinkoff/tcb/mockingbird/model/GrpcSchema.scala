@@ -49,7 +49,7 @@ object GrpcLabel
 }
 
 @derive(encoder, decoder, bsonDecoder, bsonEncoder, schema)
-case class GrpcField(
+final case class GrpcField(
     typ: GrpcType,
     label: GrpcLabel,
     typeName: String,
@@ -101,7 +101,7 @@ object GrpcSchema {
 }
 
 @derive(encoder, decoder)
-case class GrpcMessageSchema(
+final case class GrpcMessageSchema(
     name: String,
     fields: List[GrpcField],
     oneofs: Option[List[GrpcOneOfSchema]] = None,
@@ -116,19 +116,19 @@ object GrpcMessageSchema {
 }
 
 @derive(encoder, decoder, bsonEncoder, bsonDecoder, schema)
-case class GrpcEnumSchema(
+final case class GrpcEnumSchema(
     name: String,
     values: Map[FieldName, FieldNumber]
 ) extends GrpcRootMessage
 
 @derive(encoder, decoder, bsonDecoder, bsonEncoder, schema)
-case class GrpcOneOfSchema(
+final case class GrpcOneOfSchema(
     name: String,
     options: List[GrpcField]
 ) extends GrpcSchema
 
 @derive(encoder, decoder, bsonDecoder, bsonEncoder, schema)
-case class GrpcProtoDefinition(
+final case class GrpcProtoDefinition(
     name: String,
     schemas: List[GrpcRootMessage],
     `package`: Option[String] = None

@@ -22,7 +22,7 @@ import ru.tinkoff.tcb.protocol.schema.*
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 
 @derive(decoder, encoder, schema)
-case class CreateGrpcStubRequest(
+final case class CreateGrpcStubRequest(
     scope: Scope,
     times: Option[Int Refined NonNegative] = Some(1),
     service: String Refined NonEmpty,

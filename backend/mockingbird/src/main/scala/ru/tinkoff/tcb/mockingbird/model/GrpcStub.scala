@@ -31,7 +31,7 @@ import ru.tinkoff.tcb.utils.id.SID
 import ru.tinkoff.tcb.validation.Rule
 
 @derive(bsonDecoder, bsonEncoder, decoder, encoder, schema)
-case class GrpcStub(
+final case class GrpcStub(
     @BsonKey("_id") id: SID[GrpcStub],
     scope: Scope,
     created: Instant,

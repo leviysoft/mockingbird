@@ -28,7 +28,7 @@ import ru.tinkoff.tcb.protocol.schema.*
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 
 @derive(encoder, decoder, schema)
-case class CreateStubRequest(
+final case class CreateStubRequest(
     @description("Тип конфигурации")
     scope: Scope,
     @description("Количество возможных срабатываний. Имеет смысл только для scope=countdown")

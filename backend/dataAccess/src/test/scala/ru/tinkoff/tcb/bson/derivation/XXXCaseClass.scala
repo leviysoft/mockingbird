@@ -3,7 +3,7 @@ package ru.tinkoff.tcb.bson.derivation
 import derevo.derive
 
 @derive(bsonDecoder, bsonEncoder)
-case class XXXCaseClass(
+final case class XXXCaseClass(
     a: Int,
     b: Int,
     c: Int,

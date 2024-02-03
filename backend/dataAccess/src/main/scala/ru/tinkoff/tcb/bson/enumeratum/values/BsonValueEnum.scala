@@ -5,7 +5,8 @@ import scala.util.Try
 import enumeratum.values.*
 
 import ru.tinkoff.tcb.bson.*
-sealed trait BsonValueEnum[ValueType, EntryType <: ValueEnumEntry[ValueType]] {
+
+trait BsonValueEnum[ValueType, EntryType <: ValueEnumEntry[ValueType]] {
   enum: ValueEnum[ValueType, EntryType] =>
 
   implicit def bsonEncoder: BsonEncoder[EntryType]

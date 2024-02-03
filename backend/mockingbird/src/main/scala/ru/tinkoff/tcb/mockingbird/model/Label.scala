@@ -8,7 +8,7 @@ import ru.tinkoff.tcb.bson.derivation.bsonEncoder
 import ru.tinkoff.tcb.utils.id.SID
 
 @derive(bsonDecoder, bsonEncoder)
-case class Label(
+final case class Label(
     @BsonKey("_id") id: SID[Label],
     serviceSuffix: String,
     label: String

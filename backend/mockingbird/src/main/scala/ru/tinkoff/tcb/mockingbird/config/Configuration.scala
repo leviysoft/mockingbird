@@ -8,18 +8,18 @@ import net.ceedubs.ficus.Ficus.*
 import net.ceedubs.ficus.readers.ArbitraryTypeReader.*
 import net.ceedubs.ficus.readers.EnumerationReader.*
 
-case class ServerConfig(interface: String, port: Int, allowedOrigins: Seq[String], healthCheckRoute: Option[String])
+final case class ServerConfig(interface: String, port: Int, allowedOrigins: Seq[String], healthCheckRoute: Option[String])
 
-case class SecurityConfig(secret: String)
+final case class SecurityConfig(secret: String)
 
-case class ProxyServerAuth(user: String, password: String)
+final case class ProxyServerAuth(user: String, password: String)
 
 object ProxyServerType extends Enumeration {
   val Http  = Value("http")
   val Socks = Value("socks")
 }
 
-case class ProxyServerConfig(
+final case class ProxyServerConfig(
     `type`: ProxyServerType.Value,
     host: String,
     port: Int,
@@ -28,7 +28,7 @@ case class ProxyServerConfig(
     auth: Option[ProxyServerAuth]
 )
 
-case class ProxyConfig(
+final case class ProxyConfig(
     excludedRequestHeaders: Seq[String],
     excludedResponseHeaders: Set[String],
     proxyServer: Option[ProxyServerConfig],
@@ -36,11 +36,11 @@ case class ProxyConfig(
     logOutgoingRequests: Boolean
 )
 
-case class EventConfig(fetchInterval: FiniteDuration, reloadInterval: FiniteDuration)
+final case class EventConfig(fetchInterval: FiniteDuration, reloadInterval: FiniteDuration)
 
-case class MongoConfig(uri: String, collections: MongoCollections)
+final case class MongoConfig(uri: String, collections: MongoCollections)
 
-case class MongoCollections(
+final case class MongoCollections(
     stub: String,
     state: String,
     scenario: String,
@@ -51,13 +51,13 @@ case class MongoCollections(
     destination: String
 )
 
-case class TracingConfig(
+final case class TracingConfig(
     required: List[String] = List.empty,
     incomingHeaders: Map[String, String] = Map.empty,
     outcomingHeaders: Map[String, String] = Map.empty,
 )
 
-case class MockingbirdConfiguration(
+final case class MockingbirdConfiguration(
     server: ServerConfig,
     security: SecurityConfig,
     mongo: MongoConfig,

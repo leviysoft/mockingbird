@@ -15,7 +15,7 @@ import ru.tinkoff.tcb.protocol.schema.*
 import ru.tinkoff.tcb.utils.id.SID
 
 @derive(decoder, encoder, schema)
-case class CreateDestinationConfigurationRequest(
+final case class CreateDestinationConfigurationRequest(
     @description("Уникальное название конфигурации")
     name: SID[DestinationConfiguration],
     @description("Описание конфигурации")

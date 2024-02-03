@@ -9,7 +9,7 @@ import ru.tinkoff.tcb.bson.derivation.bsonDecoder
 import ru.tinkoff.tcb.bson.derivation.bsonEncoder
 
 @derive(bsonEncoder, bsonDecoder)
-case class TestEntity(_id: String, name: String, externalKey: Option[Int])
+final case class TestEntity(_id: String, name: String, externalKey: Option[Int])
 
 class PatchGeneratorSpec extends AnyFunSuite with Matchers {
   test("Generate update with Some") {
