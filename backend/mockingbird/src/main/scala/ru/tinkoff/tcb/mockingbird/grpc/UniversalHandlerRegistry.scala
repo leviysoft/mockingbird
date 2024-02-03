@@ -10,7 +10,8 @@ final case class UniversalHandlerRegistry0(method: ServerMethodDefinition[?, ?])
     method
 }
 
-final case class UniversalHandlerRegistry(handler: ServerCallHandler[Array[Byte], Array[Byte]]) extends HandlerRegistry {
+final case class UniversalHandlerRegistry(handler: ServerCallHandler[Array[Byte], Array[Byte]])
+    extends HandlerRegistry {
 
   override def lookupMethod(methodName: String, authority: String): ServerMethodDefinition[Array[Byte], Array[Byte]] = {
     val methodNameArray = methodName.split("/")
