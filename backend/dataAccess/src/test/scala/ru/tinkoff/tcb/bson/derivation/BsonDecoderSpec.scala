@@ -9,8 +9,8 @@ import org.scalatest.TryValues
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-import ru.tinkoff.tcb.bson.BsonEncoder.ops.*
 import ru.tinkoff.tcb.bson.{TestEntity => _, _}
+import ru.tinkoff.tcb.bson.BsonEncoder.ops.*
 
 class BsonDecoderSpec extends AnyFunSuite with Matchers with TryValues {
   test("decode XXXCaseClass") {

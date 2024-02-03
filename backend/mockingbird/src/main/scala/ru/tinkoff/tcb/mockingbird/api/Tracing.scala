@@ -1,10 +1,10 @@
 package ru.tinkoff.tcb.mockingbird.api
 
 import java.util.UUID
-import scalapb.zio_grpc.SafeMetadata
 
 import io.grpc.Metadata
 import mouse.option.*
+import scalapb.zio_grpc.SafeMetadata
 import sttp.model.Header
 import zio.interop.catz.*
 

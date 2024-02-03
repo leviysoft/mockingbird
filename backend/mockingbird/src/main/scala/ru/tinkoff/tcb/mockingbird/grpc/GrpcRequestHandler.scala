@@ -1,13 +1,12 @@
 package ru.tinkoff.tcb.mockingbird.grpc
 
-import scalapb.zio_grpc.RequestContext
-import scalapb.zio_grpc.ZManagedChannel
-import scalapb.zio_grpc.client.ClientCalls
-
 import io.circe.Json
 import io.circe.syntax.KeyOps
 import io.grpc.CallOptions
 import io.grpc.ManagedChannelBuilder
+import scalapb.zio_grpc.RequestContext
+import scalapb.zio_grpc.ZManagedChannel
+import scalapb.zio_grpc.client.ClientCalls
 import zio.Duration
 
 import ru.tinkoff.tcb.mockingbird.api.Tracing

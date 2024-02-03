@@ -11,8 +11,8 @@ import io.circe.parser.parse
 import io.circe.syntax.*
 import io.estatico.newtype.ops.*
 import mouse.option.*
-import sttp.client4.circe.*
 import sttp.client4.{Backend as SttpBackend, *}
+import sttp.client4.circe.*
 import sttp.model.Method
 import zio.interop.catz.core.*
 
