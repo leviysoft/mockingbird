@@ -19,8 +19,8 @@ trait BsonValueEnum[ValueType, EntryType <: ValueEnumEntry[ValueType]] {
 trait IntBsonValueEnum[EntryType <: IntEnumEntry] extends BsonValueEnum[Int, EntryType] {
   this: IntEnum[EntryType] =>
 
-  implicit def bsonEncoder: BsonEncoder[EntryType] = EnumHandler.writer(this)
-  implicit def bsonDecoder: BsonDecoder[EntryType] = EnumHandler.reader(this)
+  implicit override def bsonEncoder: BsonEncoder[EntryType] = EnumHandler.writer(this)
+  implicit override def bsonDecoder: BsonDecoder[EntryType] = EnumHandler.reader(this)
 }
 
 /**
@@ -29,8 +29,8 @@ trait IntBsonValueEnum[EntryType <: IntEnumEntry] extends BsonValueEnum[Int, Ent
 trait LongBsonValueEnum[EntryType <: LongEnumEntry] extends BsonValueEnum[Long, EntryType] {
   this: LongEnum[EntryType] =>
 
-  implicit def bsonEncoder: BsonEncoder[EntryType] = EnumHandler.writer(this)
-  implicit def bsonDecoder: BsonDecoder[EntryType] = EnumHandler.reader(this)
+  implicit override def bsonEncoder: BsonEncoder[EntryType] = EnumHandler.writer(this)
+  implicit override def bsonDecoder: BsonDecoder[EntryType] = EnumHandler.reader(this)
 }
 
 /*
@@ -51,8 +51,8 @@ trait LongBsonValueEnum[EntryType <: LongEnumEntry] extends BsonValueEnum[Long, 
 trait StringBsonValueEnum[EntryType <: StringEnumEntry] extends BsonValueEnum[String, EntryType] {
   this: StringEnum[EntryType] =>
 
-  implicit def bsonEncoder: BsonEncoder[EntryType]       = EnumHandler.writer(this)
-  implicit def bsonDecoder: BsonDecoder[EntryType]       = EnumHandler.reader(this)
+  implicit override def bsonEncoder: BsonEncoder[EntryType]       = EnumHandler.writer(this)
+  implicit override def bsonDecoder: BsonDecoder[EntryType]       = EnumHandler.reader(this)
   implicit def bsonKeyEncoder: BsonKeyEncoder[EntryType] = (t: EntryType) => t.value
   implicit def bsonKeyDecoder: BsonKeyDecoder[EntryType] = (value: String) => Try(withValue(value))
 }

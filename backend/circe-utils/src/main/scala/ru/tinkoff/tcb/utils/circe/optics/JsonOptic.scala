@@ -27,8 +27,8 @@ final case class JsonOptic private[optics] (private val jsonPath: Seq[PathPart])
 
   def getOpt: Json => Option[Json] = getAll.andThen {
     case Vector()  => None
-    case Vector(j) => Some(j)
-    case v         => Some(Json.fromValues(v))
+    case Vector(j) => Option(j)
+    case v         => Option(Json.fromValues(v))
   }
 
   def get: Json => Json = getOpt.andThen(_.getOrElse(Json.Null))

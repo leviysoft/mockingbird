@@ -17,8 +17,8 @@ class FieldsSpec extends AnyFunSuite with Matchers {
   }
 
   sealed trait ST
-  case class A(a: Int) extends ST
-  case class B(b: Int) extends ST
+  final case class A(a: Int) extends ST
+  final case class B(b: Int) extends ST
 
   test("Fields of sealed trait") {
     Fields[ST].fields shouldBe Nil

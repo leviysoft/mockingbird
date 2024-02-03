@@ -40,7 +40,7 @@ package object string {
         .map(s => s.substring(0, 1).toUpperCase(ENGLISH) + s.substring(1).toLowerCase(ENGLISH))
         .mkString
 
-    def nonEmptyString: Option[String] = if (text.isEmpty) None else Some(text)
+    def nonEmptyString: Option[String] = Option(text).filterNot(_.isEmpty)
 
     def insertAt(position: Int, insertion: String): String = {
       val (fst, snd) = text.splitAt(position)

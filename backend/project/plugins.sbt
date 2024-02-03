@@ -9,6 +9,7 @@ addSbtPlugin("com.thesamet"    % "sbt-protoc"          % "1.0.6")
 addSbtPlugin("org.scalameta"   % "sbt-native-image"    % "0.3.4")
 addSbtPlugin("com.github.sbt"  % "sbt-dynver"          % "5.0.1")
 addSbtPlugin("org.wartremover" % "sbt-wartremover"     % "3.1.6")
+addSbtPlugin("org.wartremover" % "sbt-wartremover-contrib" % "2.1.0", "1.0", "2.12")
 
 libraryDependencies +=
   "com.thesamet.scalapb.zio-grpc" %% "zio-grpc-codegen" % "0.6.0-test8"

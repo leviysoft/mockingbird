@@ -17,8 +17,8 @@ class DerivedCodecsSuite extends AnyFunSuite with Checkers with Matchers with Tr
   // Stolen from http://github.com/travisbrown/circe
   @derive(bsonDecoder, bsonEncoder) @BsonDiscriminator("case", _.reverse)
   sealed trait RecursiveAdtExample
-  case class BaseAdtExample(a: String) extends RecursiveAdtExample
-  case class NestedAdtExample(r: RecursiveAdtExample) extends RecursiveAdtExample
+  final case class BaseAdtExample(a: String) extends RecursiveAdtExample
+  final case class NestedAdtExample(r: RecursiveAdtExample) extends RecursiveAdtExample
   object RecursiveAdtExample
 
   private def atDepth(depth: Int): Gen[RecursiveAdtExample] =
