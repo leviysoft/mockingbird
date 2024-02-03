@@ -214,10 +214,15 @@ jobs:
           ref: ${{ github.ref }}
           head_ref: ${{ github.head_ref }}
 
-      - name: Compile and test
+      - name: Lint and Test
         run: |
           cd backend
-          sbt "project mockingbird-native;clean;fixCheck;test;GraalVMNativeImage / packageBin;Docker / stage;"
+          sbt "project mockingbird-native;clean;fixCheck;test"
+
+      - name: Create native image and stage image contents
+        run: |
+          cd backend
+          sbt "project mockingbird-native;GraalVMNativeImage / packageBin;Docker / stage;"
 
       - name: Build docker image for test
         uses: docker/build-push-action@v3
