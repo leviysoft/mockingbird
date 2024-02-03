@@ -9,6 +9,7 @@ import com.typesafe.sbt.packager.linux.LinuxPlugin.autoImport._
 import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport.Universal
 import coursierapi.{MavenRepository => CoursierMvnRepo}
 import wartremover.WartRemover.autoImport._
+import wartremover.contrib.ContribWart
 import sbt.Keys._
 import sbt._
 
@@ -67,12 +68,15 @@ object Settings {
     ),
     addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
     addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.2" cross CrossVersion.full),
-    wartremoverDependencies += "org.wartremover" % "sbt-wartremover-contrib" % "2.1.0" extra("sbtVersion" -> "1.0", "scalaVersion" -> "2.12"),
+    wartremoverDependencies ~= (_.filterNot(_.name == "wartremover-contrib")),
+    wartremoverDependencies += "org.wartremover" % "wartremover-contrib_2.13" % ContribWart.ContribVersion,
     wartremoverErrors ++= Seq(
       Wart.ExplicitImplicitTypes,
       Wart.FinalCaseClass,
       //Wart.IterableOps,
-      Wart.LeakingSealed
+      Wart.LeakingSealed,
+      ContribWart.DiscardedFuture,
+      //ContribWart.MissingOverride
     ),
     missinglinkExcludedDependencies ++= Seq(
       moduleFilter(organization = "ch.qos.logback", name = "logback-core" | "logback-classic"),

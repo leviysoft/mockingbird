@@ -6,7 +6,7 @@ import tofu.logging.LoggedValue
 import tofu.logging.Logging
 
 class ZUniversalLogging(name: String) extends Logging[UIO] {
-  def write(level: Logging.Level, message: String, values: LoggedValue*): UIO[Unit] =
+  override def write(level: Logging.Level, message: String, values: LoggedValue*): UIO[Unit] =
     ZIO.succeed {
       val logger = LoggerFactory.getLogger(name)
       if (UniversalLogging.enabled(level, logger))

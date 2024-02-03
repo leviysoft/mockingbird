@@ -52,9 +52,9 @@ package object bson {
 
   private[this] lazy val jsonFolder: Json.Folder[Either[Throwable, BsonValue]] =
     new Json.Folder[Either[Throwable, BsonValue]] { self =>
-      final val onNull: Either[Throwable, BsonValue]                    = Right(BsonNull())
-      final def onBoolean(value: Boolean): Either[Throwable, BsonValue] = Right(BsonBoolean(value))
-      final def onNumber(value: JsonNumber): Either[Throwable, BsonValue] = {
+      final override val onNull: Either[Throwable, BsonValue]                    = Right(BsonNull())
+      final override def onBoolean(value: Boolean): Either[Throwable, BsonValue] = Right(BsonBoolean(value))
+      final override def onNumber(value: JsonNumber): Either[Throwable, BsonValue] = {
         val asDouble = value.toDouble
 
         if (java.lang.Double.compare(asDouble, -0.0) == 0) {
@@ -77,12 +77,12 @@ package object bson {
               }
           }
       }
-      final def onString(value: String): Either[Throwable, BsonValue] = Right(BsonString(value))
-      final def onArray(value: Vector[Json]): Either[Throwable, BsonValue] =
+      final override def onString(value: String): Either[Throwable, BsonValue] = Right(BsonString(value))
+      final override def onArray(value: Vector[Json]): Either[Throwable, BsonValue] =
         value
           .traverse(json => json.foldWith(self))
           .map(BsonArray.fromIterable(_))
-      final def onObject(value: JsonObject): Either[Throwable, BsonValue] =
+      final override def onObject(value: JsonObject): Either[Throwable, BsonValue] =
         (value.toVector)
           .traverse {
             case (key, JsonDocument(json)) if json.contains("$date") =>

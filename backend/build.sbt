@@ -213,6 +213,7 @@ val examples = (project in file("examples"))
   )
 
 val root = (project in file("."))
+  .disablePlugins(ContribWarts)
   .aggregate(
     utils,
     circeUtils,
