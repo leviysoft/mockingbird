@@ -33,7 +33,7 @@ import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.id.SID
 
 @derive(decoder, encoder, schema)
-case class UpdateStubRequest(
+final case class UpdateStubRequest(
     @description("Тип конфигурации")
     scope: Scope,
     @description("Количество возможных срабатываний. Имеет смысл только для scope=countdown")
@@ -64,7 +64,7 @@ object UpdateStubRequest {
 }
 
 @derive(bsonEncoder)
-case class StubPatch(
+final case class StubPatch(
     @BsonKey("_id") id: SID[HttpStub],
     scope: Scope,
     times: Option[Int Refined NonNegative],

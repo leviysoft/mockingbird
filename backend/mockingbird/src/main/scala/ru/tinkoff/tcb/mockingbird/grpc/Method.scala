@@ -11,7 +11,7 @@ object Method {
   /*
   Универсальный маршаллер, который не меняет поток байтов
    */
-  case class ByteMarshaller() extends Marshaller[Array[Byte]] {
+  final case class ByteMarshaller() extends Marshaller[Array[Byte]] {
     override def stream(value: Array[Byte]): InputStream = new ByteArrayInputStream(value)
 
     override def parse(stream: InputStream): Array[Byte] = stream.readAllBytes()

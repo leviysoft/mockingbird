@@ -11,4 +11,4 @@ import ru.tinkoff.tcb.mockingbird.model.DestinationConfiguration
 import ru.tinkoff.tcb.utils.id.SID
 
 @derive(encoder, decoder, schema, bsonDecoder)
-case class DestinationDTO(@BsonKey("_id") name: SID[DestinationConfiguration], description: String)
+final case class DestinationDTO(@BsonKey("_id") name: SID[DestinationConfiguration], description: String)

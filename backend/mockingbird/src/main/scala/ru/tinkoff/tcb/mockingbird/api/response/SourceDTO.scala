@@ -11,4 +11,4 @@ import ru.tinkoff.tcb.mockingbird.model.SourceConfiguration
 import ru.tinkoff.tcb.utils.id.SID
 
 @derive(encoder, decoder, schema, bsonDecoder)
-case class SourceDTO(@BsonKey("_id") name: SID[SourceConfiguration], description: String)
+final case class SourceDTO(@BsonKey("_id") name: SID[SourceConfiguration], description: String)

@@ -14,7 +14,7 @@ import ru.tinkoff.tcb.mockingbird.model.ResourceRequest
 import ru.tinkoff.tcb.protocol.schema.*
 
 @derive(decoder, encoder, schema)
-case class UpdateDestinationConfigurationRequest(
+final case class UpdateDestinationConfigurationRequest(
     @description("Описание конфигурации")
     description: String,
     service: String,

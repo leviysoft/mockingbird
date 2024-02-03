@@ -9,7 +9,7 @@ import ru.tinkoff.tcb.bson.*
 import ru.tinkoff.tcb.bson.derivation.*
 import ru.tinkoff.tcb.criteria.Typed.*
 
-case class Data(intField: Int, optField: Option[Int])
+final case class Data(intField: Int, optField: Option[Int])
 
 object Data {
   implicit val dataDecoder: BsonDecoder[Data] = DerivedDecoder.genBsonDecoder[Data]

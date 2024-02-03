@@ -8,13 +8,13 @@ import derevo.derive
 import ru.tinkoff.tcb.bson.annotation.BsonKey
 
 @derive(bsonDecoder, bsonEncoder)
-case class TestMeta(time: Instant, seq: Long, flag: Boolean)
+final case class TestMeta(time: Instant, seq: Long, flag: Boolean)
 
 @derive(bsonDecoder, bsonEncoder)
-case class TestCheck(year: Year, comment: String)
+final case class TestCheck(year: Year, comment: String)
 
 @derive(bsonDecoder, bsonEncoder)
-case class TestEntity(
+final case class TestEntity(
     @BsonKey("_id") id: Int,
     name: String,
     meta: TestMeta,
@@ -24,10 +24,10 @@ case class TestEntity(
 )
 
 @derive(bsonDecoder, bsonEncoder)
-case class TestContainer[T](value: Option[T])
+final case class TestContainer[T](value: Option[T])
 
 @derive(bsonDecoder, bsonEncoder)
-case class TestEntityWithDefaults(
+final case class TestEntityWithDefaults(
     @BsonKey("_id") id: Int,
     name: String = "test",
     meta: TestMeta,

@@ -298,7 +298,7 @@ sealed trait RegexModifier {
   def value: String
 }
 
-case class CombinedRegexModifier(lhs: RegexModifier, rhs: RegexModifier) extends RegexModifier {
+final case class CombinedRegexModifier(lhs: RegexModifier, rhs: RegexModifier) extends RegexModifier {
   override def value: String = lhs.value + rhs.value
 }
 

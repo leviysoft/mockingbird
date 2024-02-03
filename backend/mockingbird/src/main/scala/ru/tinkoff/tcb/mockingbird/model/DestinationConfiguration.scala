@@ -19,7 +19,7 @@ import ru.tinkoff.tcb.utils.crypto.AES
 import ru.tinkoff.tcb.utils.id.SID
 
 @derive(encoder, decoder, schema)
-case class DestinationConfiguration(
+final case class DestinationConfiguration(
     @BsonKey("_id") name: SID[DestinationConfiguration],
     created: Instant,
     description: String,

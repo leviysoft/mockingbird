@@ -9,4 +9,4 @@ import ru.tinkoff.tcb.utils.xml.XMLString
 import ru.tinkoff.tcb.xpath.Xpath
 
 @derive(decoder, encoder, schema)
-case class XPathTestRequest(xml: XMLString, path: Xpath)
+final case class XPathTestRequest(xml: XMLString, path: Xpath)

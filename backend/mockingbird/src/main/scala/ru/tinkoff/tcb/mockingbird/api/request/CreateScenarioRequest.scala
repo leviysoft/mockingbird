@@ -28,7 +28,7 @@ import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.id.SID
 
 @derive(decoder, encoder, schema)
-case class CreateScenarioRequest(
+final case class CreateScenarioRequest(
     @description("Тип конфигурации")
     scope: Scope,
     @description("Количество возможных срабатываний. Имеет смысл только для scope=countdown")

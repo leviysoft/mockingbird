@@ -49,14 +49,14 @@ object CallbackRequest {
 }
 
 @derive(decoder, encoder)
-case class CallbackRequestWithoutBody(
+final case class CallbackRequestWithoutBody(
     url: String Refined NonEmpty,
     method: HttpMethod,
     headers: Map[String, String]
 ) extends CallbackRequest
 
 @derive(decoder, encoder)
-case class RawCallbackRequest(
+final case class RawCallbackRequest(
     url: String Refined NonEmpty,
     method: HttpMethod,
     headers: Map[String, String],
@@ -64,7 +64,7 @@ case class RawCallbackRequest(
 ) extends CallbackRequest
 
 @derive(decoder, encoder)
-case class JsonCallbackRequest(
+final case class JsonCallbackRequest(
     url: String Refined NonEmpty,
     method: HttpMethod,
     headers: Map[String, String],
@@ -72,7 +72,7 @@ case class JsonCallbackRequest(
 ) extends CallbackRequest
 
 @derive(decoder, encoder)
-case class XMLCallbackRequest(
+final case class XMLCallbackRequest(
     url: String Refined NonEmpty,
     method: HttpMethod,
     headers: Map[String, String],

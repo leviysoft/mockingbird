@@ -15,7 +15,7 @@ import ru.tinkoff.tcb.generic.PropSubset
 import ru.tinkoff.tcb.mockingbird.model.Service
 
 @derive(decoder, encoder, schema)
-case class CreateServiceRequest(
+final case class CreateServiceRequest(
     suffix: String Refined And[NonEmpty, MatchesRegex["[\\w-]+"]],
     name: String Refined NonEmpty
 )

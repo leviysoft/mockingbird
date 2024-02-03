@@ -30,8 +30,8 @@ object PredicateConstructionError {
   }
 }
 
-case class XPathError(xpath: String, error: String) extends PredicateConstructionError
-case class SpecificationError(xpath: String, errors: NonEmptyList[(Keyword, Json)]) extends PredicateConstructionError
+final case class XPathError(xpath: String, error: String) extends PredicateConstructionError
+final case class SpecificationError(xpath: String, errors: NonEmptyList[(Keyword, Json)]) extends PredicateConstructionError
 
-case class JSpecificationError(optic: JsonOptic, errors: NonEmptyList[(Keyword, Json)])
+final case class JSpecificationError(optic: JsonOptic, errors: NonEmptyList[(Keyword, Json)])
     extends PredicateConstructionError

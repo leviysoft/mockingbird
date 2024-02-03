@@ -30,7 +30,7 @@ import ru.tinkoff.tcb.utils.unpack.*
 import ru.tinkoff.tcb.validation.Rule
 
 @derive(bsonDecoder, bsonEncoder, encoder, decoder, schema)
-case class Scenario(
+final case class Scenario(
     @BsonKey("_id")
     @description("id мока")
     id: SID[Scenario],

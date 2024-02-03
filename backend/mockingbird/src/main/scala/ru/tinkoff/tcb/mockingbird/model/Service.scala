@@ -10,4 +10,4 @@ import ru.tinkoff.tcb.bson.derivation.bsonDecoder
 import ru.tinkoff.tcb.bson.derivation.bsonEncoder
 
 @derive(bsonDecoder, bsonEncoder, encoder, decoder, schema)
-case class Service(@BsonKey("_id") suffix: String, name: String)
+final case class Service(@BsonKey("_id") suffix: String, name: String)
