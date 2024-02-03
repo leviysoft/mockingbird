@@ -64,7 +64,6 @@ jobs:
         -Xmx6g 
         -XX:+AlwaysPreTouch 
         -XX:ReservedCodeCacheSize=192M 
-        -XX:MaxMetaspaceSize=512M 
         -Xss2m 
         -XX:+TieredCompilation 
         -XX:+UseParallelGC
@@ -94,7 +93,6 @@ jobs:
         -Xmx2048m 
         -XX:+AlwaysPreTouch 
         -XX:ReservedCodeCacheSize=192M 
-        -XX:MaxMetaspaceSize=512M 
         -Xss2m 
         -XX:+TieredCompilation 
         -XX:+UseParallelGC
@@ -182,7 +180,6 @@ jobs:
         -Xmx1024m 
         -XX:+AlwaysPreTouch 
         -XX:ReservedCodeCacheSize=192M 
-        -XX:MaxMetaspaceSize=512M 
         -Xss2m 
         -XX:+TieredCompilation 
         -XX:+UseParallelGC
