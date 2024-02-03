@@ -4,19 +4,17 @@ import scala.annotation.implicitNotFound
 
 import io.circe.Json
 import io.circe.syntax.*
-import simulacrum.*
 
 import ru.tinkoff.tcb.predicatedsl.Keyword
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 
 @implicitNotFound("Could not find an instance of Renderable for ${T}")
-@typeclass
 trait Renderable[T] extends Serializable {
-  @op("renderJson") def renderJson(r: T): Json
+  def renderJson(r: T): Json
 
-  @op("fill") def fill[S](r: T, values: S)(implicit subst: Substitute[Json, S]): T
+  def fill[S](r: T, values: S)(implicit subst: Substitute[Json, S]): T
 
-  @op("withPrefix") def withPrefix(r: T, prefix: String): T
+  def withPrefix(r: T, prefix: String): T
 }
 
 object Renderable {
@@ -68,15 +66,6 @@ object Renderable {
       }
     }
 
-  /* ======================================================================== */
-  /* THE FOLLOWING CODE IS MANAGED BY SIMULACRUM; PLEASE DO NOT EDIT!!!!      */
-  /* ======================================================================== */
-
-  /**
-   * Summon an instance of [[Renderable]] for `T`.
-   */
-  @inline def apply[T](implicit instance: Renderable[T]): Renderable[T] = instance
-
   object ops {
     implicit def toAllRenderableOps[T](target: T)(implicit tc: Renderable[T]): AllOps[T] {
       type TypeClassType = Renderable[T]
@@ -86,6 +75,7 @@ object Renderable {
       val typeClassInstance: TypeClassType = tc
     }
   }
+
   trait Ops[T] extends Serializable {
     type TypeClassType <: Renderable[T]
     def self: T
@@ -94,20 +84,6 @@ object Renderable {
     def fill[A](values: A)(implicit subst: Substitute[Json, A]): T = typeClassInstance.fill[A](self, values)(subst)
     def withPrefix(prefix: String): T                              = typeClassInstance.withPrefix(self, prefix)
   }
+
   trait AllOps[T] extends Ops[T]
-  trait ToRenderableOps extends Serializable {
-    implicit def toRenderableOps[T](target: T)(implicit tc: Renderable[T]): Ops[T] {
-      type TypeClassType = Renderable[T]
-    } = new Ops[T] {
-      type TypeClassType = Renderable[T]
-      val self: T                          = target
-      val typeClassInstance: TypeClassType = tc
-    }
-  }
-  object nonInheritedOps extends ToRenderableOps
-
-  /* ======================================================================== */
-  /* END OF SIMULACRUM-MANAGED CODE                                           */
-  /* ======================================================================== */
-
 }

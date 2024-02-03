@@ -27,7 +27,6 @@ val dataAccess = (project in file("dataAccess"))
     libraryDependencies ++= Dependencies.alleycats ++ Dependencies.cats ++ Dependencies.zio ++ Dependencies.catsTagless ++ Dependencies.mouse ++ Seq(
       "com.beachape"                 %% "enumeratum"                      % "1.7.0",
       "org.mongodb.scala"            %% "mongo-scala-driver"              % Versions.mongoScalaDriver,
-      "org.typelevel"                %% "simulacrum-scalafix-annotations" % Versions.simulacrum,
       "com.chuusai"                  %% "shapeless"                       % "2.3.3",
       "org.julienrf"                 %% "enum-labels"                     % "3.1",
       "tf.tofu"                      %% "derevo-core"                     % Versions.derevo,
@@ -119,10 +118,6 @@ lazy val `mockingbird-api` = (project in file("mockingbird-api"))
     addCommandAlias(
       "lintAll",
       "scalafixAll; scalafmtAll"
-    ),
-    addCommandAlias(
-      "simulacrum",
-      "scalafixEnable;scalafix AddSerializable;scalafix AddImplicitNotFound;scalafix TypeClassSupport;"
     )
   )
 
@@ -160,10 +155,6 @@ lazy val `mockingbird-native` = (project in file("mockingbird-native"))
     addCommandAlias(
       "lintAll",
       "scalafixAll; scalafmtAll"
-    ),
-    addCommandAlias(
-      "simulacrum",
-      "scalafixEnable;scalafix AddSerializable;scalafix AddImplicitNotFound;scalafix TypeClassSupport;"
     )
   )
 
@@ -214,10 +205,6 @@ val examples = (project in file("examples"))
     addCommandAlias(
       "lintAll",
       "scalafixAll; scalafmtAll"
-    ),
-    addCommandAlias(
-      "simulacrum",
-      "scalafixEnable;scalafix AddSerializable;scalafix AddImplicitNotFound;scalafix TypeClassSupport;"
     )
   )
 

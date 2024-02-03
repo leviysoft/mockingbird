@@ -5,10 +5,8 @@ import java.time.Year
 import scala.annotation.implicitNotFound
 
 import magnolia1.*
-import simulacrum.typeclass
 
 @implicitNotFound("Could not find an instance of RootOptionFields for ${T}")
-@typeclass
 trait RootOptionFields[T] extends Serializable {
   def fields: Set[String]
   def isOptionItself: Boolean
@@ -16,6 +14,8 @@ trait RootOptionFields[T] extends Serializable {
 }
 
 object RootOptionFields {
+  @inline def apply[T](implicit instance: RootOptionFields[T]): RootOptionFields[T] = instance
+
   def mk[T](fs: Set[String], isOption: Boolean = false): RootOptionFields[T] =
     new RootOptionFields[T] {
       override def fields: Set[String]     = fs
@@ -47,44 +47,4 @@ object RootOptionFields {
   def split[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] = mk(Set.empty)
 
   implicit def genRootOptionFields[T]: Typeclass[T] = macro Magnolia.gen[T]
-
-  /* ======================================================================== */
-  /* THE FOLLOWING CODE IS MANAGED BY SIMULACRUM; PLEASE DO NOT EDIT!!!!      */
-  /* ======================================================================== */
-
-  /**
-   * Summon an instance of [[RootOptionFields]] for `T`.
-   */
-  @inline def apply[T](implicit instance: RootOptionFields[T]): RootOptionFields[T] = instance
-
-  object ops {
-    implicit def toAllRootOptionFieldsOps[T](target: T)(implicit tc: RootOptionFields[T]): AllOps[T] {
-      type TypeClassType = RootOptionFields[T]
-    } = new AllOps[T] {
-      type TypeClassType = RootOptionFields[T]
-      val self: T                          = target
-      val typeClassInstance: TypeClassType = tc
-    }
-  }
-  trait Ops[T] extends Serializable {
-    type TypeClassType <: RootOptionFields[T]
-    def self: T
-    val typeClassInstance: TypeClassType
-  }
-  trait AllOps[T] extends Ops[T]
-  trait ToRootOptionFieldsOps extends Serializable {
-    implicit def toRootOptionFieldsOps[T](target: T)(implicit tc: RootOptionFields[T]): Ops[T] {
-      type TypeClassType = RootOptionFields[T]
-    } = new Ops[T] {
-      type TypeClassType = RootOptionFields[T]
-      val self: T                          = target
-      val typeClassInstance: TypeClassType = tc
-    }
-  }
-  object nonInheritedOps extends ToRootOptionFieldsOps
-
-  /* ======================================================================== */
-  /* END OF SIMULACRUM-MANAGED CODE                                           */
-  /* ======================================================================== */
-
 }

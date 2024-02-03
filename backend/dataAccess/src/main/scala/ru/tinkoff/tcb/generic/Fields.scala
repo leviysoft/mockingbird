@@ -8,15 +8,15 @@ import enumeratum.EnumEntry
 import enumeratum.values.StringEnumEntry
 import io.circe.Json
 import magnolia1.*
-import simulacrum.typeclass
 
 @implicitNotFound("Could not find an instance of Fields for ${T}")
-@typeclass
 trait Fields[T] extends Serializable {
   def fields: List[String]
   override def toString: String = fields.mkString(", ")
 }
 object Fields {
+  @inline def apply[T](implicit instance: Fields[T]): Fields[T] = instance
+
   def mk[T](fs: List[String]): Fields[T] = new Fields[T] {
     override def fields: List[String] = fs
   }
@@ -49,44 +49,4 @@ object Fields {
   def split[T](sealedTrait: SealedTrait[Typeclass, T]): Typeclass[T] = mk(Nil)
 
   implicit def genFields[T]: Typeclass[T] = macro Magnolia.gen[T]
-
-  /* ======================================================================== */
-  /* THE FOLLOWING CODE IS MANAGED BY SIMULACRUM; PLEASE DO NOT EDIT!!!!      */
-  /* ======================================================================== */
-
-  /**
-   * Summon an instance of [[Fields]] for `T`.
-   */
-  @inline def apply[T](implicit instance: Fields[T]): Fields[T] = instance
-
-  object ops {
-    implicit def toAllFieldsOps[T](target: T)(implicit tc: Fields[T]): AllOps[T] {
-      type TypeClassType = Fields[T]
-    } = new AllOps[T] {
-      type TypeClassType = Fields[T]
-      val self: T                          = target
-      val typeClassInstance: TypeClassType = tc
-    }
-  }
-  trait Ops[T] extends Serializable {
-    type TypeClassType <: Fields[T]
-    def self: T
-    val typeClassInstance: TypeClassType
-  }
-  trait AllOps[T] extends Ops[T]
-  trait ToFieldsOps extends Serializable {
-    implicit def toFieldsOps[T](target: T)(implicit tc: Fields[T]): Ops[T] {
-      type TypeClassType = Fields[T]
-    } = new Ops[T] {
-      type TypeClassType = Fields[T]
-      val self: T                          = target
-      val typeClassInstance: TypeClassType = tc
-    }
-  }
-  object nonInheritedOps extends ToFieldsOps
-
-  /* ======================================================================== */
-  /* END OF SIMULACRUM-MANAGED CODE                                           */
-  /* ======================================================================== */
-
 }
