@@ -6,11 +6,11 @@ import com.linecorp.armeria.client.encoding.DecodingClient
 import com.mongodb.ConnectionString
 import io.grpc.ServerBuilder
 import io.grpc.Status
+import io.grpc.StatusException
 import org.mongodb.scala.MongoClient
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.MongoDatabase
 import org.mongodb.scala.bson.BsonDocument
-import scalapb.zio_grpc.RequestContext
 import scalapb.zio_grpc.server.ZServerCallHandler
 import sttp.client4.BackendOptions as SttpBackendOptions
 import sttp.client4.armeria.zio.ArmeriaZioBackend
@@ -174,10 +174,11 @@ object Mockingbird extends scala.App {
     runtime <- zio.ZIO.runtime[Any]
     handler = ZServerCallHandler.unaryCallHandler(
       runtime,
-      (bytes: Array[Byte]) =>
+      (bytes: Array[Byte], requestContext) =>
         GrpcRequestHandler
           .exec(bytes)
-          .provideSome[RequestContext](
+          .provide(
+            ZLayer.succeed(requestContext),
             Tracing.live,
             MockingbirdConfiguration.mongo,
             MockingbirdConfiguration.tracing,
@@ -187,7 +188,7 @@ object Mockingbird extends scala.App {
             GrpcStubResolverImpl.live,
             GrpcRequestHandlerImpl.live
           )
-          .mapError(e => Status.INTERNAL.withDescription(e.getMessage))
+          .mapError((e: Throwable) => new StatusException(Status.INTERNAL.withDescription(e.getMessage)))
     )
     mutableRegistry = UniversalHandlerRegistry(
       handler
