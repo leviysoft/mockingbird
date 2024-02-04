@@ -54,7 +54,8 @@ final case class GrpcField(
     label: GrpcLabel,
     typeName: String,
     name: String,
-    order: Int
+    order: Int,
+    isProto3Optional: Option[Boolean],
 )
 
 @derive(

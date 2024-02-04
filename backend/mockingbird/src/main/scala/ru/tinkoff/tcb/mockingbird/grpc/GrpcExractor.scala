@@ -48,19 +48,19 @@ object GrpcExractor {
   def buildMessageDefinition(gm: GrpcMessageSchema): MessageDefinition = {
     val builder = MessageDefinition.newBuilder(gm.name)
 
-    gm.fields.foreach {
-      case f if f.label == GrpcLabel.Optional =>
-        val oneOfBuilder = builder.addOneof(s"_${f.name}")
-        oneOfBuilder.addField(f.typeName, f.name, f.order)
-      case f =>
-        builder.addField(f.label.entryName, f.typeName, f.name, f.order)
-    }
-
     gm.oneofs.getOrElse(List.empty).foreach { oneof =>
       val oneOfBuilder = builder.addOneof(oneof.name)
       oneof.options.foreach { of =>
         oneOfBuilder.addField(of.typeName, of.name, of.order)
       }
+    }
+
+    gm.fields.foreach {
+      case f if f.isProto3Optional.getOrElse(false) =>
+        val oneOfBuilder = builder.addOneof(s"_${f.name}")
+        oneOfBuilder.addField(f.typeName, f.name, f.order)
+      case f =>
+        builder.addField(f.label.entryName, f.typeName, f.name, f.order)
     }
 
     gm.nested
@@ -84,6 +84,8 @@ object GrpcExractor {
         builder.addValue(name.asString, number.asInt)
       }
       .build()
+
+  private val jsonPrinter = JsonFormat.printer().preservingProtoFieldNames().includingDefaultValueFields()
 
   implicit class FromGrpcProtoDefinition(private val definition: GrpcProtoDefinition) extends AnyVal {
     def toDynamicSchema: DynamicSchema = {
@@ -111,7 +113,7 @@ object GrpcExractor {
     def convertMessageToJson(bytes: Array[Byte], className: String): Task[Json] =
       for {
         message    <- ZIO.attempt(parseFrom(bytes, className))
-        jsonString <- ZIO.attempt(JsonFormat.printer().preservingProtoFieldNames().print(message))
+        jsonString <- ZIO.attempt(jsonPrinter.print(message))
         js         <- ZIO.fromEither(parse(jsonString))
       } yield js
   }
@@ -140,8 +142,10 @@ object GrpcExractor {
     )
 
   private def message2messageSchema(message: DescriptorProtos.DescriptorProto): GrpcMessageSchema = {
+    val oneOfFields = message.getOneofDeclList.asScala.map(_.getName).toSet
+
     val (fields, oneofs) = message.getFieldList.asScala.toList
-      .partition(f => !f.hasOneofIndex || isProto3OptionalField(f, message.getOneofDeclList.asScala.map(_.getName).toSet))
+      .partition(f => !f.hasOneofIndex || isProto3OptionalField(f, oneOfFields))
 
     val nestedEnums = message.getEnumTypeList().asScala.toList
     val nested      = message.getNestedTypeList.asScala.toList
@@ -150,20 +154,12 @@ object GrpcExractor {
       message.getName,
       fields
         .map { field =>
-          val label = GrpcLabel.withValue(field.getLabel.toString.split("_").last.toLowerCase).pipe { label =>
-            if (
-              label == GrpcLabel.Optional && (!isProto3OptionalField(
-                field,
-                message.getOneofDeclList.asScala.map(_.getName).toSet
-              ))
-            ) GrpcLabel.Required
-            else label
-          }
-          getGrpcField(field, label)
+          val label = GrpcLabel.withValue(field.getLabel.toString.split("_").last.toLowerCase)
+          getGrpcField(field, label, isProto3OptionalField(field, oneOfFields))
         },
       oneofs
         .groupMap(_.getOneofIndex) { field =>
-          getGrpcField(field, GrpcLabel.Optional)
+          getGrpcField(field, GrpcLabel.Optional, false)
         }
         .map { case (index, fields) =>
           GrpcOneOfSchema(
@@ -191,14 +187,19 @@ object GrpcExractor {
     GrpcLabel.withValue(field.getLabel.toString.split("_").last.toLowerCase) == GrpcLabel.Optional &&
       oneOfFields(s"_${field.getName}")
 
-  private def getGrpcField(field: DescriptorProtos.FieldDescriptorProto, label: GrpcLabel): GrpcField = {
+  private def getGrpcField(
+      field: DescriptorProtos.FieldDescriptorProto,
+      label: GrpcLabel,
+      isProto3Optional: Boolean
+  ): GrpcField = {
     val grpcType = getGrpcType(field)
     GrpcField(
       grpcType,
       label,
       getFieldType(field, grpcType == GrpcType.Custom),
       field.getName,
-      field.getNumber
+      field.getNumber,
+      isProto3Optional.some,
     )
   }
 

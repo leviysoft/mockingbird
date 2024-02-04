@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+enum Bar {
+  BAR_ZERO = 0;
+  BAR_ONE = 1;
+}
+
+message Foo {
+  string field1 = 1;
+  Bar field2 = 3;
+}
