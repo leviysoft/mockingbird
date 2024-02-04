@@ -176,8 +176,8 @@ jobs:
     env:
       CI: true
       SBT_OPTS: >
-        -Xms1024m 
-        -Xmx1024m 
+        -Xms512m 
+        -Xmx2048m 
         -XX:+AlwaysPreTouch 
         -XX:ReservedCodeCacheSize=192M 
         -Xss2m 
