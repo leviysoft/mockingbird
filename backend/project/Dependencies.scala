@@ -83,10 +83,10 @@ object Dependencies {
   )
 
   lazy val protobuf = Seq(
-    "io.grpc"               % "grpc-netty"           % "1.43.2",
+    "io.grpc"               % "grpc-netty"           % "1.61.1",
     "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion,
-    "com.google.protobuf"   % "protobuf-java"        % "3.19.3",
-    "com.google.protobuf"   % "protobuf-java-util"   % "3.19.3"
+    "com.google.protobuf"   % "protobuf-java"        % "3.25.2",
+    "com.google.protobuf"   % "protobuf-java-util"   % "3.25.2"
   )
 
   lazy val metrics: Seq[ModuleID] = Seq(

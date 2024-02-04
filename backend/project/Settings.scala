@@ -142,8 +142,8 @@ object Settings {
           Seq(
             Cmd("RUN", "apt-get", "update"),
             Cmd("RUN", "apt-get", "install", "-y", "unzip"),
-            Cmd("RUN", "unzip", "/opt/mockingbird/protoc-3.20.0-linux-x86_64.zip -d", "/opt/protoc"),
-            Cmd("RUN", "rm", "/opt/mockingbird/protoc-3.20.0-linux-x86_64.zip"),
+            Cmd("RUN", "unzip", "/opt/mockingbird/protoc-25.2-linux-x86_64.zip -d", "/opt/protoc"),
+            Cmd("RUN", "rm", "/opt/mockingbird/protoc-25.2-linux-x86_64.zip"),
             Cmd("ENV", "PATH=\"$PATH:/opt/protoc/bin:${PATH}\"")
           ),
           0
@@ -204,8 +204,8 @@ object Settings {
           Seq(
             Cmd("RUN", "apt-get", "update"),
             Cmd("RUN", "apt-get", "install", "-y", "unzip"),
-            Cmd("RUN", "unzip", "/opt/mockingbird-native/protoc-3.20.0-linux-x86_64.zip -d", "/opt/protoc"),
-            Cmd("RUN", "rm", "/opt/mockingbird-native/protoc-3.20.0-linux-x86_64.zip"),
+            Cmd("RUN", "unzip", "/opt/mockingbird-native/protoc-25.2-linux-x86_64.zip -d", "/opt/protoc"),
+            Cmd("RUN", "rm", "/opt/mockingbird-native/protoc-25.2-linux-x86_64.zip"),
             Cmd("ENV", "PATH=\"$PATH:/opt/protoc/bin:${PATH}\"")
           ),
           0

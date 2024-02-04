@@ -78,7 +78,6 @@ class GrpcRequestHandlerImpl(stubResolver: GrpcStubResolver) extends GrpcRequest
               context.metadata,
               bytes
             )
-            .mapError(_.asRuntimeException())
         } yield result
       }
     }
