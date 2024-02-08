@@ -5,7 +5,6 @@ import scala.util.control.TailCalls.TailRec
 
 import cats.instances.vector.*
 import io.circe.*
-import io.circe.generic.extras.*
 
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 
@@ -102,16 +101,5 @@ package object circe {
   implicit def eitherEncoder[A, B](implicit a: Encoder[A], b: Encoder[B]): Encoder[Either[A, B]] = {
     case Left(va)  => a.apply(va)
     case Right(vb) => b.apply(vb)
-  }
-
-  object UpperCamelCaseConfiguration {
-    private def pascalize(word: String): String =
-      word
-        .split("_")
-        .map(s => s.capitalize)
-        .mkString
-
-    implicit val circeConfig: Configuration =
-      Configuration(pascalize, identity, useDefaults = false, None)
   }
 }
