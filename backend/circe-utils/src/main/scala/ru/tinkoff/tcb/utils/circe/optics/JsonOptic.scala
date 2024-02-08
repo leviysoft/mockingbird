@@ -2,6 +2,7 @@ package ru.tinkoff.tcb.utils.circe.optics
 
 import scala.annotation.nowarn
 
+import io.circe.ACursor
 import io.circe.Json
 
 @nowarn("cat=scala3-migration")
@@ -34,13 +35,20 @@ final case class JsonOptic private[optics] (private val jsonPath: Seq[PathPart])
   def get: Json => Json = getOpt.andThen(_.getOrElse(Json.Null))
 
   def getAll: Json => Vector[Json] = { json =>
-    jsonPath.foldLeft(Vector(json))((j, p) =>
-      p.fold(
-        f => j.flatMap(_.hcursor.downField(f).focus),
-        i => j.flatMap(_.hcursor.downN(i).focus),
-        j.flatMap(_.asArray.toVector.flatten)
+    jsonPath
+      .foldLeft(Vector[ACursor](json.hcursor))((c, p) =>
+        p.fold(
+          f => c.map(_.downField(f)),
+          i => c.map(_.downN(i)),
+          c.flatMap(cx =>
+            cx.values match {
+              case Some(value) => Vector.tabulate(value.size)(cx.downN)
+              case None        => Vector.empty
+            }
+          )
+        )
       )
-    )
+      .flatMap(_.focus)
   }
 
   def prune: Json => Json = { json =>
