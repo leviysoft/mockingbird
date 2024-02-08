@@ -2,8 +2,10 @@ package ru.tinkoff.tcb.mockingbird
 
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.security.KeyStore
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLEngine
+import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509ExtendedTrustManager
 
 /*
@@ -44,4 +46,15 @@ class TrustSomeHostsManager(delegate: X509ExtendedTrustManager, insecureHosts: S
   override def getAcceptedIssuers: Array[X509Certificate] = delegate.getAcceptedIssuers
 }
 
-object TrustSomeHostsManager {}
+object TrustSomeHostsManager {
+  def of(insecureHosts: Set[String]): TrustSomeHostsManager = {
+    var trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
+    trustManagerFactory.init(null.asInstanceOf[KeyStore])
+    val trustManagers = trustManagerFactory.getTrustManagers
+    for (tm <- trustManagers)
+      if (tm.isInstanceOf[X509ExtendedTrustManager])
+        return new TrustSomeHostsManager(tm.asInstanceOf[X509ExtendedTrustManager], insecureHosts)
+
+    throw new NoSuchElementException("cannot resolve default trust manager")
+  }
+}

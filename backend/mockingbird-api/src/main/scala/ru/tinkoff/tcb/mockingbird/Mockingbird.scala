@@ -1,8 +1,11 @@
 package ru.tinkoff.tcb.mockingbird
 
-import com.linecorp.armeria.client.ClientFactory
-import com.linecorp.armeria.client.WebClient
-import com.linecorp.armeria.client.encoding.DecodingClient
+import java.net.http.HttpClient
+import java.security.SecureRandom
+import javax.net.ssl.KeyManagerFactory
+import javax.net.ssl.SSLContext
+import scala.jdk.DurationConverters.*
+
 import com.mongodb.ConnectionString
 import io.grpc.ServerBuilder
 import io.grpc.Status
@@ -13,7 +16,7 @@ import org.mongodb.scala.MongoDatabase
 import org.mongodb.scala.bson.BsonDocument
 import scalapb.zio_grpc.server.ZServerCallHandler
 import sttp.client4.BackendOptions as SttpBackendOptions
-import sttp.client4.armeria.zio.ArmeriaZioBackend
+import sttp.client4.httpclient.zio.HttpClientZioBackend
 import tofu.logging.Logging
 import tofu.logging.impl.ZUniversalLogging
 import zio.managed.*
@@ -119,24 +122,18 @@ object Mockingbird extends scala.App {
                     .some
                 )
             }
-            factory = ClientFactory
-              .builder()
-              .connectTimeoutMillis(sttpSettings.connectionTimeout.toMillis)
-              .pipe(b => sttpSettings.proxy.fold(b)(conf => b.proxyConfig(conf.asJavaProxySelector)))
-              .tlsNoVerifyHosts(pc.insecureHosts*)
+            keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm)
+            trustManager      = TrustSomeHostsManager.of(pc.insecureHosts.to(Set))
+            sslContext = SSLContext.getInstance("TLS").tap { sslc =>
+              sslc.init(keyManagerFactory.getKeyManagers, Array(trustManager), new SecureRandom)
+            }
+            httpClient = HttpClient
+              .newBuilder()
+              .connectTimeout(sttpSettings.connectionTimeout.toJava)
+              .pipe(b => sttpSettings.proxy.fold(b)(conf => b.proxy(conf.asJavaProxySelector)))
+              .sslContext(sslContext)
               .build()
-            webClient = WebClient
-              .builder()
-              .decorator(
-                DecodingClient
-                  .builder()
-                  .autoFillAcceptEncoding(false)
-                  .strictContentEncoding(true)
-                  .newDecorator()
-              )
-              .factory(factory)
-              .build()
-            scopedBackend <- ArmeriaZioBackend.scopedUsingClient(webClient)
+            scopedBackend <- HttpClientZioBackend.scopedUsingClient(httpClient)
           } yield scopedBackend
         },
         mongoLayer,

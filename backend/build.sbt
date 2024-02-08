@@ -68,7 +68,6 @@ val mockingbird = (project in file("mockingbird"))
       "tf.tofu"                       %% "derevo-circe"        % Versions.derevo,
       "org.webjars.npm"                % "swagger-ui-dist"     % "3.32.5",
       "eu.timepit"                    %% "fs2-cron-core"       % "0.2.2",
-      "com.softwaremill.sttp.client4" %% "armeria-backend-zio" % Versions.sttp,
       "com.softwaremill.sttp.client4" %% "zio"                 % Versions.sttp,
       "com.softwaremill.sttp.client4" %% "circe"               % Versions.sttp,
       "org.javassist"                  % "javassist"           % "3.29.2-GA", // Armeria dependency
