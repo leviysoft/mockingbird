@@ -143,7 +143,6 @@ lazy val `mockingbird-native` = (project in file("mockingbird-native"))
     Compile / packageDoc / mappings := Seq(),
     GraalVMNativeImage / mainClass := Some("ru.tinkoff.tcb.mockingbird.Mockingbird"),
     GraalVMNativeImage / graalVMNativeImageOptions ++= Seq(
-      "-J-Xmx6144m", // Required to fit native-image runtime heap in Standard GitHub-hosted runners
       "-H:+StaticExecutableWithDynamicLibC",
       "--gc=G1"
     ).filter(_ => dockerize.value),
