@@ -94,7 +94,8 @@ object Settings {
       IgnoredPackage("com.fasterxml.jackson.databind"),
       IgnoredPackage("io.vertx.core.json.jackson"),
       IgnoredPackage("io.netty.handler.codec.haproxy"),
-      IgnoredPackage("io.netty.channel.kqueue")
+      IgnoredPackage("io.netty.channel.kqueue"),
+      IgnoredPackage("io.netty.channel.epoll")
     ),
     dockerize := ciEnabled,
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
