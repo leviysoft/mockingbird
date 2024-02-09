@@ -87,6 +87,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    outputs:
+      ref: ${{ steps.get-ref.outputs.tag }}
+
     env:
       SBT_OPTS: >
         -Xms2048m 
@@ -138,7 +141,7 @@ jobs:
           context: ./backend/mockingbird-api/target/docker/stage
           push: false
           tags: ${{ env.MOCKINGBIRD_TEST_IMAGE_JVM }}
-        if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+        if: ${{ ! ( github.ref_type == 'tag' || endsWith(steps.get-ref.outputs.tag, 'docker') ) }}
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -146,7 +149,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-        if: ${{ github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') }}
+        if: ${{ github.ref_type == 'tag' || endsWith(steps.get-ref.outputs.tag, 'docker') }}
 
       - name: Build and push docker image
         uses: docker/build-push-action@v5
@@ -154,25 +157,28 @@ jobs:
           context: ./backend/mockingbird-api/target/docker/stage
           push: true
           tags: ghcr.io/leviysoft/mockingbird:${{ steps.get-ref.outputs.tag }}
-        if: ${{ github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') }}
+        if: ${{ github.ref_type == 'tag' || endsWith(steps.get-ref.outputs.tag, 'docker') }}
 
       - name: Save docker image to file
         run: |
           docker save -o /tmp/image-jvm.tar ${{ env.MOCKINGBIRD_TEST_IMAGE_JVM }}
           gzip /tmp/image-jvm.tar
-        if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+        if: ${{ ! ( github.ref_type == 'tag' || endsWith(steps.get-ref.outputs.tag, 'docker') ) }}
 
       - name: Upload image with JVM mockingbird
         uses: actions/upload-artifact@v4
         with:
           name: image-jvm
           path: /tmp/image-jvm.tar.gz
-        if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+        if: ${{ ! ( github.ref_type == 'tag' || endsWith(steps.get-ref.outputs.tag, 'docker') ) }}
 
   back-build-native:
     needs: [front-build]
 
     runs-on: ubuntu-22.04
+
+    outputs:
+      ref: ${{ steps.get-ref.outputs.tag }}
 
     env:
       CI: true
@@ -208,7 +214,7 @@ jobs:
         with:
           version: "25.2"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Get the Ref
         id: get-ref
         uses: ankitvgupta/ref-to-tag-action@v1.0.1
@@ -232,7 +238,7 @@ jobs:
           context: ./backend/mockingbird-native/target/docker/stage
           push: false
           tags: ${{ env.MOCKINGBIRD_TEST_IMAGE_NATIVE }}
-        if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+        if: ${{ ! ( github.ref_type == 'tag' || endsWith(steps.get-ref.outputs.tag, 'docker') ) }}
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -240,7 +246,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-        if: ${{ github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') }}
+        if: ${{ github.ref_type == 'tag' || endsWith(steps.get-ref.outputs.tag, 'docker') }}
 
       - name: Build and push docker image
         uses: docker/build-push-action@v5
@@ -248,24 +254,24 @@ jobs:
           context: ./backend/mockingbird-native/target/docker/stage
           push: true
           tags: ghcr.io/leviysoft/mockingbird:${{ steps.get-ref.outputs.tag }}-native
-        if: ${{ github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') }}
+        if: ${{ github.ref_type == 'tag' || endsWith(steps.get-ref.outputs.tag, 'docker')}}
 
       - name: Save docker image to file
         run: |
           docker save -o /tmp/image-native.tar ${{ env.MOCKINGBIRD_TEST_IMAGE_NATIVE }}
           gzip /tmp/image-native.tar
-        if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+        if: ${{ ! ( github.ref_type == 'tag' || endsWith(steps.get-ref.outputs.tag, 'docker') ) }}
 
       - name: Upload image with native mockingbird
         uses: actions/upload-artifact@v4
         with:
           name: image-native
           path: /tmp/image-native.tar.gz
-        if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
+        if: ${{ ! ( github.ref_type == 'tag' || endsWith(steps.get-ref.outputs.tag, 'docker') ) }}
 
   test-jvm-image:
-    if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
     needs: [back-build]
+    if: ${{ ! ( github.ref_type == 'tag' || endsWith(needs.back-build.outputs.ref, 'docker') ) }}
 
     runs-on: ubuntu-latest
 
@@ -298,8 +304,8 @@ jobs:
           sbt "project examples; clean; fixCheck; test"
 
   test-native-image:
-    if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
     needs: [back-build-native]
+    if: ${{ ! ( github.ref_type == 'tag' || endsWith(needs.back-build-native.outputs.ref, 'docker') ) }}
 
     runs-on: ubuntu-latest
 
@@ -332,7 +338,6 @@ jobs:
           sbt "project examples; clean; fixCheck; test"
 
   test-example-dsl:
-    if: ${{ ! ( github.ref_type == 'tag' || startsWith(github.event.head_commit.message, '[docker]') ) }}
     runs-on: ubuntu-latest
 
     steps:
