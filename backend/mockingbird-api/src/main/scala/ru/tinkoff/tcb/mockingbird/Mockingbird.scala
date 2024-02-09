@@ -122,8 +122,10 @@ object Mockingbird extends scala.App {
                     .some
                 )
             }
-            keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm)
-            trustManager      = TrustSomeHostsManager.of(pc.insecureHosts.to(Set))
+            keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm).tap { kmf =>
+              kmf.init(null, Array())
+            }
+            trustManager = TrustSomeHostsManager.of(pc.insecureHosts.to(Set))
             sslContext = SSLContext.getInstance("TLS").tap { sslc =>
               sslc.init(keyManagerFactory.getKeyManagers, Array(trustManager), new SecureRandom)
             }
