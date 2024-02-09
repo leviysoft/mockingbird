@@ -90,9 +90,9 @@ val mockingbird = (project in file("mockingbird"))
   )
 
 /*
-   Отдельный подпроект создан ради того, чтобы не отключать coursier во всём проекте.
-   Предполагается, что после того, как починят https://github.com/coursier/coursier/issues/2016
-   можно будет перенести код отсюда в mockingbird
+   Отдельный подпроект был создан ради того, чтобы не отключать coursier во всём проекте.
+   См. https://github.com/coursier/coursier/issues/2016
+   Так как netty-tranport-epoll больше не используется можно перенести код отсюда в mockingbird
  */
 lazy val `mockingbird-api` = (project in file("mockingbird-api"))
   .enablePlugins(BuildInfoPlugin)
@@ -105,7 +105,6 @@ lazy val `mockingbird-api` = (project in file("mockingbird-api"))
     libraryDependencies ++= Seq(
       Dependencies.tapir
     ).flatten,
-    useCoursier := false, // https://github.com/coursier/coursier/issues/2016
     buildInfoKeys := Seq[BuildInfoKey](version),
     buildInfoPackage := "ru.tinkoff.tcb.mockingbird.build",
     Compile / packageDoc / mappings := Seq(),
@@ -137,7 +136,6 @@ lazy val `mockingbird-native` = (project in file("mockingbird-native"))
   .configure(Settings.dockerNative("mockingbird-native", 8228 :: 9000 :: Nil))
   .settings(
     name := "mockingbird-native",
-    useCoursier := false, // https://github.com/coursier/coursier/issues/2016
     Compile / run / mainClass := Some("ru.tinkoff.tcb.mockingbird.Mockingbird"),
     Compile / packageDoc / mappings := Seq(),
     GraalVMNativeImage / mainClass := Some("ru.tinkoff.tcb.mockingbird.Mockingbird"),
