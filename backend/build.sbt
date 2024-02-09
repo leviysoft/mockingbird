@@ -175,7 +175,6 @@ val edsl = (project in file("edsl"))
       Dependencies.refined,
     ).flatten,
     libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.client4" %% "armeria-backend-zio" % Versions.sttp,
       "com.softwaremill.sttp.client4" %% "circe"               % Versions.sttp,
       "pl.muninn"                     %% "scala-md-tag"        % "0.2.3",
     ),
