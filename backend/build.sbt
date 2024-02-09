@@ -70,7 +70,6 @@ val mockingbird = (project in file("mockingbird"))
       "eu.timepit"                    %% "fs2-cron-core"       % "0.2.2",
       "com.softwaremill.sttp.client4" %% "zio"                 % Versions.sttp,
       "com.softwaremill.sttp.client4" %% "circe"               % Versions.sttp,
-      "org.javassist"                  % "javassist"           % "3.29.2-GA", // Armeria dependency
       "org.apache.tika"                % "tika-core"           % "2.1.0",
       "io.scalaland"                  %% "chimney"             % "0.8.5",
       "com.ironcorelabs"              %% "cats-scalatest"      % "3.0.8" % Test,
