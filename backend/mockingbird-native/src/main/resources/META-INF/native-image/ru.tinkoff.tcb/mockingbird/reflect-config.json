@@ -186,6 +186,9 @@
   "name":"io.grpc.census.InternalCensusTracingAccessor"
 },
 {
+  "name":"io.grpc.okhttp.OkHttpServerProvider"
+},
+{
   "name":"io.micrometer.core.instrument.DistributionSummary$Builder",
   "queryAllPublicMethods":true
 },
@@ -553,11 +556,19 @@
 },
 {
   "name":"java.lang.Boolean",
-  "fields":[{"name":"TYPE"}]
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
 },
 {
   "name":"java.lang.Byte",
-  "fields":[{"name":"TYPE"}]
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
 },
 {
   "name":"java.lang.Character",
@@ -572,25 +583,49 @@
 },
 {
   "name":"java.lang.Double",
-  "fields":[{"name":"TYPE"}]
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
 },
 {
   "name":"java.lang.Exception"
 },
 {
   "name":"java.lang.Float",
-  "fields":[{"name":"TYPE"}]
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
 },
 {
   "name":"java.lang.IllegalArgumentException"
 },
 {
   "name":"java.lang.Integer",
-  "fields":[{"name":"TYPE"}]
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
 },
 {
   "name":"java.lang.Long",
-  "fields":[{"name":"TYPE"}]
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
+},
+{
+  "name":"java.lang.Math",
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
 },
 {
   "name":"java.lang.Module",
@@ -614,11 +649,19 @@
 },
 {
   "name":"java.lang.Short",
-  "fields":[{"name":"TYPE"}]
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
 },
 {
   "name":"java.lang.String",
-  "fields":[{"name":"TYPE"}]
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
 },
 {
   "name":"java.lang.Thread",
@@ -663,10 +706,20 @@
   "methods":[{"name":"getInputArguments","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }]
 },
 {
-  "name":"java.math.BigDecimal"
+  "name":"java.math.BigDecimal",
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
 },
 {
-  "name":"java.math.BigInteger"
+  "name":"java.math.BigInteger",
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
 },
 {
   "name":"java.net.InetAddress",
@@ -763,10 +816,66 @@
   "name":"java.time.Instant"
 },
 {
+  "name":"java.time.LocalDate",
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
+},
+{
+  "name":"java.time.LocalDateTime",
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
+},
+{
+  "name":"java.time.format.DateTimeFormatter",
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
+},
+{
   "name":"java.util.Date"
 },
 {
+  "name":"java.util.List",
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
+},
+{
+  "name":"java.util.Map",
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
+},
+{
   "name":"java.util.PropertyPermission"
+},
+{
+  "name":"java.util.Random",
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
+},
+{
+  "name":"java.util.Set",
+  "allDeclaredFields": true,
+  "allDeclaredMethods": true,
+  "allPublicMethods": true,
+  "queryAllDeclaredMethods": true,
+  "queryAllPublicMethods" : true
 },
 {
   "name":"java.util.concurrent.ForkJoinTask",
@@ -811,6 +920,14 @@
 {
   "name":"jdk.internal.misc.Unsafe",
   "methods":[{"name":"getUnsafe","parameterTypes":[] }]
+},
+{
+  "name":"org.graalvm.polyglot.io.IOHelper",
+  "fields":[{"name":"ACCESS"}]
+},
+{
+  "name":"org.graalvm.polyglot.management.Management",
+  "fields":[{"name":"ACCESS"}]
 },
 {
   "name":"org.slf4j.Logger"
@@ -970,6 +1087,10 @@
 },
 {
   "name":"sun.security.rsa.RSASignature$SHA256withRSA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.ssl.KeyManagerFactoryImpl$SunX509",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
