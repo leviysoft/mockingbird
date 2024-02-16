@@ -12,7 +12,7 @@
     "stylelint": "stylelint '**/*.{less,css}'"
   },
   "engines": {
-    "node": "16"
+    "node": "20"
   },
   "devDependencies": {
     "@tinkoff/eslint-config": "1.36.1",
