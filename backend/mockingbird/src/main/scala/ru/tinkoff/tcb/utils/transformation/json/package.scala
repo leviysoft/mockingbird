@@ -14,7 +14,6 @@ import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.json.json2StringFolder
 import ru.tinkoff.tcb.utils.regex.OneOrMore
 import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
-import ru.tinkoff.tcb.utils.transformation.json.js_eval.fold2Json
 import ru.tinkoff.tcb.utils.transformation.xml.nodeTemplater
 
 package object json {
@@ -91,9 +90,8 @@ package object json {
 
     def eval(implicit sandbox: GraalJsSandbox): Json =
       transformValues { case js @ JsonString(CodeRx(code)) =>
-        (sandbox.eval[AnyRef](code) match {
-          case Success(value) if fold2Json.isDefinedAt(value) => Option(fold2Json(value))
-          case Success(other)     => throw new Exception(s"${other.getClass.getCanonicalName}: $other")
+        (sandbox.eval(code) match {
+          case Success(value)     => Option(value)
           case Failure(exception) => throw exception
         }).getOrElse(js)
       }.result
