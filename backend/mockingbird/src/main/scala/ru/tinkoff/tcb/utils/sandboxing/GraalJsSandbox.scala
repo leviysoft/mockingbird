@@ -1,13 +1,13 @@
 package ru.tinkoff.tcb.utils.sandboxing
 
-import scala.reflect.ClassTag
-import scala.reflect.classTag
 import scala.util.Try
 import scala.util.Using
 
+import io.circe.Json
 import org.graalvm.polyglot.*
 
 import ru.tinkoff.tcb.mockingbird.config.JsSandboxConfig
+import ru.tinkoff.tcb.utils.sandboxing.conversion.*
 
 class GraalJsSandbox(
     jsSandboxConfig: JsSandboxConfig,
@@ -16,7 +16,7 @@ class GraalJsSandbox(
   private val allowedClasses = GraalJsSandbox.DefaultAccess ++ jsSandboxConfig.allowedClasses
   private val preludeSource  = prelude.map(Source.create("js", _))
 
-  def eval[T: ClassTag](code: String, environment: Map[String, Any] = Map.empty): Try[T] =
+  def eval(code: String, environment: Map[String, Json] = Map.empty): Try[Json] =
     Using(
       Context
         .newBuilder("js")
@@ -26,12 +26,12 @@ class GraalJsSandbox(
         .build()
     ) { context =>
       context.getBindings("js").pipe { bindings =>
-        for ((key, value) <- environment)
+        for ((key, value) <- environment.view.mapValues(_.foldWith(circe2js)))
           bindings.putMember(key, value)
       }
       preludeSource.foreach(context.eval)
-      context.eval("js", code).as(classTag[T].runtimeClass.asInstanceOf[Class[T]])
-    }
+      context.eval("js", code).toJson
+    }.flatten
 }
 
 object GraalJsSandbox {
