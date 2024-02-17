@@ -22,7 +22,7 @@ package object circe {
   }
 
   object JsonNull {
-    def unapply(arg: Json): Option[Unit] = arg.asNull
+    def unapply(arg: Json): Boolean = arg.isNull
   }
 
   object JsonDocument {
@@ -53,8 +53,8 @@ package object circe {
         if (baseArr.length >= patchArr.length)
           Json.fromValues((baseArr zip patchArr).map(mrgPair.tupled))
         else Json.fromValues(baseArr.zipAll(patchArr, Json.Null, patchArr.last).map(mrgPair.tupled))
-      case (p, JsonNull(())) if arraySubvalues => p
-      case (_, p)                              => p
+      case (p, JsonNull()) if arraySubvalues => p
+      case (_, p)                            => p
     }
 
   implicit class JsonOps(private val json: Json) extends AnyVal {
