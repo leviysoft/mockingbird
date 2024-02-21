@@ -12,9 +12,15 @@ class GraalJsSandboxSpec extends AnyFunSuite with Matchers with TryValues {
   private val sandbox = new GraalJsSandbox(new JsSandboxConfig())
 
   test("Eval literals") {
-    sandbox.eval("[1, \"test\", true]").success.value shouldBe Json.arr(Json.fromInt(1), Json.fromString("test"), Json.True)
+    sandbox.eval("[1, \"test\", true]").success.value shouldBe Json.arr(
+      Json.fromInt(1),
+      Json.fromString("test"),
+      Json.True
+    )
 
-    sandbox.eval("var res = {'a': {'b': 'c'}}; res").success.value shouldBe Json.obj("a" -> Json.obj("b" -> Json.fromString("c")))
+    sandbox.eval("var res = {'a': {'b': 'c'}}; res").success.value shouldBe Json.obj(
+      "a" -> Json.obj("b" -> Json.fromString("c"))
+    )
   }
 
   test("Eval simple arithmetics") {
