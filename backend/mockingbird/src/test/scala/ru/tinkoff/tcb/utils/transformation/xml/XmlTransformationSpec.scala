@@ -1,5 +1,6 @@
 package ru.tinkoff.tcb.utils.transformation.xml
 
+import java.util.UUID
 import scala.xml.Node
 
 import advxml.transform.XmlZoom
@@ -10,6 +11,9 @@ import kantan.xpath.XmlSource
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
+import ru.tinkoff.tcb.mockingbird.config.JsSandboxConfig
+import ru.tinkoff.tcb.utils.resource.readStr
+import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 import ru.tinkoff.tcb.utils.xml.SafeXML
 
 class XmlTransformationSpec extends AnyFunSuite with Matchers {
@@ -56,6 +60,9 @@ class XmlTransformationSpec extends AnyFunSuite with Matchers {
   }
 
   test("Eval template") {
+    val prelude                          = readStr("prelude.js")
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+
     val template: Node =
       <root>
         <tag1>%{{randomString(10)}}</tag1>
@@ -64,7 +71,7 @@ class XmlTransformationSpec extends AnyFunSuite with Matchers {
         <tag2i>%{{randomInt(3, 8)}}</tag2i>
         <tag3>%{{randomLong(5)}}</tag3>
         <tag3i>%{{randomLong(3, 8)}}</tag3i>
-        <tag4>%{{UUID}}</tag4>
+        <tag4>%{{UUID()}}</tag4>
       </root>
 
     template.isTemplate shouldBe true
@@ -86,6 +93,8 @@ class XmlTransformationSpec extends AnyFunSuite with Matchers {
 
     (res \ "tag3i").text.toLong should be >= 3L
     (res \ "tag3i").text.toLong should be < 8L
+
+    noException should be thrownBy UUID.fromString((res \ "tag4").text)
   }
 
   test("Inline CDATA") {
