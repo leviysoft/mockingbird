@@ -49,13 +49,13 @@ package object xml {
           elem.attributes.exists(attr =>
             attr.value match {
               case Seq(Text(SubstRx(Xexpr(_)))) => true
-              case Seq(Text(FunRx()))           => true
+              case Seq(Text(CodeRx(_)))         => true
               case Seq(Text(SubstRxs()))        => true
               case _                            => false
             }
           ) || elem.child.exists(_.isTemplate)
         case Text(SubstRx(Xexpr(_))) => true
-        case Text(FunRx())           => true
+        case Text(CodeRx(_))         => true
         case Text(SubstRxs())        => true
         case _                       => false
       }
