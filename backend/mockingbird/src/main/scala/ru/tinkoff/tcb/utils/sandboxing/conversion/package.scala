@@ -10,28 +10,35 @@ import alleycats.std.map.*
 import io.circe.Json
 import io.circe.JsonNumber
 import io.circe.JsonObject
+import io.estatico.newtype.macros.newtype
+import io.estatico.newtype.ops.*
 import org.graalvm.polyglot.Value
 import org.graalvm.polyglot.proxy.*
 
 package object conversion {
-  val circe2js: Json.Folder[AnyRef] = new Json.Folder[AnyRef] {
-    override def onNull: AnyRef = null
+  @newtype class GValue(val unwrap: AnyRef)
+  object GValue {
+    private[conversion] def apply(anyRef: AnyRef): GValue = anyRef.coerce
+  }
 
-    override def onBoolean(value: Boolean): AnyRef = jl.Boolean.valueOf(value)
+  val circe2js: Json.Folder[GValue] = new Json.Folder[GValue] {
+    override def onNull: GValue = GValue(null)
 
-    override def onNumber(value: JsonNumber): AnyRef =
-      value.toLong.map(jl.Long.valueOf).getOrElse(jl.Float.valueOf(value.toFloat))
+    override def onBoolean(value: Boolean): GValue = GValue(jl.Boolean.valueOf(value))
 
-    override def onString(value: String): AnyRef = value
+    override def onNumber(value: JsonNumber): GValue =
+      GValue(value.toLong.map(jl.Long.valueOf).getOrElse(jl.Float.valueOf(value.toFloat)))
 
-    override def onArray(value: Vector[Json]): AnyRef = new ProxyArray {
-      override def get(index: Long): AnyRef             = value(index.toInt).foldWith(circe2js)
+    override def onString(value: String): GValue = GValue(value)
+
+    override def onArray(value: Vector[Json]): GValue = GValue(new ProxyArray {
+      override def get(index: Long): AnyRef             = value(index.toInt).foldWith(circe2js).unwrap
       override def set(index: Long, value: Value): Unit = throw new UnsupportedOperationException()
       override def getSize: Long                        = value.size
-    }
+    })
 
-    override def onObject(value: JsonObject): AnyRef = new ProxyObject {
-      override def getMember(key: String): AnyRef = value.apply(key).map(_.foldWith(circe2js)).orNull
+    override def onObject(value: JsonObject): GValue = GValue(new ProxyObject {
+      override def getMember(key: String): AnyRef = value.apply(key).map(_.foldWith(circe2js).unwrap).orNull
       override def getMemberKeys: AnyRef = new ProxyArray {
         private val keys                                  = value.keys.toVector
         override def get(index: Long): AnyRef             = keys(index.toInt)
@@ -40,7 +47,7 @@ package object conversion {
       }
       override def hasMember(key: String): Boolean            = value.keys.exists(_ == key)
       override def putMember(key: String, value: Value): Unit = throw new UnsupportedOperationException()
-    }
+    })
   }
 
   implicit class ValueConverter(private val value: Value) extends AnyVal {

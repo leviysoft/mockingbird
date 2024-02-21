@@ -28,8 +28,13 @@ import ru.tinkoff.tcb.predicatedsl.Keyword
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.id.SID
 import ru.tinkoff.tcb.utils.regex.*
+import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 
-final class StubResolver(stubDAO: HttpStubDAO[Task], stateDAO: PersistentStateDAO[Task]) {
+final class StubResolver(
+    stubDAO: HttpStubDAO[Task],
+    stateDAO: PersistentStateDAO[Task],
+    implicit val jsSandbox: GraalJsSandbox
+) {
   private val log = MDCLogging.`for`[WLD](this)
 
   private type StateSpec = Map[JsonOptic, Map[Keyword.Json, Json]]
@@ -155,8 +160,9 @@ final class StubResolver(stubDAO: HttpStubDAO[Task], stateDAO: PersistentStateDA
 object StubResolver {
   val live = ZLayer {
     for {
-      hsd <- ZIO.service[HttpStubDAO[Task]]
-      ssd <- ZIO.service[PersistentStateDAO[Task]]
-    } yield new StubResolver(hsd, ssd)
+      hsd       <- ZIO.service[HttpStubDAO[Task]]
+      ssd       <- ZIO.service[PersistentStateDAO[Task]]
+      jsSandbox <- ZIO.service[GraalJsSandbox]
+    } yield new StubResolver(hsd, ssd, jsSandbox)
   }
 }

@@ -102,7 +102,7 @@ package object xml {
         }.result
       }
 
-    def substitute(values: Json): Node =
+    def substitute(values: Json)(implicit sandbox: GraalJsSandbox): Node =
       jsonTemplater(values).pipe { templater =>
         transform {
           case elem: Elem =>
@@ -133,7 +133,9 @@ package object xml {
         xml
       }.result
 
-    def patchFromValues(jValues: Json, xValues: Node, schema: Map[XmlZoom, String]): Node = {
+    def patchFromValues(jValues: Json, xValues: Node, schema: Map[XmlZoom, String])(implicit
+        sandbox: GraalJsSandbox
+    ): Node = {
       val jt = jsonTemplater(jValues)
       val nt = nodeTemplater(<wrapper>{xValues}</wrapper>)
 
