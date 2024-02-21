@@ -23,6 +23,7 @@ import ru.tinkoff.tcb.mockingbird.model.Scope
 import ru.tinkoff.tcb.predicatedsl.Keyword
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.id.SID
+import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 
 trait GrpcStubResolver {
   def findStubAndState(service: String, request: Array[Byte])(
@@ -30,7 +31,11 @@ trait GrpcStubResolver {
   ): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]]
 }
 
-class GrpcStubResolverImpl(stubDAO: GrpcStubDAO[Task], stateDAO: PersistentStateDAO[Task]) extends GrpcStubResolver {
+class GrpcStubResolverImpl(
+    stubDAO: GrpcStubDAO[Task],
+    stateDAO: PersistentStateDAO[Task],
+    implicit val jsSandbox: GraalJsSandbox
+) extends GrpcStubResolver {
 
   private type StateSpec = Map[JsonOptic, Map[Keyword.Json, Json]]
 
@@ -123,11 +128,12 @@ class GrpcStubResolverImpl(stubDAO: GrpcStubDAO[Task], stateDAO: PersistentState
 }
 
 object GrpcStubResolverImpl {
-  val live: URLayer[GrpcStubDAO[Task] & PersistentStateDAO[Task], GrpcStubResolver] =
+  val live: URLayer[GrpcStubDAO[Task] & PersistentStateDAO[Task] & GraalJsSandbox, GrpcStubResolver] =
     ZLayer {
       for {
-        gsd <- ZIO.service[GrpcStubDAO[Task]]
-        psd <- ZIO.service[PersistentStateDAO[Task]]
-      } yield new GrpcStubResolverImpl(gsd, psd)
+        gsd       <- ZIO.service[GrpcStubDAO[Task]]
+        psd       <- ZIO.service[PersistentStateDAO[Task]]
+        jsSandbox <- ZIO.service[GraalJsSandbox]
+      } yield new GrpcStubResolverImpl(gsd, psd, jsSandbox)
     }
 }

@@ -16,7 +16,7 @@ class GraalJsSandbox(
   private val allowedClasses = GraalJsSandbox.DefaultAccess ++ jsSandboxConfig.allowedClasses
   private val preludeSource  = prelude.map(Source.create("js", _))
 
-  def eval(code: String, environment: Map[String, Json] = Map.empty): Try[Json] =
+  def eval(code: String, environment: Map[String, GValue] = Map.empty): Try[Json] =
     Using(
       Context
         .newBuilder("js")
@@ -26,7 +26,7 @@ class GraalJsSandbox(
         .build()
     ) { context =>
       context.getBindings("js").pipe { bindings =>
-        for ((key, value) <- environment.view.mapValues(_.foldWith(circe2js)))
+        for ((key, value) <- environment.view.mapValues(_.unwrap))
           bindings.putMember(key, value)
       }
       preludeSource.foreach(context.eval)
