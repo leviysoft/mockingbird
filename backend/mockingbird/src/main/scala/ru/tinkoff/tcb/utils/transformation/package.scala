@@ -4,6 +4,5 @@ import scala.util.matching.Regex
 
 package object transformation {
   val SubstRx: Regex = """\$\{(.*?)\}""".r
-  val FunRx: Regex   = """%\{.*?\}""".r
   val CodeRx: Regex  = """%\{(.*?)\}""".r
 }

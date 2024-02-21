@@ -56,7 +56,8 @@ package object json {
         false,
         _ => false,
         _ => false,
-        str => JORx.findFirstIn(str).isDefined || FunRx.findFirstIn(str).isDefined || SubstRx.findFirstIn(str).isDefined,
+        str =>
+          JORx.findFirstIn(str).isDefined || CodeRx.findFirstIn(str).isDefined || SubstRx.findFirstIn(str).isDefined,
         _.exists(_.isTemplate),
         _.values.exists(_.isTemplate)
       )
