@@ -1,7 +1,9 @@
 package ru.tinkoff.tcb.utils.transformation
 
 import java.util.UUID
+import scala.util.Failure
 import scala.util.Random
+import scala.util.Success
 import scala.util.Try
 import scala.util.control.TailCalls
 import scala.util.control.TailCalls.TailRec
@@ -19,8 +21,10 @@ import io.circe.Json
 import kantan.xpath.Node as KNode
 import kantan.xpath.implicits.*
 
+import ru.tinkoff.tcb.utils.circe.JsonString
 import ru.tinkoff.tcb.utils.json.json2StringFolder
 import ru.tinkoff.tcb.utils.regex.OneOrMore
+import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 import ru.tinkoff.tcb.utils.transformation.json.jsonTemplater
 import ru.tinkoff.tcb.xpath.*
 
@@ -119,24 +123,12 @@ package object xml {
         }.result
       }
 
-    def eval: Node =
-      transform {
-        case Text(RandStr(len)) =>
-          Text(Random.alphanumeric.take(len.toInt).mkString)
-        case Text(RandAlphabetStr(alphabet, minLen, maxLen)) =>
-          Text(
-            List.fill(Random.between(minLen.toInt, maxLen.toInt))(alphabet(Random.nextInt(alphabet.length))).mkString
-          )
-        case Text(RandInt(max)) =>
-          Text(Random.nextInt(max.toInt).toString)
-        case Text(RandIntInterval(min, max)) =>
-          Text(Random.between(min.toInt, max.toInt).toString)
-        case Text(RandLong(max)) =>
-          Text(Random.nextLong(max.toLong).toString)
-        case Text(RandLongInterval(min, max)) =>
-          Text(Random.between(min.toLong, max.toLong).toString)
-        case Text(RandUUID()) =>
-          Text(UUID.randomUUID().toString)
+    def eval(implicit sandbox: GraalJsSandbox): Node =
+      transform { case tx @ Text(CodeRx(code)) =>
+        sandbox.eval(code) match {
+          case Success(value)     => Text(value.foldWith(json2StringFolder))
+          case Failure(exception) => throw exception
+        }
       }.result
 
     def inlineXmlFromCData: Node =

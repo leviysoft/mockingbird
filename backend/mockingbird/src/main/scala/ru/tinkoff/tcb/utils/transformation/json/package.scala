@@ -90,10 +90,10 @@ package object json {
 
     def eval(implicit sandbox: GraalJsSandbox): Json =
       transformValues { case js @ JsonString(CodeRx(code)) =>
-        (sandbox.eval(code) match {
-          case Success(value)     => Option(value)
+        sandbox.eval(code) match {
+          case Success(value)     => value
           case Failure(exception) => throw exception
-        }).getOrElse(js)
+        }
       }.result
 
     def patch(values: Json, schema: Map[JsonOptic, String]): Json =
