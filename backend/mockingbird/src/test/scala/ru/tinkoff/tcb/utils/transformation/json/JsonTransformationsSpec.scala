@@ -19,6 +19,9 @@ import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 
 class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValues {
   test("Fill template") {
+    val prelude                          = readStr("prelude.js")
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+
     val template = Json.obj(
       "description" := "${description}",
       "topic" := "${extras.topic}",
@@ -31,6 +34,18 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
 
     template.isTemplate shouldBe true
 
+    val template2 = Json.obj(
+      "description" := "%{description}",
+      "topic" := "%{extras.topic}",
+      "comment" := "%{extras.comments[0].text}",
+      "meta" := Json.obj(
+        "field1" := "%{extras.fields[0]}"
+      ),
+      "composite" := "%{extras.topic + ': ' + description}"
+    )
+
+    template2.isTemplate shouldBe true
+
     val values = Json.obj(
       "description" := "Some description",
       "extras" := Json.obj(
@@ -42,9 +57,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
 
     values.isTemplate shouldBe false
 
-    val sut = template.substitute(values)
-
-    sut shouldBe Json.obj(
+    val expected = Json.obj(
       "description" := "Some description",
       "topic" := "Main topic",
       "comment" := "First nah!",
@@ -53,9 +66,20 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
       ),
       "composite" := "Main topic: Some description"
     )
+
+    val sut = template.substitute(values)
+
+    sut shouldBe expected
+
+    val sut2 = template2.substitute(values)
+
+    sut2 shouldBe expected
   }
 
   test("Absent fields") {
+    val prelude                          = readStr("prelude.js")
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+
     val template = Json.obj(
       "value" := "${description}"
     )
@@ -66,6 +90,9 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Substitute object") {
+    val prelude                          = readStr("prelude.js")
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+
     val template = Json.obj("value" := "${message}")
 
     val sut = template.substitute(Json.obj("message" := Json.obj("peka" := "name")))
@@ -74,6 +101,9 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Convert to string") {
+    val prelude                          = readStr("prelude.js")
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+
     val template = Json.obj(
       "a" := "$:{b1}",
       "b" := "$:{b2}",
@@ -98,6 +128,9 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Convert from string") {
+    val prelude                          = readStr("prelude.js")
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+
     val template = Json.obj(
       "a" := "$~{b1}",
       "b" := "$~{b2}",
@@ -142,6 +175,9 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Failover test") {
+    val prelude                          = readStr("prelude.js")
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+
     Json.Null.substitute(Json.Null)
     Json.Null.substitute(Json.obj())
     Json.obj().substitute(Json.Null)
@@ -218,6 +254,9 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Json patcher") {
+    val prelude                          = readStr("prelude.js")
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+
     val target = Json.obj(
       "f1" := "v1",
       "a2" := "e1" :: "e2" :: "e3" :: Nil,
