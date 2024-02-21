@@ -11,11 +11,17 @@ import ru.tinkoff.tcb.mockingbird.config.JsSandboxConfig
 class GraalJsSandboxSpec extends AnyFunSuite with Matchers with TryValues {
   private val sandbox = new GraalJsSandbox(new JsSandboxConfig())
 
+  test("Eval literals") {
+    sandbox.eval("[1, \"test\", true]").success.value shouldBe Json.arr(Json.fromInt(1), Json.fromString("test"), Json.True)
+
+    sandbox.eval("var res = {'a': {'b': 'c'}}; res").success.value shouldBe Json.obj("a" -> Json.obj("b" -> Json.fromString("c")))
+  }
+
   test("Eval simple arithmetics") {
     sandbox.eval("1 + 2").success.value shouldBe Json.fromInt(3)
   }
 
-  test("Java classes are inaccessable") {
+  test("Java classes are inaccessible") {
     sandbox.eval("java.lang.System.out.println('hello');").failure.exception shouldBe a[PolyglotException]
   }
 

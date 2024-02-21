@@ -56,7 +56,7 @@ package object conversion {
         case v if v.isString                         => Success(Json.fromString(v.asString()))
         case v if v.hasArrayElements =>
           Vector.tabulate(v.getArraySize.toInt)(v.getArrayElement(_)).traverse(_.toJson).map(Json.fromValues)
-        case v if v.isProxyObject && v.hasMembers =>
+        case v if v.hasMembers =>
           v.getMemberKeys.asScala.map(k => k -> v.getMember(k)).toMap.traverse(_.toJson).map(Json.fromFields)
         case v if v.isException => Try(v.throwException()).asInstanceOf[Try[Nothing]]
         case other => Failure(new IllegalArgumentException(s"Unsupported value: ${printValueFlags(other)}"))
