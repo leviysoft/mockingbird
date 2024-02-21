@@ -1,8 +1,6 @@
 package ru.tinkoff.tcb.utils.transformation
 
-import java.util.UUID
 import scala.util.Failure
-import scala.util.Random
 import scala.util.Success
 import scala.util.Try
 import scala.util.control.TailCalls
@@ -21,7 +19,6 @@ import io.circe.Json
 import kantan.xpath.Node as KNode
 import kantan.xpath.implicits.*
 
-import ru.tinkoff.tcb.utils.circe.JsonString
 import ru.tinkoff.tcb.utils.json.json2StringFolder
 import ru.tinkoff.tcb.utils.regex.OneOrMore
 import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
