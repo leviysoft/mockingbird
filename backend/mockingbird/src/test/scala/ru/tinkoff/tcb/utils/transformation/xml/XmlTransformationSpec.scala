@@ -42,8 +42,7 @@ class XmlTransformationSpec extends AnyFunSuite with Matchers {
   }
 
   test("Fill template from JSON") {
-    val prelude                          = readStr("prelude.js")
-    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
 
     val template: Node =
       <root rt="${root.rt}"><tag1 t1="a1">${{root.tag1}}</tag1><tag2 t2="${root.t2}">${{root.tag2}}</tag2><composite cmp="${root.rt}_${root.t2}">${{root.tag1}}_${{root.tag2}}</composite></root>
@@ -115,8 +114,7 @@ class XmlTransformationSpec extends AnyFunSuite with Matchers {
   }
 
   test("XML patcher") {
-    val prelude                          = readStr("prelude.js")
-    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
 
     val target: Node =
       <root>
