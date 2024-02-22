@@ -61,6 +61,23 @@ object HttpStubResponse {
   implicit val customConfiguration: TapirConfig =
     TapirConfig.default.withDiscriminator("mode").copy(toEncodedName = modes)
 
+  val headers: Property[HttpStubResponse, Map[String, String]] =
+    new Property[HttpStubResponse, Map[String, String]] {
+      private val properties: Vector[Property[HttpStubResponse, Map[String, String]]] = Vector(
+        EmptyResponse.prism >> EmptyResponse.headers,
+        RawResponse.prism >> RawResponse.headers,
+        JsonResponse.prism >> JsonResponse.headers,
+        XmlResponse.prism >> XmlResponse.headers,
+        BinaryResponse.prism >> BinaryResponse.headers
+      )
+
+      override def set(s: HttpStubResponse, b: Map[String, String]): HttpStubResponse =
+        properties.map(_.setF(b)).reduce(_ andThen _).apply(s)
+
+      override def narrow(s: HttpStubResponse): Either[HttpStubResponse, Map[String, String]] =
+        properties.map(_.narrow(s)).foldLeft(s.asLeft[Map[String, String]])(_ orElse _)
+    }
+
   val jsonBody: Property[HttpStubResponse, Json] = JsonResponse.prism >> JsonResponse.body
 
   val xmlBody: Property[HttpStubResponse, Node] = XmlResponse.prism >> XmlResponse.body
@@ -75,6 +92,12 @@ final case class EmptyResponse(
   val isTemplate: Boolean = false
 }
 
+object EmptyResponse {
+  val prism: Subset[HttpStubResponse, EmptyResponse] = GenSubset[HttpStubResponse, EmptyResponse]
+
+  val headers: Contains[EmptyResponse, Map[String, String]] = GenContains[EmptyResponse](_.headers)
+}
+
 @derive(decoder, encoder)
 final case class RawResponse(
     code: HttpStatusCode,
@@ -83,6 +106,12 @@ final case class RawResponse(
     delay: Option[FiniteDuration]
 ) extends HttpStubResponse {
   val isTemplate: Boolean = false
+}
+
+object RawResponse {
+  val prism: Subset[HttpStubResponse, RawResponse] = GenSubset[HttpStubResponse, RawResponse]
+
+  val headers: Contains[RawResponse, Map[String, String]] = GenContains[RawResponse](_.headers)
 }
 
 final case class JsonResponse(
@@ -97,6 +126,8 @@ object JsonResponse {
   val prism: Subset[HttpStubResponse, JsonResponse] = GenSubset[HttpStubResponse, JsonResponse]
 
   val body: Contains[JsonResponse, Json] = GenContains[JsonResponse](_.body)
+
+  val headers: Contains[JsonResponse, Map[String, String]] = GenContains[JsonResponse](_.headers)
 
   implicit val jrEncoder: Encoder.AsObject[JsonResponse] =
     Encoder.forProduct4(
@@ -134,6 +165,8 @@ object XmlResponse {
     override def extract(s: XmlResponse): Node = s.node
   }
 
+  val headers: Contains[XmlResponse, Map[String, String]] = GenContains[XmlResponse](_.headers)
+
   implicit val xrEncoder: Encoder.AsObject[XmlResponse] =
     Encoder.forProduct4(
       nameOf[XmlResponse](_.code),
@@ -163,6 +196,8 @@ final case class BinaryResponse(
 
 object BinaryResponse {
   val prism: Subset[HttpStubResponse, BinaryResponse] = GenSubset[HttpStubResponse, BinaryResponse]
+
+  val headers: Contains[BinaryResponse, Map[String, String]] = GenContains[BinaryResponse](_.headers)
 }
 
 @derive(decoder, encoder)
