@@ -19,8 +19,7 @@ import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 
 class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValues {
   test("Fill template") {
-    val prelude                          = readStr("prelude.js")
-    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
 
     val template = Json.obj(
       "description" := "${description}",
@@ -77,8 +76,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Absent fields") {
-    val prelude                          = readStr("prelude.js")
-    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
 
     val template = Json.obj(
       "value" := "${description}"
@@ -90,8 +88,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Substitute object") {
-    val prelude                          = readStr("prelude.js")
-    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
 
     val template = Json.obj("value" := "${message}")
 
@@ -101,8 +98,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Convert to string") {
-    val prelude                          = readStr("prelude.js")
-    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
 
     val template = Json.obj(
       "a" := "$:{b1}",
@@ -128,8 +124,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Convert from string") {
-    val prelude                          = readStr("prelude.js")
-    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
 
     val template = Json.obj(
       "a" := "$~{b1}",
@@ -175,8 +170,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Failover test") {
-    val prelude                          = readStr("prelude.js")
-    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
 
     Json.Null.substitute(Json.Null)
     Json.Null.substitute(Json.obj())
@@ -254,8 +248,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Json patcher") {
-    val prelude                          = readStr("prelude.js")
-    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
 
     val target = Json.obj(
       "f1" := "v1",
