@@ -7,6 +7,7 @@ import {
   getUpdateErrorToast,
 } from 'src/infrastructure/notifications';
 import { getPathDestination } from 'src/mockingbird/paths';
+import i18n from 'src/mockingbird/i18n';
 import {
   setCreating,
   createSuccess,
@@ -33,7 +34,7 @@ export const createAction = createActionCore({
     })
       .then((response) => {
         if (response.status === 'success' && response.id) {
-          dispatch(getSuccessToast('Получатель успешно создан'));
+          dispatch(getSuccessToast(i18n.t('destination.createSuccess')));
           pageService.navigate(getPathDestination(serviceId, response.id));
           return dispatch(createSuccess());
         }
@@ -79,7 +80,7 @@ export const updateAction = createActionCore({
     })
       .then((response) => {
         if (response.status === 'success' && response.id) {
-          dispatch(getSuccessToast('Получатель успешно обновлен'));
+          dispatch(getSuccessToast(i18n.t('destination.updateSuccess')));
           return dispatch(updateSuccess(data));
         }
         dispatch(getUpdateErrorToast(null));

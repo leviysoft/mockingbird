@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from '@tramvai/state';
-import { Container, Space, Title } from '@mantine/core';
+import { Container, Title, Flex } from '@mantine/core';
 import { getJson } from 'src/infrastructure/request';
+import { LanguageSwitcher } from 'src/mockingbird/components/Language';
 import { Shadow } from './Shadow';
 
 type Props = {
@@ -21,9 +22,12 @@ function Header({ assetsPrefix }: Props) {
   return (
     <Shadow>
       <Container>
-        <Space h="sm" />
-        <Title order={2}>{title}</Title>
-        <Space h="sm" />
+        <Flex py="sm" align="center">
+          <Title order={2} mr="auto">
+            {title}
+          </Title>
+          <LanguageSwitcher />
+        </Flex>
       </Container>
     </Shadow>
   );

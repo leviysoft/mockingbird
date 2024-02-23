@@ -1,8 +1,10 @@
+import i18n from 'src/mockingbird/i18n';
+
 export default function copyToClipboard(
   text: string,
   callback: (error: Error) => void
 ) {
-  if (text == null) throw new Error('copyToClipboard: text can not be null');
+  if (text == null) throw new Error(i18n.t('components.copy.textEmptyError'));
   const el = window.document.createElement('textarea');
   el.readOnly = true; // подавляем экранную клавиатуру на touch-устройствах
   Object.assign(
@@ -33,7 +35,7 @@ export default function copyToClipboard(
     el.select(); // для большинства
     el.setSelectionRange(0, text.length); // для iOS
     global.document.execCommand('copy');
-    if (!eventFired) throw new Error('Copy to clipboard failed');
+    if (!eventFired) throw new Error(i18n.t('components.copy.copyError'));
     if (callback) callback();
   } catch (e) {
     if (callback) callback(e);

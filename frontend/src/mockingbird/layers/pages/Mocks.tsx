@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useActions, useStoreSelector } from '@tramvai/state';
 import { useNavigate, useUrl } from '@tramvai/module-router';
 import {
@@ -56,6 +57,7 @@ const TYPES = [
 const MOCK_ITEM_HEIGHT = 80;
 
 export default function Mocks() {
+  const { t } = useTranslation();
   const url = useUrl();
   const serviceId = Array.isArray(url.query.service)
     ? url.query.service[0]
@@ -114,16 +116,16 @@ export default function Mocks() {
     <div className={styles.root}>
       <PageHeader
         title={(service && service.name) || serviceId}
-        backText="К списку сервисов"
+        backText={t('pages.mock.mockListHeaderBackText')}
         backPath={getPathServices()}
         right={
           <Button size="sm" onClick={navigateToCreate}>
-            Создать
+            {t('pages.mock.createText')}
           </Button>
         }
       />
       <TextInput
-        placeholder="Поиск"
+        placeholder={t('pages.mock.searchPlaceholder')}
         size="md"
         value={query}
         onChange={handleChangeQuery}
@@ -134,7 +136,7 @@ export default function Mocks() {
       <Flex mb="xl">
         <Box sx={{ width: '50%' }}>
           <Select
-            placeholder="Тип"
+            placeholder={t('pages.mock.typePlaceholder')}
             size="md"
             data={TYPES}
             value={type}
@@ -144,7 +146,7 @@ export default function Mocks() {
         <Space w="md" />
         <Box sx={{ width: '50%' }}>
           <MultiSelect
-            placeholder="Фильтр по лейблам"
+            placeholder={t('pages.mock.filterPlaceholder')}
             size="md"
             data={allLabels.map(mapSelectItem)}
             value={labels}
@@ -170,7 +172,7 @@ export default function Mocks() {
             disabled={status === 'loading-more'}
             onClick={handleFetchMore}
           >
-            Загрузить еще
+            {t('pages.mock.loadMore')}
           </Button>
         </div>
       )}
