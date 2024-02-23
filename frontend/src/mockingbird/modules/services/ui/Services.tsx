@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { connect, useActions, useStoreSelector } from '@tramvai/state';
 import { Button } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -21,6 +22,7 @@ type Props = {
 const SERVICE_ITEM_HEIGHT = 80;
 
 function Services({ execApiPath }: Props) {
+  const { t } = useTranslation();
   const fetchServices = useActions(fetchAction);
   const { services, status } = useStoreSelector(
     servicesStore,
@@ -35,14 +37,14 @@ function Services({ execApiPath }: Props) {
   return (
     <>
       <PageHeader
-        title="Сервисы"
+        title={t('services.listTitle')}
         right={
           <Button
             size="sm"
             disabled={status === 'loading'}
             onClick={handleCreate}
           >
-            Создать
+            {t('services.createText')}
           </Button>
         }
       />

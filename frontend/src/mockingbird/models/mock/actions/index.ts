@@ -1,5 +1,6 @@
 import { createAction } from '@tramvai/core';
 import { PAGE_SERVICE_TOKEN } from '@tramvai/tokens-router';
+import i18n from 'src/mockingbird/i18n';
 import { getJson, patchJson } from 'src/mockingbird/infrastructure/request';
 import {
   getSuccessToast,
@@ -49,7 +50,7 @@ export const updateAction = createAction({
     return patchJson(`${MOCKINGBIRD_API}/v2/${method}/${id}`, { body: data })
       .then((response) => {
         if (response.status === 'success' && response.id) {
-          dispatch(getSuccessToast('Мок успешно обновлен'));
+          dispatch(getSuccessToast(i18n.t('models.mock.updateSuccess')));
           return dispatch(updateSuccess(data));
         }
         dispatch(getUpdateErrorToast(null));
@@ -75,7 +76,7 @@ export const deleteAction = createAction({
     })
       .then((response) => {
         if (response.status === 'success') {
-          dispatch(getSuccessToast('Мок успешно удален'));
+          dispatch(getSuccessToast(i18n.t('models.mock.deleteSuccess')));
           pageService.navigate(basePath);
           return dispatch(deleteSuccess());
         }

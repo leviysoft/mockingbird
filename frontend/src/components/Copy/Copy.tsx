@@ -4,6 +4,7 @@ import { Tooltip } from '@mantine/core';
 // @ts-ignore for tree shaking purposes
 import IconCopy from '@tabler/icons-react/dist/esm/icons/IconCopy';
 import copyToClipboard from 'src/infrastructure/helpers/copy-to-clipboard';
+import i18n from 'src/mockingbird/i18n';
 import styles from './Copy.css';
 
 type State = {
@@ -42,7 +43,9 @@ export default class Copy extends PureComponent<Props, State> {
     copyToClipboard(this.props.targetValue, (err) => {
       this.setState({
         tooltipVisible: !err,
-        message: err ? 'Не удалось скопировать' : 'Скопировано',
+        message: err
+          ? i18n.t('components.copy.error')
+          : i18n.t('components.copy.success'),
       });
       if (last) last.focus();
       this.timer = setTimeout(() => {

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useActions, useStoreSelector } from '@tramvai/state';
 import { useUrl } from '@tramvai/module-router';
 import { Paper, Text, Title, Button } from '@mantine/core';
@@ -22,6 +23,7 @@ import type { SourceFormData } from '../types';
 const SOURCE_HEIGHT_ITEM = 80;
 
 export default function PageSource() {
+  const { t } = useTranslation();
   const url = useUrl();
   const serviceId = Array.isArray(url.query.service)
     ? url.query.service[0]
@@ -62,9 +64,9 @@ export default function PageSource() {
   }, [deleteSource, name, basePath]);
   const actions = (
     <Paper>
-      <Title order={4}>Удалить навсегда</Title>
+      <Title order={4}>{t('source.actionTitle')}</Title>
       <Text size="md" mb="lg">
-        Источник будет немедленно удален, действие необратимо
+        {t('source.actionWarning')}
       </Text>
       <Button
         size="md"
@@ -72,15 +74,15 @@ export default function PageSource() {
         disabled={status === 'deleting'}
         onClick={onDelete}
       >
-        Удалить
+        {t('source.actionText')}
       </Button>
     </Paper>
   );
   return (
     <div>
       <PageHeader
-        title="Редактирование источника"
-        backText="К списку источников"
+        title={t('source.editHeaderTitle')}
+        backText={t('source.editHeaderBackText')}
         backPath={basePath}
       />
       {status === 'loading' && <ListLoading mih={SOURCE_HEIGHT_ITEM} />}
@@ -89,7 +91,7 @@ export default function PageSource() {
         <Form
           actions={actions}
           data={source}
-          submitText="Сохранить"
+          submitText={t('source.formSubmitText')}
           disabled={status === 'updating'}
           onSubmit={onUpdate}
         />
