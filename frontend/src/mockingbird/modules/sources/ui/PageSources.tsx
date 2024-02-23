@@ -11,11 +11,13 @@ import { selectorAsIs } from 'src/mockingbird/infrastructure/helpers/state';
 import Page from 'src/mockingbird/components/Page';
 import { getPathServices, getPathSourceNew } from 'src/mockingbird/paths';
 import useService from 'src/mockingbird/modules/service';
+import { useTranslation } from 'react-i18next';
 import SourceItem from './SourceItem';
 import sourcesStore from '../reducers';
 import { fetchAction, resetAction } from '../actions';
 
 export default function PageSources() {
+  const { t } = useTranslation();
   const url = useUrl();
   const serviceId = Array.isArray(url.query.service)
     ? url.query.service[0]
@@ -36,12 +38,14 @@ export default function PageSources() {
   return (
     <Page>
       <PageHeader
-        title={`Источники сервиса ${(service && service.name) || serviceId}`}
-        backText="К списку сервисов"
+        title={`${t('sources.listHeaderTitle')} ${
+          (service && service.name) || serviceId
+        }`}
+        backText={t('sources.listHeaderBackText')}
         backPath={getPathServices()}
         right={
           <Button size="sm" onClick={navigateToCreate}>
-            Создать
+            {t('sources.listCreate')}
           </Button>
         }
       />

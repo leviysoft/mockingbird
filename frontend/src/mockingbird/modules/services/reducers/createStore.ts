@@ -1,4 +1,5 @@
 import { createReducer, createEvent } from '@tramvai/state';
+import i18n from 'src/mockingbird/i18n';
 
 export type ServiceState = {
   status: 'none' | 'loading' | 'complete' | 'error';
@@ -23,7 +24,7 @@ const reducer = createReducer(storeName, initialState)
   }))
   .on(createFail, (state, e) => ({
     status: 'error',
-    errorMessage: (e && e.body && e.body.error) || 'Попробуйте еще раз',
+    errorMessage: (e && e.body && e.body.error) || i18n.t('services.tryAgain'),
   }))
   .on(setLoading, () => ({
     status: 'loading',
