@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { BoxProps } from '@mantine/core';
 import { Switch, Text, JsonInput, Box } from '@mantine/core';
 import Copy from 'src/components/Copy/Copy';
@@ -10,6 +11,7 @@ type Props = BoxProps & {
 };
 
 export default function JSONRequest({ getValues, ...restProps }: Props) {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   const handleChange = useCallback(
     (e) => setShow(e.currentTarget.checked),
@@ -18,7 +20,7 @@ export default function JSONRequest({ getValues, ...restProps }: Props) {
   return (
     <Box {...restProps}>
       <div className={styles.header}>
-        <Text size="md">Показать как JSON</Text>
+        <Text size="md">{t('pages.mock.showAsJson')}</Text>
         <Switch
           label=""
           checked={show}
@@ -29,8 +31,7 @@ export default function JSONRequest({ getValues, ...restProps }: Props) {
       {show && (
         <div className={styles.description}>
           <Text color="grey" size="xs">
-            Чтобы ваш МОК наверняка работал, рекомендуем предварительно
-            сохранить, если вы вносили правки
+            {t('pages.mock.jsonRequestDescription')}
           </Text>
         </div>
       )}

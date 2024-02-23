@@ -8,6 +8,7 @@ import {
   getRemoveErrorToast,
 } from 'src/infrastructure/notifications';
 import { getPathSource } from 'src/mockingbird/paths';
+import i18n from 'src/mockingbird/i18n';
 import {
   setCreating,
   createSuccess,
@@ -37,7 +38,7 @@ export const createAction = createActionCore({
     })
       .then((response) => {
         if (response.status === 'success' && response.id) {
-          dispatch(getSuccessToast('Источник успешно создан'));
+          dispatch(getSuccessToast(i18n.t('source.createSuccess')));
           pageService.navigate(getPathSource(serviceId, response.id));
           return dispatch(createSuccess());
         }
@@ -81,7 +82,7 @@ export const updateAction = createActionCore({
     return patchJson(`${MOCKINGBIRD_API}/v3/source/${name}`, { body: data })
       .then((response) => {
         if (response.status === 'success' && response.id) {
-          dispatch(getSuccessToast('Источник успешно обновлен'));
+          dispatch(getSuccessToast(i18n.t('source.updateSuccess')));
           return dispatch(updateSuccess(data));
         }
         dispatch(getUpdateErrorToast(null));
@@ -106,7 +107,7 @@ export const deleteAction = createActionCore({
     })
       .then((response) => {
         if (response.status === 'success') {
-          dispatch(getSuccessToast('Источник успешно удален'));
+          dispatch(getSuccessToast(i18n.t('source.deleteSuccess')));
           pageService.navigate(basePath);
           return dispatch(deleteSuccess());
         }

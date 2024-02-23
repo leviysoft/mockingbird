@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -35,12 +36,13 @@ type Props = {
 };
 
 export default function FormGrpc(props: Props) {
+  const { t } = useTranslation();
   const {
     labels,
     serviceId = '',
     data,
     actions,
-    submitText = 'Создать',
+    submitText = t('pages.mock.grpcSubmitTextDefault'),
     submitDisabled = false,
     disabled = false,
     onSubmit: onSubmitParent,
@@ -62,7 +64,7 @@ export default function FormGrpc(props: Props) {
     <form onSubmit={handleSubmit(onSubmit)}>
       <Input
         name="name"
-        label="Название"
+        label={t('pages.mock.nameLabel')}
         control={control as any}
         disabled={disabled}
         required
@@ -70,7 +72,7 @@ export default function FormGrpc(props: Props) {
       />
       <InputSearchTagged
         name="labels"
-        label="Лейблы"
+        label={t('pages.mock.labelsLabel')}
         options={labels}
         control={control as any}
         disabled={disabled}
@@ -80,7 +82,7 @@ export default function FormGrpc(props: Props) {
         <Box sx={{ width: '50%' }}>
           <Select
             name="scope"
-            label="Время жизни"
+            label={t('pages.mock.scopeLabel')}
             options={SCOPES}
             control={control as any}
             disabled={disabled}
@@ -92,7 +94,7 @@ export default function FormGrpc(props: Props) {
           <Box sx={{ width: '50%' }}>
             <InputCount
               name="times"
-              label="Количество срабатываний"
+              label={t('pages.mock.timesLabel')}
               min={1}
               control={control as any}
               disabled={disabled}
@@ -104,17 +106,17 @@ export default function FormGrpc(props: Props) {
       </Flex>
       <Input
         name="methodName"
-        label="Метод"
+        label={t('pages.mock.methodNameLabel')}
         control={control as any}
         disabled={disabled}
         required
         mb="sm"
       />
-      <Title order={4}>Запрос</Title>
+      <Title order={4}>{t('pages.mock.grpcRequestTitle')}</Title>
       {!disabled && (
         <AttachFile
           name="requestCodecs"
-          label="Proto файл"
+          label={t('pages.mock.requestCodecsLabel')}
           control={control as any}
           single
           required
@@ -124,13 +126,13 @@ export default function FormGrpc(props: Props) {
       {disabled && (
         <Textarea
           value={watch('requestSchema')}
-          label="Proto схема"
+          label={t('pages.mockrequestSchemaLabel')}
           minRows={15}
         />
       )}
       <Input
         name="requestClass"
-        label="Класс"
+        label={t('pages.mock.requestClassLabel')}
         control={control as any}
         disabled={disabled}
         required
@@ -138,7 +140,7 @@ export default function FormGrpc(props: Props) {
       />
       <InputJson
         name="requestPredicates"
-        label="Предикаты"
+        label={t('pages.mock.requestPredicatesLabel')}
         control={control as any}
         disabled={disabled}
         required
@@ -148,7 +150,7 @@ export default function FormGrpc(props: Props) {
       {!disabled && (
         <AttachFile
           name="responseCodecs"
-          label="Proto файл"
+          label={t('pages.mock.responseCodecsLabel')}
           control={control as any}
           single
           required
@@ -158,13 +160,13 @@ export default function FormGrpc(props: Props) {
       {disabled && (
         <Textarea
           value={watch('responseSchema')}
-          label="Proto схема"
+          label={t('pages.mock.responseSchemaLabel')}
           minRows={15}
         />
       )}
       <Input
         name="responseClass"
-        label="Класс"
+        label={t('pages.mock.responseClassLabel')}
         control={control as any}
         disabled={disabled}
         required
@@ -172,7 +174,7 @@ export default function FormGrpc(props: Props) {
       />
       <InputJson
         name="response"
-        label="Ответ"
+        label={t('pages.mock.responseLabel')}
         control={control as any}
         disabled={disabled}
         required
@@ -180,14 +182,14 @@ export default function FormGrpc(props: Props) {
       />
       <InputJson
         name="state"
-        label="Предикат для поиска состояния"
+        label={t('pages.mock.stateLabel')}
         control={control as any}
         disabled={disabled}
         mb="sm"
       />
       <InputJson
         name="seed"
-        label="Генерация переменных"
+        label={t('pages.mock.seedLabel')}
         control={control as any}
         disabled={disabled}
         mb="sm"
@@ -196,7 +198,9 @@ export default function FormGrpc(props: Props) {
       {actions && (
         <Accordion variant="contained" mb="md">
           <Accordion.Item value="actions">
-            <Accordion.Control>Действия</Accordion.Control>
+            <Accordion.Control>
+              {t('pages.mock.actionsTitle')}
+            </Accordion.Control>
             <Accordion.Panel>{actions}</Accordion.Panel>
           </Accordion.Item>
         </Accordion>
