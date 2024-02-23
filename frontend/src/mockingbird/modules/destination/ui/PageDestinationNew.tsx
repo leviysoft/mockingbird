@@ -5,6 +5,7 @@ import PageHeader from 'src/components/PageHeader/PageHeader';
 import Page from 'src/mockingbird/components/Page';
 import { getPathDestinations } from 'src/mockingbird/paths';
 import { selectorAsIs } from 'src/mockingbird/infrastructure/helpers/state';
+import { useTranslation } from 'react-i18next';
 import Form from './Form';
 import { createAction } from '../actions';
 import { createStore } from '../reducers';
@@ -12,6 +13,7 @@ import { mapFormDataToDestination } from '../utils';
 import type { DestinationFormData } from '../types';
 
 export default function MockNew() {
+  const { t } = useTranslation();
   const url = useUrl();
   const serviceId = Array.isArray(url.query.service)
     ? url.query.service[0]
@@ -30,8 +32,8 @@ export default function MockNew() {
   return (
     <Page>
       <PageHeader
-        title="Создание получателя"
-        backText="К списку получателей"
+        title={t('destination.createHeaderTitle')}
+        backText={t('destination.createHeaderBackText')}
         backPath={getPathDestinations(serviceId)}
       />
       <Form disabled={status === 'loading'} onSubmit={onCreate} />

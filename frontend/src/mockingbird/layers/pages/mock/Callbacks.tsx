@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { v4 as generateId } from 'uuid';
 import type { BoxProps } from '@mantine/core';
 import { Box, Button, Text, Paper, Flex } from '@mantine/core';
@@ -25,6 +26,7 @@ export default function Callbacks({
   onChange,
   ...restProps
 }: Props) {
+  const { t } = useTranslation();
   const [index, setIndex] = useState(-1);
   const handleCreate = useCallback(() => {
     setIndex(callbacks.length);
@@ -53,7 +55,7 @@ export default function Callbacks({
   return (
     <Box {...restProps}>
       <div className={styles.header}>
-        <Text size="md">Коллбэки</Text>
+        <Text size="md">{t('pages.mock.callbacksTitle')}</Text>
         <Button size="sm" variant="outline" onClick={handleCreate} compact>
           <IconPlus size="1rem" />
         </Button>

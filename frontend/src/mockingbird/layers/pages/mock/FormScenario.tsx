@@ -17,6 +17,7 @@ import Sources from 'src/mockingbird/modules/sources';
 import Destinations from 'src/mockingbird/modules/destinations';
 import { InputJson } from 'src/mockingbird/components/form/InputJson';
 import type { TScenarioMock } from 'src/mockingbird/models/mock/types';
+import { useTranslation } from 'react-i18next';
 import Callbacks from './Callbacks';
 import JSONRequest from './JSONRequest';
 import { mapScenarioToFormData, mapFormDataToScenario } from './utils';
@@ -34,12 +35,13 @@ type Props = {
 };
 
 export default function FormScenario(props: Props) {
+  const { t } = useTranslation();
   const {
     labels,
     serviceId,
     data,
     actions,
-    submitText = 'Создать',
+    submitText = t('pages.mock.scenarioSubmitTextDefault'),
     submitDisabled = false,
     onSubmit: onSubmitParent,
   } = props;
@@ -62,14 +64,14 @@ export default function FormScenario(props: Props) {
     <form onSubmit={handleSubmit(onSubmit)}>
       <Input
         name="name"
-        label="Название"
+        label={t('pages.mock.nameLabel')}
         control={control as any}
         required
         mb="sm"
       />
       <InputSearchTagged
         name="labels"
-        label="Лейблы"
+        label={t('pages.mock.labelsLabel')}
         options={labels}
         control={control as any}
         mb="sm"
@@ -78,7 +80,7 @@ export default function FormScenario(props: Props) {
         <Box sx={{ width: '50%' }}>
           <Select
             name="scope"
-            label="Время жизни"
+            label={t('pages.mock.scopeLabel')}
             options={SCOPES}
             control={control as any}
             required
@@ -89,7 +91,7 @@ export default function FormScenario(props: Props) {
           <Box sx={{ width: '50%' }}>
             <InputCount
               name="times"
-              label="Количество срабатываний"
+              label={t('pages.mock.timesLabel')}
               min={1}
               control={control as any}
             />
@@ -98,10 +100,10 @@ export default function FormScenario(props: Props) {
           <Box sx={{ width: '50%' }} />
         )}
       </Flex>
-      <Title order={4}>Источник</Title>
+      <Title order={4}>{t('pages.mock.scenarioSourceTitle')}</Title>
       <Sources
         name="source"
-        label="Источник событий"
+        label={t('pages.mock.sourceLabel')}
         serviceId={serviceId}
         control={control as any}
         required
@@ -109,41 +111,41 @@ export default function FormScenario(props: Props) {
       />
       <InputJson
         name="input"
-        label="Запрос"
+        label={t('pages.mock.inputLabel')}
         control={control as any}
         required
         mb="sm"
       />
       <InputJson
         name="state"
-        label="Предикат для поиска состояния"
+        label={t('pages.mock.stateLabel')}
         control={control as any}
         mb="sm"
       />
       <Title order={4}>Получатель</Title>
       <Destinations
         name="destination"
-        label="Получатель событий"
+        label={t('pages.mock.destinationLabel')}
         serviceId={serviceId}
         control={control as any}
         mb="sm"
       />
       <InputJson
         name="output"
-        label="Ответ"
+        label={t('pages.mock.outputLabel')}
         control={control as any}
         required
         mb="sm"
       />
       <InputJson
         name="persist"
-        label="Данные, записываемые в базу"
+        label={t('pages.mock.persistLabel')}
         control={control as any}
         mb="sm"
       />
       <InputJson
         name="seed"
-        label="Генерация переменных"
+        label={t('pages.mock.seedLabel')}
         control={control as any}
         mb="sm"
       />
@@ -157,7 +159,9 @@ export default function FormScenario(props: Props) {
       {actions && (
         <Accordion variant="contained" mb="md">
           <Accordion.Item value="actions">
-            <Accordion.Control>Действия</Accordion.Control>
+            <Accordion.Control>
+              {t('pages.mock.actionsTitle')}
+            </Accordion.Control>
             <Accordion.Panel>{actions}</Accordion.Panel>
           </Accordion.Item>
         </Accordion>

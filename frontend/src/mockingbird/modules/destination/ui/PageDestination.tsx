@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useActions, useStoreSelector } from '@tramvai/state';
 import { useUrl } from '@tramvai/module-router';
 import PageHeader from 'src/components/PageHeader/PageHeader';
@@ -16,6 +17,7 @@ import type { DestinationFormData } from '../types';
 const DESTINATION_ITEM_HEIGHT = 80;
 
 export default function PageDestination() {
+  const { t } = useTranslation();
   const url = useUrl();
   const serviceId = Array.isArray(url.query.service)
     ? url.query.service[0]
@@ -49,8 +51,8 @@ export default function PageDestination() {
   return (
     <div>
       <PageHeader
-        title="Редактирование получателя"
-        backText="К списку получателей"
+        title={t('destination.editHeaderTitle')}
+        backText={t('destination.editHeaderBackText')}
         backPath={getPathDestinations(serviceId)}
       />
       {status === 'loading' && <ListLoading mih={DESTINATION_ITEM_HEIGHT} />}
@@ -58,7 +60,7 @@ export default function PageDestination() {
       {destination && (
         <Form
           data={destination}
-          submitText="Сохранить"
+          submitText={t('destination.formSubmitText')}
           disabled={status === 'updating'}
           onSubmit={onUpdate}
         />
