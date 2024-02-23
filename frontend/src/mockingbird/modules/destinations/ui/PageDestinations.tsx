@@ -11,6 +11,7 @@ import { selectorAsIs } from 'src/mockingbird/infrastructure/helpers/state';
 import Page from 'src/mockingbird/components/Page';
 import { getPathServices, getPathDestinationNew } from 'src/mockingbird/paths';
 import useService from 'src/mockingbird/modules/service';
+import { useTranslation } from 'react-i18next';
 import DestinationItem from './DestinationItem';
 import type { State } from '../reducers';
 import store from '../reducers';
@@ -19,6 +20,7 @@ import { fetchAction, resetAction } from '../actions';
 const DESTINATION_ITEM_HEIGHT = 80;
 
 export default function PageDestinations() {
+  const { t } = useTranslation();
   const url = useUrl();
   const serviceId = Array.isArray(url.query.service)
     ? url.query.service[0]
@@ -42,12 +44,14 @@ export default function PageDestinations() {
   return (
     <Page>
       <PageHeader
-        title={`Получатели сервиса ${(service && service.name) || serviceId}`}
-        backText="К списку сервисов"
+        title={`${t('destinations.listHeaderTitle')} ${
+          (service && service.name) || serviceId
+        }`}
+        backText={t('destinations.listHeaderBackText')}
         backPath={getPathServices()}
         right={
           <Button size="sm" onClick={navigateToCreate}>
-            Создать
+            {t('destinations.listCreate')}
           </Button>
         }
       />

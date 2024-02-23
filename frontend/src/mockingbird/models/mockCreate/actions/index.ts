@@ -6,6 +6,7 @@ import {
   getCreateErrorToast,
 } from 'src/infrastructure/notifications';
 import { getPathMock } from 'src/mockingbird/paths';
+import i18n from 'src/mockingbird/i18n';
 import {
   setLoading,
   createSuccess,
@@ -64,11 +65,11 @@ function getMethodByType(method: string) {
 function getSuccessMessageByType(method: string) {
   switch (method) {
     case 'http':
-      return 'Стаб успешно создан';
+      return i18n.t('models.mockCreate.httpSuccess');
     case 'scenario':
-      return 'Сценарий успешно создан';
+      return i18n.t('models.mockCreate.scenarioSuccess');
     case 'grpc':
-      return 'GRPC успешно создан';
+      return i18n.t('models.mockCreate.grpcSuccess');
     default:
       return '';
   }

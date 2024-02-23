@@ -2,6 +2,7 @@ import {
   parseJSON,
   stringifyJSON,
 } from 'src/mockingbird/infrastructure/utils/forms';
+import i18n from 'src/mockingbird/i18n';
 import { DEFAULT_REQUEST } from './refs';
 import type { Source, SourceFormData } from './types';
 
@@ -9,7 +10,7 @@ export function mapSourceToFormData(data?: Source): SourceFormData {
   if (!data)
     return {
       name: 'test_in',
-      description: 'Источник ***',
+      description: i18n.t('source.inputDescription'),
       request: stringifyJSON(DEFAULT_REQUEST),
       init: stringifyJSON([]),
       shutdown: stringifyJSON([]),

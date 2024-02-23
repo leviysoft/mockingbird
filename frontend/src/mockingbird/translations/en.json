@@ -1,0 +1,181 @@
+{
+  "models": {
+    "mock": {
+      "createSuccess": "Mock has been created",
+      "updateSuccess": "Mock has been updated",
+      "deleteSuccess": "Mock has been deleted"
+    },
+    "mockCreate": {
+      "httpSuccess": "Stub has been created",
+      "scenarioSuccess": "Scenario has been created",
+      "grpcSuccess": "GRPC has been created"
+    }
+  },
+  "destination": {
+    "createSuccess": "Destination has been created",
+    "updateSuccess": "Destination has been updated",
+    "inputDescription": "Destination ***",
+    "formSubmitTextDefault": "Create",
+    "formSubmitText": "Save",
+    "nameLabel": "Title",
+    "descriptionLabel": "Description",
+    "requestLabel": "Request",
+    "initLabel": "init",
+    "shutdownLabel": "shutdown",
+    "editHeaderTitle": "Edit destination",
+    "editHeaderBackText": "Back to list",
+    "createHeaderTitle": "Create destination",
+    "createHeaderBackText": "Back to list"
+  },
+  "destinations": {
+    "listHeaderTitle": "Service's destinations",
+    "listHeaderBackText": "Back to list",
+    "listCreate": "Create"
+  },
+  "services": {
+    "tryAgain": "Try again",
+    "createSuccess": "Service has been created",
+    "createError": "Can't create service",
+    "title": "Create service",
+    "nameLabel": "Title",
+    "suffixLabel": "Suffix",
+    "submitText": "Create",
+    "sources": "Sources",
+    "destinations": "Destinations",
+    "listTitle": "Services",
+    "createText": "Create"
+  },
+  "source": {
+    "createSuccess": "Source has been created",
+    "updateSuccess": "Source has been updated",
+    "deleteSuccess": "Source has been deleted",
+    "formSubmitTextDefault": "Create",
+    "formSubmitText": "Save",
+    "nameLabel": "Title",
+    "descriptionLabel": "Description",
+    "requestLabel": "Request",
+    "initLabel": "init",
+    "shutdownLabel": "shutdown",
+    "reInitTriggersLabel": "reInitTriggers",
+    "actionsText": "Actions",
+    "actionTitle": "Remove entirely",
+    "actionWarning": "Source will be removed entirely",
+    "actionText": "Remove",
+    "editHeaderTitle": "Edit source",
+    "editHeaderBackText": "Back to list",
+    "createHeaderTitle": "Create source",
+    "createHeaderBackText": "Back to list",
+    "inputDescription": "Source ***"
+  },
+  "sources": {
+    "listHeaderTitle": "Sources of service",
+    "listHeaderBackText": "Back to list",
+    "listCreate": "Create"
+  },
+  "pages": {
+    "mock": {
+      "editCallbackText": "Edit callback",
+      "createCallbackText": "Create callback",
+      "responseModeLabel": "Response mode",
+      "persistLabel": "Data that will be written to DB",
+      "destinationLabel": "Destination",
+      "outputLabel": "Output",
+      "typeLabel": "Type",
+      "delayLabel": "Delay",
+      "pattern": "Pattern",
+      "editText": "Save",
+      "createText": "Create",
+      "cancelText": "Cancel",
+      "callbacksTitle": "Callbacks",
+      "grpcSubmitTextDefault": "Create",
+      "grpcRequestTitle": "Request",
+      "nameLabel": "Title",
+      "labelsLabel": "Labels",
+      "scopeLabel": "Scope",
+      "timesLabel": "Number of invokes",
+      "methodNameLabel": "Method",
+      "requestCodecsLabel": "Proto file",
+      "requestSchemaLabel": "Proto schema",
+      "requestClassLabel": "Class",
+      "requestPredicatesLabel": "Predicate",
+      "responseCodecsLabel": "Proto file",
+      "responseSchemaLabel": "Proto schema",
+      "responseClassLabel": "Class",
+      "requestLabel": "Request",
+      "responseLabel": "Response",
+      "stateLabel": "Predicate for state search",
+      "seedLabel": "Vars generation",
+      "actionsTitle": "Actions",
+      "formHttpSubmitTextDefault": "Create",
+      "pathLabel": "Path",
+      "isPathPatternLabel": "RegExp path",
+      "scenarioSubmitTextDefault": "Create",
+      "scenarioSourceTitle": "Source",
+      "sourceLabel": "Event's source",
+      "inputLabel": "Request",
+      "showAsJson": "Show JSON",
+      "jsonRequestDescription": "Don't forget to save MOCK",
+      "scopesPersistentLabel": "Persistent",
+      "scopesEphemeralLabel": "Ephemeral",
+      "scopesCountdownLabel": "Countdown",
+      "stubInputDescription": "Stub ***",
+      "scenarioInputDescription": "Scenario ***",
+      "grpcInputDescription": "GRPC ***",
+      "missedCallbackError": "Missed callback type while mapping",
+      "left": "Left",
+      "callSingle": "call",
+      "callPlural1": "calls",
+      "callPlural2": "calls",
+      "mockHeaderTitle": "Edit",
+      "mockHeaderCreateText": "Back to list",
+      "mockHeaderBackText": "Back to list",
+      "mockListHeaderBackText": "Back to list",
+      "mockHeaderTitleHttp": "Edit HTTP",
+      "mockHeaderTitleScenario": "Edit scenario",
+      "mockHeaderTitleGrpc": "View GRPC",
+      "mockHeaderTitleDefault": "Edit",
+      "actionDeleteTitle": "Remove entirely",
+      "actionDeleteWarning": "Mock will be removed entirely",
+      "actionDeleteText": "Remove",
+      "mockUnknownType": "Unknown mock",
+      "searchPlaceholder": "Search",
+      "typePlaceholder": "Type",
+      "filterPlaceholder": "Label's filter",
+      "loadMore": "Load more"
+    },
+    "notFound": "Page Not Found",
+    "goBack": "Go back"
+  },
+  "components": {
+    "copy": {
+      "success": "Copied",
+      "error": "Copy failed",
+      "textEmptyError": "copyToClipboard: text can not be null",
+      "copyError": "Copy to clipboard failed"
+    },
+    "list": {
+      "textDefault": "No data",
+      "loadError": "Failed to load",
+      "tryAgain": "Try again"
+    }
+  },
+  "notifications": {
+    "createError": "Error while creating",
+    "updateError": "Error while updating",
+    "removeError": "Error while removing"
+  },
+  "form": {
+    "attachFile": {
+      "defaultPlaceholderSingle": "Choose file",
+      "defaultPlaceholderPlural": "Choose files"
+    },
+    "inputSearchTagged": {
+      "label": "+ Add"
+    }
+  },
+  "validation": {
+    "required": "Required field",
+    "invalidJson": "Invalid JSON object",
+    "invalidArray": "Invalid JSON array"
+  }
+}
