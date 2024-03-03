@@ -3,8 +3,8 @@ package ru.tinkoff.tcb.utils.transformation
 import scala.util.control.TailCalls
 import scala.util.control.TailCalls.TailRec
 
-import io.circe.JsonNumber as JNumber
 import io.circe.Json
+import io.circe.JsonNumber as JNumber
 import kantan.xpath.*
 import mouse.boolean.*
 
