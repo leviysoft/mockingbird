@@ -24,4 +24,17 @@ class StringTransformationsSpec extends AnyFunSuite with Matchers with TryValues
 
     "${/a}".substitute(Json.Null, xml("<a>test</a>")) shouldBe "test"
   }
+
+  test("isTemplate test") {
+    "".isTemplate shouldBe false
+    "{}".isTemplate shouldBe false
+    "${}".isTemplate shouldBe false
+    "${a}".isTemplate shouldBe true
+    "${a.b}".isTemplate shouldBe true
+    "${a.[0]}".isTemplate shouldBe true
+    "${a.[0].b}".isTemplate shouldBe true
+
+    "%{}".isTemplate shouldBe false
+    "%{var a = 1}".isTemplate shouldBe true
+  }
 }

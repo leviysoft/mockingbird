@@ -43,6 +43,7 @@ import ru.tinkoff.tcb.mockingbird.model.XmlProxyResponse
 import ru.tinkoff.tcb.mockingbird.scenario.CallbackEngine
 import ru.tinkoff.tcb.mockingbird.scenario.ScenarioEngine
 import ru.tinkoff.tcb.protocol.log.*
+import ru.tinkoff.tcb.utils.any.*
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.regex.*
 import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
@@ -128,11 +129,15 @@ final class PublicApiHandler(
           )
         case _ =>
           ZIO.succeed(
-            if (stub.response.isTemplate) {
-              HttpStubResponse.jsonBody
-                .updateF(_.substitute(data).substitute(xdata))
-                .andThen(HttpStubResponse.xmlBody.updateF(_.substitute(data).substitute(xdata)))(stub.response)
-            } else stub.response
+            stub.response
+              .applyIf(_.isTemplate)(
+                HttpStubResponse.jsonBody
+                  .updateF(_.substitute(data).substitute(xdata))
+                  .andThen(HttpStubResponse.xmlBody.updateF(_.substitute(data).substitute(xdata)))
+              )
+              .applyIf(HttpStubResponse.headers.getOption(_).exists(_.values.exists(_.isTemplate)))(
+                HttpStubResponse.headers.updateF(_.view.mapValues(_.substitute(data, xdata)).toMap)
+              )
           )
       }
       _ <- ZIO.when(stub.scope == Scope.Countdown)(stubDAO.updateById(stub.id, prop[HttpStub](_.times).inc(-1)))
