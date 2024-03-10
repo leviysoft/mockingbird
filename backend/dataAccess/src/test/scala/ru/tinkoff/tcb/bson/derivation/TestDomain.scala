@@ -5,6 +5,7 @@ import java.time.Year
 
 import derevo.derive
 
+import ru.tinkoff.tcb.bson.annotation.BsonDiscriminator
 import ru.tinkoff.tcb.bson.annotation.BsonKey
 
 @derive(bsonDecoder, bsonEncoder)
@@ -35,3 +36,10 @@ final case class TestEntityWithDefaults(
     linkId: Option[Int],
     checks: Seq[TestCheck] = Seq()
 )
+
+// Stolen from http://github.com/travisbrown/circe
+@derive(bsonDecoder, bsonEncoder) @BsonDiscriminator("case", _.reverse)
+sealed trait RecursiveAdtExample
+final case class BaseAdtExample(a: String) extends RecursiveAdtExample
+final case class NestedAdtExample(r: RecursiveAdtExample) extends RecursiveAdtExample
+object RecursiveAdtExample
