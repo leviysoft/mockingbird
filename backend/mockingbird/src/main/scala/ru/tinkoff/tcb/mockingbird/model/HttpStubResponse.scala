@@ -62,21 +62,13 @@ object HttpStubResponse {
     TapirConfig.default.withDiscriminator("mode").copy(toEncodedName = modes)
 
   val headers: Property[HttpStubResponse, Map[String, String]] =
-    new Property[HttpStubResponse, Map[String, String]] {
-      private val properties: Vector[Property[HttpStubResponse, Map[String, String]]] = Vector(
-        EmptyResponse.prism >> EmptyResponse.headers,
-        RawResponse.prism >> RawResponse.headers,
-        JsonResponse.prism >> JsonResponse.headers,
-        XmlResponse.prism >> XmlResponse.headers,
-        BinaryResponse.prism >> BinaryResponse.headers
-      )
-
-      override def set(s: HttpStubResponse, b: Map[String, String]): HttpStubResponse =
-        properties.map(_.setF(b)).reduce(_ andThen _).apply(s)
-
-      override def narrow(s: HttpStubResponse): Either[HttpStubResponse, Map[String, String]] =
-        properties.map(_.narrow(s)).foldLeft(s.asLeft[Map[String, String]])(_ orElse _)
-    }
+    Vector(
+      EmptyResponse.prism >> EmptyResponse.headers,
+      RawResponse.prism >> RawResponse.headers,
+      JsonResponse.prism >> JsonResponse.headers,
+      XmlResponse.prism >> XmlResponse.headers,
+      BinaryResponse.prism >> BinaryResponse.headers
+    ).reduce[Property[HttpStubResponse, Map[String, String]]](_ orElse _)
 
   val jsonBody: Property[HttpStubResponse, Json] = JsonResponse.prism >> JsonResponse.body
 
