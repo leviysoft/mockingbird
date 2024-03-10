@@ -1,6 +1,5 @@
 package ru.tinkoff.tcb.bson.derivation
 
-import derevo.derive
 import org.mongodb.scala.bson.BsonDocument
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
@@ -10,17 +9,8 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.Checkers
 
 import ru.tinkoff.tcb.bson.*
-import ru.tinkoff.tcb.bson.annotation.BsonDiscriminator
 
 class DerivedCodecsSuite extends AnyFunSuite with Checkers with Matchers with TryValues {
-
-  // Stolen from http://github.com/travisbrown/circe
-  @derive(bsonDecoder, bsonEncoder) @BsonDiscriminator("case", _.reverse)
-  sealed trait RecursiveAdtExample
-  final case class BaseAdtExample(a: String) extends RecursiveAdtExample
-  final case class NestedAdtExample(r: RecursiveAdtExample) extends RecursiveAdtExample
-  object RecursiveAdtExample
-
   private def atDepth(depth: Int): Gen[RecursiveAdtExample] =
     if (depth < 3)
       Gen.oneOf(
