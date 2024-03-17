@@ -6,6 +6,10 @@ import com.github.dwickern.macros.NameOf.*
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
+import glass.Contains
+import glass.Subset
+import glass.macros.GenContains
+import glass.macros.GenSubset
 import io.circe.Json
 import sttp.tapir.derevo.schema
 import sttp.tapir.generic.Configuration as TapirConfig
@@ -33,8 +37,9 @@ sealed trait GrpcStubResponse {
 
 object GrpcStubResponse {
   val modes: Map[String, String] = Map(
-    nameOfType[FillResponse]   -> "fill",
-    nameOfType[GProxyResponse] -> "proxy"
+    nameOfType[FillResponse]       -> "fill",
+    nameOfType[GProxyResponse]     -> "proxy",
+    nameOfType[FillStreamResponse] -> "fill_stream"
   ).withDefault(identity)
 
   implicit val customConfiguration: TapirConfig =
@@ -48,8 +53,20 @@ final case class FillResponse(
 ) extends GrpcStubResponse
 
 @derive(decoder, encoder)
+final case class FillStreamResponse(
+    data: Vector[Json],
+    delay: Option[FiniteDuration]
+) extends GrpcStubResponse
+
+@derive(decoder, encoder)
 final case class GProxyResponse(
     endpoint: String,
     patch: Map[JsonOptic, String],
     delay: Option[FiniteDuration]
 ) extends GrpcStubResponse
+
+object GProxyResponse {
+  val prism: Subset[GrpcStubResponse, GProxyResponse] = GenSubset[GrpcStubResponse, GProxyResponse]
+
+  val endpoint: Contains[GProxyResponse, String] = GenContains[GProxyResponse](_.endpoint)
+}

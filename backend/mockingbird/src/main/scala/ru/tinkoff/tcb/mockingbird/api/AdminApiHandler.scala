@@ -20,6 +20,7 @@ import ru.tinkoff.tcb.mockingbird.api.response.DestinationDTO
 import ru.tinkoff.tcb.mockingbird.api.response.OperationResult
 import ru.tinkoff.tcb.mockingbird.api.response.SourceDTO
 import ru.tinkoff.tcb.mockingbird.dal.DestinationConfigurationDAO
+import ru.tinkoff.tcb.mockingbird.dal.GrpcMethodDescriptionDAO
 import ru.tinkoff.tcb.mockingbird.dal.GrpcStubDAO
 import ru.tinkoff.tcb.mockingbird.dal.HttpStubDAO
 import ru.tinkoff.tcb.mockingbird.dal.LabelDAO
@@ -32,7 +33,9 @@ import ru.tinkoff.tcb.mockingbird.error.DuplicationError
 import ru.tinkoff.tcb.mockingbird.error.ValidationError
 import ru.tinkoff.tcb.mockingbird.grpc.ProtobufSchemaResolver
 import ru.tinkoff.tcb.mockingbird.model.DestinationConfiguration
+import ru.tinkoff.tcb.mockingbird.model.GrpcMethodDescription
 import ru.tinkoff.tcb.mockingbird.model.GrpcStub
+import ru.tinkoff.tcb.mockingbird.model.GrpcStubView
 import ru.tinkoff.tcb.mockingbird.model.HttpMethod
 import ru.tinkoff.tcb.mockingbird.model.HttpStub
 import ru.tinkoff.tcb.mockingbird.model.Label
@@ -58,6 +61,7 @@ final class AdminApiHandler(
     serviceDAO: ServiceDAO[Task],
     labelDAO: LabelDAO[Task],
     grpcStubDAO: GrpcStubDAO[Task],
+    grpcMethodDescriptionDAO: GrpcMethodDescriptionDAO[Task],
     sourceDAO: SourceConfigurationDAO[Task],
     destinationDAO: DestinationConfigurationDAO[Task],
     fetcher: SDFetcher,
@@ -397,26 +401,39 @@ final class AdminApiHandler(
       query: Option[String],
       service: Option[String],
       labels: List[String]
-  ): RIO[WLD, Vector[GrpcStub]] = {
-    var queryDoc = prop[GrpcStub](_.scope) =/= Scope.Countdown.asInstanceOf[Scope] || prop[GrpcStub](_.times) > Option(
+  ): RIO[WLD, Vector[GrpcStubView]] =
+  for {
+    methodQueryDoc <- ZIO.foreach(service.flatMap(refineV[NonEmpty](_).toOption)){ service =>
+      ZIO.succeed(prop[GrpcMethodDescription](_.service) === service)
+    }.someOrElse(Expression.empty: Expression[GrpcMethodDescription])
+    serviceDescriptions <- grpcMethodDescriptionDAO.findChunk(methodQueryDoc, 0, Integer.MAX_VALUE)
+    notCountdownScope = serviceDescriptions.filterNot(_.scope == Scope.Countdown).map(_.id)
+    scopeQuery = prop[GrpcStub](_.methodDescriptionId).in(notCountdownScope) || prop[GrpcStub](_.times) > Option(
       refineMV[NonNegative](0)
     )
-    if (query.isDefined) {
+    nameDescriptions <- ZIO.foreach(query){ query =>
+      val queryDoc = prop[GrpcMethodDescription](_.methodName).regex(query, "i")
+      grpcMethodDescriptionDAO.findChunk(queryDoc, 0, Integer.MAX_VALUE)
+    }.map(_.toList.flatten)
+    nameQuery = if (query.isDefined) {
       val qs = query.get
       val q = prop[GrpcStub](_.id) === SID[GrpcStub](qs).asInstanceOf[SID[GrpcStub]] ||
         prop[GrpcStub](_.name).regex(qs, "i") ||
-        prop[GrpcStub](_.methodName).regex(qs, "i")
-      queryDoc = queryDoc && q
-    }
-    val refService = service.flatMap(refineV[NonEmpty](_).toOption)
-    if (refService.isDefined) {
-      queryDoc = queryDoc && (prop[GrpcStub](_.service) === refService.get)
-    }
-    if (labels.nonEmpty) {
-      queryDoc = queryDoc && (prop[GrpcStub](_.labels).containsAll(labels))
-    }
-    grpcStubDAO.findChunk(queryDoc, page.getOrElse(0) * 20, 20, prop[GrpcStub](_.created).sort(Desc))
-  }
+        prop[GrpcStub](_.methodDescriptionId).in(nameDescriptions.map(_.id))
+      scopeQuery && q
+    } else scopeQuery
+    queryDoc = if (labels.nonEmpty) {
+      nameQuery && (prop[GrpcStub](_.labels).containsAll(labels))
+    } else nameQuery
+    stubs <- grpcStubDAO.findChunk(queryDoc, page.getOrElse(0) * 20, 20, prop[GrpcStub](_.created).sort(Desc))
+    descriptions = (serviceDescriptions ++ nameDescriptions).toSet
+    res = stubs.flatMap(stub =>
+      descriptions
+        .find(_.id == stub.methodDescriptionId)
+        .map(description => GrpcStubView.makeFrom(stub, description))
+        .toList
+    )
+  } yield res
 
   def createGrpcStub(body: CreateGrpcStubRequest): RIO[WLD, OperationResult[SID[GrpcStub]]] = {
     val requestSchemaBytes  = body.requestCodecs.asArray
@@ -437,14 +454,32 @@ final class AdminApiHandler(
       _ <- ZIO.foreachParDiscard(body.requestPredicates.definition.keys)(
         GrpcStub.validateOptics(_, requestTypes, rootFields)
       )
+      responseSchema <- protobufSchemaResolver.parseDefinitionFrom(responseSchemaBytes)
+      responsePkg   = GrpcStub.PackagePrefix(responseSchema)
+      responseTypes = GrpcStub.makeDictTypes(responsePkg, responseSchema.schemas).toMap
+      _ <- GrpcStub.getRootFields(responsePkg.resolve(body.responseClass), responseTypes)
+      _ <- GrpcStub.getRootFields(body.responseClass, responseSchema)
+      methodDescription <- grpcMethodDescriptionDAO
+        .findOne(
+          prop[GrpcMethodDescription](_.methodName) === body.methodName &&
+          prop[GrpcMethodDescription](_.scope) === body.scope
+        )
+        .someOrElseZIO {
+          val methodDescription = GrpcMethodDescription.fromCreateRequest(body, requestSchema, responseSchema)
+          grpcMethodDescriptionDAO.insert(methodDescription).as(methodDescription)
+        }
+      _ <- GrpcMethodDescription.validate(methodDescription)(
+        body.requestClass,
+        requestSchema,
+        body.responseClass,
+        responseSchema
+      )
       candidates0 <- grpcStubDAO.findChunk(
-        prop[GrpcStub](_.methodName) === body.methodName,
+        prop[GrpcStub](_.methodDescriptionId) === methodDescription.id,
         0,
         Integer.MAX_VALUE
       )
       candidates = candidates0
-        .filter(_.requestClass == body.requestClass)
-        .filter(_.requestSchema == requestSchema)
         .filter(_.requestPredicates.definition == body.requestPredicates.definition)
         .filter(_.state == body.state)
       _ <- ZIO.when(candidates.nonEmpty)(
@@ -455,27 +490,25 @@ final class AdminApiHandler(
           )
         )
       )
-      responseSchema <- protobufSchemaResolver.parseDefinitionFrom(responseSchemaBytes)
-      responsePkg   = GrpcStub.PackagePrefix(responseSchema)
-      responseTypes = GrpcStub.makeDictTypes(responsePkg, responseSchema.schemas).toMap
-      _   <- GrpcStub.getRootFields(responsePkg.resolve(body.responseClass), responseTypes)
       now <- ZIO.clockWith(_.instant)
       stub = body
         .into[GrpcStub]
         .withFieldComputed(_.id, _ => SID.random[GrpcStub])
+        .withFieldConst(_.methodDescriptionId, methodDescription.id)
         .withFieldConst(_.created, now)
-        .withFieldComputed(_.requestSchema, _ => requestSchema)
-        .withFieldComputed(_.responseSchema, _ => responseSchema)
         .transform
       vr = GrpcStub.validationRules(stub)
       _   <- ZIO.when(vr.nonEmpty)(ZIO.fail(ValidationError(vr)))
       res <- grpcStubDAO.insert(stub)
-      _   <- labelDAO.ensureLabels(stub.service.value, stub.labels.to(Vector))
+      _   <- labelDAO.ensureLabels(methodDescription.service.value, stub.labels.to(Vector))
     } yield if (res > 0) OperationResult("success", stub.id) else OperationResult("nothing inserted")
   }
 
-  def getGrpcStub(id: SID[GrpcStub]): RIO[WLD, Option[GrpcStub]] =
-    grpcStubDAO.findById(id)
+  def getGrpcStub(id: SID[GrpcStub]): RIO[WLD, Option[GrpcStubView]] =
+    (for {
+      stub <- grpcStubDAO.findById(id).some
+      description <- grpcMethodDescriptionDAO.findById(stub.methodDescriptionId).some
+    } yield GrpcStubView.makeFrom(stub, description)).unsome
 
   def deleteGrpcStub(id: SID[GrpcStub]): RIO[WLD, OperationResult[String]] =
     ZIO.ifZIO(grpcStubDAO.deleteById(id).map(_ > 0))(
@@ -709,6 +742,7 @@ object AdminApiHandler {
       srd              <- ZIO.service[ServiceDAO[Task]]
       ld               <- ZIO.service[LabelDAO[Task]]
       gsd              <- ZIO.service[GrpcStubDAO[Task]]
+      gmdd             <- ZIO.service[GrpcMethodDescriptionDAO[Task]]
       srcd             <- ZIO.service[SourceConfigurationDAO[Task]]
       dstd             <- ZIO.service[DestinationConfigurationDAO[Task]]
       ftch             <- ZIO.service[SDFetcher]
@@ -724,6 +758,7 @@ object AdminApiHandler {
       srd,
       ld,
       gsd,
+      gmdd,
       srcd,
       dstd,
       ftch,

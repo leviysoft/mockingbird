@@ -20,6 +20,7 @@ import sttp.client4.httpclient.zio.HttpClientZioBackend
 import tofu.logging.Logging
 import tofu.logging.impl.ZUniversalLogging
 import zio.managed.*
+import zio.stream.Stream
 
 import ru.tinkoff.tcb.mockingbird.api.AdminApiHandler
 import ru.tinkoff.tcb.mockingbird.api.AdminHttp
@@ -156,6 +157,7 @@ object Mockingbird extends scala.App {
         collection(_.service) >>> ServiceDAOImpl.live,
         collection(_.label) >>> LabelDAOImpl.live,
         collection(_.grpcStub) >>> GrpcStubDAOImpl.live,
+        collection(_.grpcMethodDescription) >>> GrpcMethodDescriptionDAOImpl.live,
         collection(_.source) >>> SourceConfigurationDAOImpl.live,
         collection(_.destination) >>> DestinationConfigurationDAOImpl.live,
         ProtobufSchemaResolverImpl.live,
@@ -179,27 +181,29 @@ object Mockingbird extends scala.App {
 
   val builder: ServerBuilder[?] = ServerBuilder.forPort(port)
 
+  private val grpcHandlerLayer = ZLayer.make[WLD & GrpcRequestHandler](
+    Tracing.live,
+    MockingbirdConfiguration.server,
+    MockingbirdConfiguration.mongo,
+    MockingbirdConfiguration.tracing,
+    mongoLayer,
+    collection(_.state) >>> PersistentStateDAOImpl.live,
+    collection(_.grpcStub) >>> GrpcStubDAOImpl.live,
+    collection(_.grpcMethodDescription) >>> GrpcMethodDescriptionDAOImpl.live,
+    (ZLayer.service[ServerConfig].project(_.sandbox) ++ ZLayer
+      .fromZIO(ZIO.attempt(readStr("prelude.js")).map(Option(_)))) >>> GraalJsSandbox.live,
+    GrpcStubResolverImpl.live,
+    GrpcRequestHandlerImpl.live
+  )
+
   val runGRPCServer: UIO[Unit] = for {
     runtime <- zio.ZIO.runtime[Any]
-    handler = ZServerCallHandler.unaryCallHandler(
+    handler = ZServerCallHandler.bidiCallHandler(
       runtime,
-      (bytes: Array[Byte], requestContext) =>
+      (stream: Stream[StatusException, Array[Byte]], requestContext) =>
         GrpcRequestHandler
-          .exec(bytes)
-          .provide(
-            ZLayer.succeed(requestContext),
-            Tracing.live,
-            MockingbirdConfiguration.server,
-            MockingbirdConfiguration.mongo,
-            MockingbirdConfiguration.tracing,
-            mongoLayer,
-            collection(_.state) >>> PersistentStateDAOImpl.live,
-            collection(_.grpcStub) >>> GrpcStubDAOImpl.live,
-            (ZLayer.service[ServerConfig].project(_.sandbox) ++ ZLayer
-              .fromZIO(ZIO.attempt(readStr("prelude.js")).map(Option(_)))) >>> GraalJsSandbox.live,
-            GrpcStubResolverImpl.live,
-            GrpcRequestHandlerImpl.live
-          )
+          .exec(stream)
+          .provideLayer(ZLayer.succeed(requestContext) ++ grpcHandlerLayer)
           .mapError((e: Throwable) => new StatusException(Status.INTERNAL.withDescription(e.getMessage)))
     )
     mutableRegistry = UniversalHandlerRegistry(

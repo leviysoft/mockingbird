@@ -1,0 +1,63 @@
+package ru.tinkoff.tcb.mockingbird.model
+
+import java.time.Instant
+
+import derevo.circe.decoder
+import derevo.circe.encoder
+import derevo.derive
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.collection.NonEmpty
+import eu.timepit.refined.numeric.NonNegative
+import io.circe.Json
+import io.circe.refined.*
+import io.scalaland.chimney.dsl.TransformationOps
+import sttp.tapir.codec.refined.*
+import sttp.tapir.derevo.schema
+
+import ru.tinkoff.tcb.bson.annotation.BsonKey
+import ru.tinkoff.tcb.predicatedsl.Keyword
+import ru.tinkoff.tcb.predicatedsl.json.JsonPredicate
+import ru.tinkoff.tcb.protocol.json.*
+import ru.tinkoff.tcb.protocol.schema.*
+import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
+import ru.tinkoff.tcb.utils.id.SID
+
+@derive(encoder, decoder, schema)
+final case class GrpcStubView(
+    @BsonKey("_id") id: SID[GrpcStub],
+    methodDescriptionId: SID[GrpcMethodDescription],
+    scope: Scope,
+    created: Instant,
+    service: String Refined NonEmpty,
+    times: Option[Int Refined NonNegative],
+    methodName: String,
+    name: String Refined NonEmpty,
+    connectionType: GrpcConnectionType,
+    proxyUrl: Option[String],
+    requestSchema: GrpcProtoDefinition,
+    requestClass: String,
+    responseSchema: GrpcProtoDefinition,
+    responseClass: String,
+    response: GrpcStubResponse,
+    seed: Option[Json],
+    state: Option[Map[JsonOptic, Map[Keyword.Json, Json]]],
+    requestPredicates: JsonPredicate,
+    persist: Option[Map[JsonOptic, Json]],
+    labels: Seq[String]
+)
+
+object GrpcStubView {
+  def makeFrom(stub: GrpcStub, description: GrpcMethodDescription): GrpcStubView =
+    stub
+      .into[GrpcStubView]
+      .withFieldConst(_.scope, description.scope)
+      .withFieldConst(_.service, description.service)
+      .withFieldConst(_.methodName, description.methodName)
+      .withFieldConst(_.connectionType, description.connectionType)
+      .withFieldConst(_.proxyUrl, description.proxyUrl)
+      .withFieldConst(_.requestSchema, description.requestSchema)
+      .withFieldConst(_.requestClass, description.requestClass)
+      .withFieldConst(_.responseSchema, description.responseSchema)
+      .withFieldConst(_.responseClass, description.responseClass)
+      .transform
+}

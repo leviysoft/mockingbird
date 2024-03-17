@@ -27,6 +27,7 @@ import ru.tinkoff.tcb.mockingbird.codec.*
 import ru.tinkoff.tcb.mockingbird.model.AbsentRequestBody
 import ru.tinkoff.tcb.mockingbird.model.DestinationConfiguration
 import ru.tinkoff.tcb.mockingbird.model.GrpcStub
+import ru.tinkoff.tcb.mockingbird.model.GrpcStubView
 import ru.tinkoff.tcb.mockingbird.model.HttpStub
 import ru.tinkoff.tcb.mockingbird.model.PersistentState
 import ru.tinkoff.tcb.mockingbird.model.RequestBody
@@ -200,23 +201,23 @@ package object admin {
   private val grpcStubBase = basicV2.in("grpcStub")
 
   val fetchGrpcStubs
-      : Endpoint[Unit, (Option[Int], Option[String], Option[String], List[String]), Throwable, Vector[GrpcStub], Any] =
+      : Endpoint[Unit, (Option[Int], Option[String], Option[String], List[String]), Throwable, Vector[GrpcStubView], Any] =
     grpcStubBase.get
       .in(query[Option[Int]]("page"))
       .in(query[Option[String]]("query"))
       .in(query[Option[String]]("service"))
       .in(query[List[String]]("labels"))
-      .out(jsonBody[Vector[GrpcStub]])
+      .out(jsonBody[Vector[GrpcStubView]])
 
   val createGrpcStub: Endpoint[Unit, CreateGrpcStubRequest, Throwable, OperationResult[SID[GrpcStub]], Any] =
     grpcStubBase.post
       .in(jsonBody[CreateGrpcStubRequest])
       .out(jsonBody[OperationResult[SID[GrpcStub]]])
 
-  val getGrpcStub: Endpoint[Unit, SID[GrpcStub], Throwable, Option[GrpcStub], Any] =
+  val getGrpcStub: Endpoint[Unit, SID[GrpcStub], Throwable, Option[GrpcStubView], Any] =
     grpcStubBase.get
       .in(path[SID[GrpcStub]].name("id"))
-      .out(jsonBody[Option[GrpcStub]])
+      .out(jsonBody[Option[GrpcStubView]])
 
   val deleteGrpcStub: Endpoint[Unit, SID[GrpcStub], Throwable, OperationResult[String], Any] =
     grpcStubBase.delete

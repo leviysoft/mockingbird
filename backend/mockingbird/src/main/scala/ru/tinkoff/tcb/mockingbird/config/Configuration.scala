@@ -75,6 +75,7 @@ final case class MongoCollections(
     service: String,
     label: String,
     grpcStub: String,
+    grpcMethodDescription: String,
     source: String,
     destination: String
 )

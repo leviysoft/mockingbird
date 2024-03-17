@@ -35,16 +35,10 @@ import ru.tinkoff.tcb.validation.Rule
 @derive(bsonDecoder, bsonEncoder, decoder, encoder, schema)
 final case class GrpcStub(
     @BsonKey("_id") id: SID[GrpcStub],
-    scope: Scope,
+    methodDescriptionId: SID[GrpcMethodDescription],
     created: Instant,
-    service: String Refined NonEmpty,
     times: Option[Int Refined NonNegative],
-    methodName: String,
     name: String Refined NonEmpty,
-    requestSchema: GrpcProtoDefinition,
-    requestClass: String,
-    responseSchema: GrpcProtoDefinition,
-    responseClass: String,
     response: GrpcStubResponse,
     seed: Option[Json],
     state: Option[Map[JsonOptic, Map[Keyword.Json, Json]]],
