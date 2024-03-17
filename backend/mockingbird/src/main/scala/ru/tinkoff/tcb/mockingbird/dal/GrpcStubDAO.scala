@@ -22,11 +22,9 @@ class GrpcStubDAOImpl(collection: MongoCollection[BsonDocument])
     extends DAOBase[GrpcStub](collection)
     with GrpcStubDAO[Task] {
   def createIndexes: Task[Unit] = createIndex(
-    ascending(nameOf[GrpcStub](_.methodName), nameOf[GrpcStub](_.scope))
+    ascending(nameOf[GrpcStub](_.methodDescriptionId))
   ) *> createIndex(
     descending(nameOf[GrpcStub](_.created))
-  ) *> createIndex(
-    ascending(nameOf[GrpcStub](_.service))
   ) *> createIndex(
     ascending(nameOf[GrpcStub](_.labels))
   )
