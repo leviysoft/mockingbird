@@ -67,7 +67,7 @@ object Settings {
       "-Ywarn-macros:after"
     ),
     addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
-    addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.2" cross CrossVersion.full),
+    addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.3" cross CrossVersion.full),
     wartremoverDependencies ~= (_.filterNot(_.name == "wartremover-contrib")),
     wartremoverDependencies += "org.wartremover" % "wartremover-contrib_2.13" % ContribWart.ContribVersion,
     wartremoverErrors ++= Seq(

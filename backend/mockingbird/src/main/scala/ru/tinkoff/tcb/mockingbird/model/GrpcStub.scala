@@ -47,6 +47,7 @@ final case class GrpcStub(
     seed: Option[Json],
     state: Option[Map[JsonOptic, Map[Keyword.Json, Json]]],
     requestPredicates: JsonPredicate,
+    persist: Option[Map[JsonOptic, Json]],
     labels: Seq[String]
 )
 

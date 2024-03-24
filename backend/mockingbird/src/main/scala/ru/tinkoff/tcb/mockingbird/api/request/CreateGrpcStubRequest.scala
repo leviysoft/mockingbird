@@ -36,5 +36,6 @@ final case class CreateGrpcStubRequest(
     requestPredicates: JsonPredicate,
     state: Option[Map[JsonOptic, Map[Keyword.Json, Json]]],
     seed: Option[Json],
+    persist: Option[Map[JsonOptic, Json]],
     labels: Seq[String] = Seq.empty
 )
