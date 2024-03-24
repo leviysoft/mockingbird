@@ -5,26 +5,18 @@
       "name": "mockingbird",
       "root": "src/mockingbird",
       "type": "application",
-      "commands": {
-        "build": {
-          "options": {
-            "server": "src/mockingbird/index.ts",
-            "vendor": "src/vendor.ts"
-          },
-          "configurations": {
-            "sourceMap": true,
-            "dedupeIgnore": ["@platform-ui/"],
-            "postcss": {
-              "config": "src/mockingbird/postcss"
-            }
-          }
-        },
-        "serve": {
-          "configurations": {
-            "hotRefresh": true,
-            "modern": true
-          }
-        }
+      "sourceMap": true,
+      "postcss": {
+        "config": "src/mockingbird/postcss",
+        "cssLocalIdentName": {}
+      },
+      "dedupe": {
+        "ignore": [
+          "@platform-ui/"
+        ]
+      },
+      "hotRefresh": {
+        "enabled": true
       }
     }
   }

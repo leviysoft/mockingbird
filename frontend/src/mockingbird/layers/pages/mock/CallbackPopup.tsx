@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Control, WatchInternal } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { Modal as Popup, Button, Group } from '@mantine/core';
@@ -28,13 +29,16 @@ export default function CallbackPopup({
   onSave,
   onClose,
 }: Props) {
+  const { t } = useTranslation();
   const [type, setType] = useState(
     callback ? callback.type : CALLBACK_TYPES[0].value
   );
   const Form = type === 'http' ? HTTPForm : MessageForm;
-  const onChangeType = useCallback((t) => setType(t), []);
+  const onChangeType = useCallback((nextType) => setType(nextType), []);
   const edit = Boolean(callback);
-  const title = edit ? 'Редактирование коллбэка' : 'Создание коллбэка';
+  const title = edit
+    ? t('pages.mock.editCallbackText')
+    : t('pages.mock.createCallbackText');
   return (
     <Popup size="lg" opened onClose={onClose} title={title}>
       <Form
@@ -67,20 +71,26 @@ function HTTPForm({ callback, ...props }: FormProps) {
 }
 
 function MTTPFormFields({ control, watch }: FieldsProps) {
+  const { t } = useTranslation();
   const responseMode = watch('responseMode');
   return (
     <>
-      <InputJson name="request" label="Запрос" control={control} required />
+      <InputJson
+        name="request"
+        label={t('pages.mock.requestLabel')}
+        control={control}
+        required
+      />
       <Select
         name="responseMode"
-        label="Тип ответа"
+        label={t('pages.mock.responseModeLabel')}
         options={CALLBACK_HTTP_RESPONSE_TYPES}
         control={control}
       />
       {responseMode && (
         <InputJson
           name="persist"
-          label="Данные, записываемые в базу"
+          label={t('pages.mock.persistLabel')}
           control={control}
           required
         />
@@ -102,16 +112,22 @@ function MessageForm({ callback, ...props }: FormProps) {
 }
 
 function MessageFormFields({ control, serviceId }: FieldsProps) {
+  const { t } = useTranslation();
   return (
     <>
       <Destinations
         name="destination"
-        label="Получатель событий"
+        label={t('pages.mock.destinationLabel')}
         serviceId={serviceId}
         control={control}
         required
       />
-      <InputJson name="output" label="Ответ" control={control} required />
+      <InputJson
+        name="output"
+        label={t('pages.mock.outputLabel')}
+        control={control}
+        required
+      />
     </>
   );
 }
@@ -132,6 +148,7 @@ type FormBaseProps = FormProps & {
 };
 
 function FormBase(props: FormBaseProps) {
+  const { t } = useTranslation();
   const {
     edit,
     Fields,
@@ -161,7 +178,7 @@ function FormBase(props: FormBaseProps) {
     <form onSubmit={onSubmit}>
       <Select
         name="type"
-        label="Тип"
+        label={t('pages.mock.typeLabel')}
         options={CALLBACK_TYPES}
         control={control as any}
         disabled={edit}
@@ -170,17 +187,19 @@ function FormBase(props: FormBaseProps) {
       <Fields control={control as any} watch={watch} serviceId={serviceId} />
       <Input
         name="delay"
-        label="Задержка"
-        description="Паттерн: d+ (d|day|h|hour|m|min|minute|s|sec|second|ms|milli|millisecond|µs|micro|microsecond|ns|nano|nanosecond)"
+        label={t('pages.mock.delayLabel')}
+        description={`${t(
+          'pages.mock.pattern'
+        )}: d+ (d|day|h|hour|m|min|minute|s|sec|second|ms|milli|millisecond|µs|micro|microsecond|ns|nano|nanosecond)`}
         control={control as any}
         mb="lg"
       />
       <Group>
         <Button size="md" type="submit">
-          {edit ? 'Сохранить' : 'Создать'}
+          {edit ? t('pages.mock.editText') : t('pages.mock.createText')}
         </Button>
         <Button size="md" variant="outline" onClick={onClose}>
-          Отмена
+          {t('pages.mock.cancelText')}
         </Button>
       </Group>
     </form>

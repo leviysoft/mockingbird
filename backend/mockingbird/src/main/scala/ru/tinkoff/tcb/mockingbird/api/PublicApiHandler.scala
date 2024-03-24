@@ -43,8 +43,10 @@ import ru.tinkoff.tcb.mockingbird.model.XmlProxyResponse
 import ru.tinkoff.tcb.mockingbird.scenario.CallbackEngine
 import ru.tinkoff.tcb.mockingbird.scenario.ScenarioEngine
 import ru.tinkoff.tcb.protocol.log.*
+import ru.tinkoff.tcb.utils.any.*
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.regex.*
+import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 import ru.tinkoff.tcb.utils.transformation.json.*
 import ru.tinkoff.tcb.utils.transformation.string.*
 import ru.tinkoff.tcb.utils.transformation.xml.*
@@ -58,6 +60,7 @@ final class PublicApiHandler(
     stateDAO: PersistentStateDAO[Task],
     resolver: StubResolver,
     engine: CallbackEngine,
+    implicit val jsSandbox: GraalJsSandbox,
     private val httpBackend: SttpBackend[Task],
     proxyConfig: ProxyConfig
 ) {
@@ -126,11 +129,15 @@ final class PublicApiHandler(
           )
         case _ =>
           ZIO.succeed(
-            if (stub.response.isTemplate) {
-              HttpStubResponse.jsonBody
-                .updateF(_.substitute(data).substitute(xdata))
-                .andThen(HttpStubResponse.xmlBody.updateF(_.substitute(data).substitute(xdata)))(stub.response)
-            } else stub.response
+            stub.response
+              .applyIf(_.isTemplate)(
+                HttpStubResponse.jsonBody
+                  .updateF(_.substitute(data).substitute(xdata))
+                  .andThen(HttpStubResponse.xmlBody.updateF(_.substitute(data).substitute(xdata)))
+              )
+              .applyIf(HttpStubResponse.headers.getOption(_).exists(_.values.exists(_.isTemplate)))(
+                HttpStubResponse.headers.updateF(_.view.mapValues(_.substitute(data, xdata)).toMap)
+              )
           )
       }
       _ <- ZIO.when(stub.scope == Scope.Countdown)(stubDAO.updateById(stub.id, prop[HttpStub](_.times).inc(-1)))
@@ -318,8 +325,9 @@ object PublicApiHandler {
       ssd        <- ZIO.service[PersistentStateDAO[Task]]
       resolver   <- ZIO.service[StubResolver]
       engine     <- ZIO.service[ScenarioEngine]
+      jsSandbox  <- ZIO.service[GraalJsSandbox]
       sttpClient <- ZIO.service[SttpBackend[Task]]
       proxyCfg   <- ZIO.service[ProxyConfig]
-    } yield new PublicApiHandler(hsd, ssd, resolver, engine, sttpClient, proxyCfg)
+    } yield new PublicApiHandler(hsd, ssd, resolver, engine, jsSandbox, sttpClient, proxyCfg)
   }
 }

@@ -22,7 +22,7 @@ trait BaseSuite extends AsyncScalaTestSuite with TestContainerForAll {
 
   override val containerDef: DockerComposeContainer.Def =
     DockerComposeContainer.Def(
-      new File("./compose-test.yml"),
+      new File("../compose-test.yml"),
       exposedServices = Seq(
         ExposedService("mockingbird", 9000, 1),
         ExposedService("mockingbird", 8228, 1, Wait.forLogMessage(".*\"App started\".*", 1)),

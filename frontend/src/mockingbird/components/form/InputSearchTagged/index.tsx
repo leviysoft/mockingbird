@@ -7,6 +7,7 @@ import {
   mapSelectValue,
   extractError,
 } from 'src/mockingbird/infrastructure/helpers/forms';
+import { useTranslation } from 'react-i18next';
 
 type Props = Omit<MultiSelectProps, 'data' | 'name'> & {
   name: string;
@@ -25,6 +26,7 @@ export default function InputSearchTagged(props: Props) {
     disabled = false,
     ...restProps
   } = props;
+  const { t } = useTranslation();
   const { field, formState, fieldState } = useController({
     name,
     control,
@@ -54,7 +56,9 @@ export default function InputSearchTagged(props: Props) {
       error={uiError}
       searchable
       creatable
-      getCreateLabel={(query) => `+ Добавить ${query}`}
+      getCreateLabel={(query) =>
+        `${t('form.inputSearchTagged.label')} ${query}`
+      }
       onCreate={(q) => {
         const query = q.trim().toLowerCase();
         const item = { value: query, label: q };

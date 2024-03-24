@@ -3,6 +3,7 @@ import { Layout } from './layers/layout/Layout';
 import Header from './layers/layout/Header';
 import paths from './paths';
 import { configureSettings } from './settings';
+import './i18n';
 import './main.css';
 
 createApp({

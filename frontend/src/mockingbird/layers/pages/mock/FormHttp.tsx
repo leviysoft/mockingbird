@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { Flex, Box, Space, Button, Accordion } from '@mantine/core';
 import { Input } from 'src/mockingbird/components/form/Input';
@@ -25,12 +26,13 @@ type Props = {
 };
 
 export default function FormHttp(props: Props) {
+  const { t } = useTranslation();
   const {
     labels,
     serviceId = '',
     data,
     actions,
-    submitText = 'Создать',
+    submitText = t('pages.mock.formHttpSubmitTextDefault'),
     submitDisabled = false,
     onSubmit: onSubmitParent,
   } = props;
@@ -55,14 +57,14 @@ export default function FormHttp(props: Props) {
     <form onSubmit={handleSubmit(onSubmit)}>
       <Input
         name="name"
-        label="Название"
+        label={t('pages.mock.nameLabel')}
         control={control as any}
         required
         mb="sm"
       />
       <InputSearchTagged
         name="labels"
-        label="Лейблы"
+        label={t('pages.mock.labelsLabel')}
         options={labels}
         control={control as any}
         mb="sm"
@@ -71,7 +73,7 @@ export default function FormHttp(props: Props) {
         <Box sx={{ width: '50%' }}>
           <Select
             name="scope"
-            label="Время жизни"
+            label={t('pages.mock.scopeLabel')}
             options={SCOPES}
             control={control as any}
             required
@@ -82,7 +84,7 @@ export default function FormHttp(props: Props) {
           <Box sx={{ width: '50%' }}>
             <InputCount
               name="times"
-              label="Количество срабатываний"
+              label={t('pages.mock.timesLabel')}
               min={1}
               control={control as any}
             />
@@ -93,7 +95,7 @@ export default function FormHttp(props: Props) {
       </Flex>
       <Select
         name="method"
-        label="Метод"
+        label={t('pages.mock.methodNameLabel')}
         options={METHODS}
         control={control as any}
         required
@@ -102,14 +104,14 @@ export default function FormHttp(props: Props) {
       <Flex mb="sm" align="flex-start">
         <Input
           name="path"
-          label="Путь"
+          label={t('pages.mock.pathLabel')}
           control={control as any}
           required
           description={`Без префикса /${serviceId}. Пример: /demo`}
         />
         <ToggleBlock
           name="isPathPattern"
-          label="Путь-регулярка"
+          label={t('pages.mock.isPathPatternLabel')}
           control={control as any}
           mb="xs"
           ml="md"
@@ -118,33 +120,33 @@ export default function FormHttp(props: Props) {
       </Flex>
       <InputJson
         name="request"
-        label="Запрос"
+        label={t('pages.mock.requestLabel')}
         control={control as any}
         required
         mb="sm"
       />
       <InputJson
         name="response"
-        label="Ответ"
+        label={t('pages.mock.responseLabel')}
         control={control as any}
         required
         mb="sm"
       />
       <InputJson
         name="state"
-        label="Предикат для поиска состояния"
+        label={t('pages.mock.stateLabel')}
         control={control as any}
         mb="sm"
       />
       <InputJson
         name="persist"
-        label="Данные, записываемые в базу"
+        label={t('pages.mock.persistLabel')}
         control={control as any}
         mb="sm"
       />
       <InputJson
         name="seed"
-        label="Генерация переменных"
+        label={t('pages.mock.seedLabel')}
         control={control as any}
         mb="sm"
       />
@@ -158,7 +160,9 @@ export default function FormHttp(props: Props) {
       {actions && (
         <Accordion variant="contained" mb="md">
           <Accordion.Item value="actions">
-            <Accordion.Control>Действия</Accordion.Control>
+            <Accordion.Control>
+              {t('pages.mock.actionsTitle')}
+            </Accordion.Control>
             <Accordion.Panel>{actions}</Accordion.Panel>
           </Accordion.Item>
         </Accordion>

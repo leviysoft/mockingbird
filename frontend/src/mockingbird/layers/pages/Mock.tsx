@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useActions, useStoreSelector } from '@tramvai/state';
 import { useUrl } from '@tramvai/module-router';
 import { Button, Text, Loader, Paper, Title } from '@mantine/core';
@@ -32,6 +33,7 @@ import type {
 const TYPES = ['http', 'scenario', 'grpc'];
 
 export default function Mock() {
+  const { t } = useTranslation();
   const url = useUrl();
   const serviceId = Array.isArray(url.query.service)
     ? url.query.service[0]
@@ -100,8 +102,8 @@ export default function Mock() {
     return (
       <div>
         <PageHeader
-          title="Редактирование"
-          backText="К списку моков"
+          title={t('pages.mock.mockHeaderTitleDefault')}
+          backText={t('pages.mock.mockHeaderBackText')}
           backPath={basePath}
         />
       </div>
@@ -109,16 +111,16 @@ export default function Mock() {
 
   const pageHeader = (
     <PageHeader
-      title={formatTitle(type)}
-      backText="К списку моков"
+      title={formatTitle(type, t)}
+      backText={t('pages.mock.mockHeaderBackText')}
       backPath={basePath}
     />
   );
   const actions = (
     <Paper>
-      <Title order={4}>Удалить навсегда</Title>
+      <Title order={4}>{t('pages.mock.actionDeleteTitle')}</Title>
       <Text size="md" mb="lg">
-        Мок будет немедленно удален, действие необратимо
+        {t('pages.mock.actionDeleteWarning')}
       </Text>
       <Button
         size="md"
@@ -126,7 +128,7 @@ export default function Mock() {
         disabled={status === 'deleting'}
         onClick={onDelete}
       >
-        Удалить
+        {t('pages.mock.actionDeleteText')}
       </Button>
     </Paper>
   );
@@ -135,7 +137,7 @@ export default function Mock() {
       <div>
         {pageHeader}
         <Text size="md" color="red">
-          Неизвестный тип
+          {t('pages.mock.mockUnknownType')}
         </Text>
       </div>
     );
@@ -150,7 +152,7 @@ export default function Mock() {
           serviceId={serviceId}
           data={mock}
           actions={actions}
-          submitText="Сохранить"
+          submitText={t('pages.mock.editText')}
           submitDisabled={status === 'updating'}
           onSubmit={onUpdate}
         />
@@ -161,7 +163,7 @@ export default function Mock() {
           serviceId={serviceId}
           data={mock}
           actions={actions}
-          submitText="Сохранить"
+          submitText={t('pages.mock.editText')}
           submitDisabled={status === 'updating'}
           onSubmit={onUpdate}
         />
@@ -172,7 +174,7 @@ export default function Mock() {
           serviceId={serviceId}
           data={mock}
           actions={actions}
-          submitText="Сохранить"
+          submitText={t('pages.mock.editText')}
           submitDisabled
           disabled
           onSubmit={onUpdate}
@@ -182,15 +184,15 @@ export default function Mock() {
   );
 }
 
-function formatTitle(type: string) {
+function formatTitle(type: string, t: any) {
   switch (type) {
     case 'http':
-      return 'Редактирование HTTP';
+      return t('pages.mock.mockHeaderTitleHttp');
     case 'scenario':
-      return 'Редактирование scenario';
+      return t('pages.mock.mockHeaderTitleScenario');
     case 'grpc':
-      return 'Просмотр GRPC';
+      return t('pages.mock.mockHeaderTitleGrpc');
     default:
-      return 'Редактирование';
+      return t('pages.mock.mockHeaderTitleDefault');
   }
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Paper, Text, Chip, Anchor } from '@mantine/core';
 import pluralize from 'src/mockingbird/infrastructure/pluralize';
+import i18n from 'src/mockingbird/i18n';
 import styles from './Item.css';
 
 type Props = {
@@ -38,10 +39,18 @@ export default function Item(props: Props) {
 }
 
 function getScopeText(scope: string, times?: number) {
-  if (scope === 'persistent') return 'Вечный';
-  if (scope === 'ephemeral') return 'Эфемерный';
+  if (scope === 'persistent') return i18n.t('pages.mock.scopesPersistentLabel');
+  if (scope === 'ephemeral') return i18n.t('pages.mock.scopesEphemeralLabel');
   if (scope === 'countdown' && typeof times === 'number') {
-    return `Осталось ${pluralize(times, 'вызов', 'вызова', 'вызовов')}`;
+    const callSingle = i18n.t('pages.mock.callSingle');
+    const callPlural1 = i18n.t('pages.mock.callPlural1');
+    const callPlural2 = i18n.t('pages.mock.callPlural2');
+    return `${i18n.t('pages.mock.left')} ${pluralize(
+      times,
+      callSingle,
+      callPlural1,
+      callPlural2
+    )}`;
   }
   return '';
 }

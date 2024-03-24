@@ -10,6 +10,7 @@ import type {
   TCallBack,
   TCallBackHTTP,
 } from 'src/mockingbird/models/mock/types';
+import i18n from 'src/mockingbird/i18n';
 import {
   SCOPES,
   METHODS,
@@ -27,7 +28,7 @@ import type {
 export function mapStubToFormData(serviceId: string, data?: THTTPMock) {
   if (!data)
     return {
-      name: 'Стаб ***',
+      name: i18n.t('pages.mock.stubInputDescription'),
       labels: [],
       scope: SCOPES[0].value,
       times: 1,
@@ -83,7 +84,7 @@ export function mapFormDataToStub(
 export function mapScenarioToFormData(data?: TScenarioMock) {
   if (!data)
     return {
-      name: 'Сценарий ***',
+      name: i18n.t('scenarioInputDescription'),
       labels: [],
       scope: SCOPES[0].value,
       times: 1,
@@ -138,7 +139,7 @@ export function mapFormDataToScenario(
 export function mapGrpcToFormData(serviceId: string, data?: TGRPCMock) {
   if (!data)
     return {
-      name: 'GRPC ***',
+      name: i18n.t('grpcInputDescription'),
       labels: [],
       scope: SCOPES[0].value,
       times: 1,
@@ -275,7 +276,7 @@ function mapCallback(callback: TCallBack): TFormCallback {
       delay: callback.delay,
     };
   }
-  throw new Error('Missed callback type while mapping');
+  throw new Error(i18n.t('missedCallbackError'));
 }
 
 function mapFormCallback(callback: TFormCallback): TCallBack {
@@ -299,7 +300,7 @@ function mapFormCallback(callback: TFormCallback): TCallBack {
       delay: callback.delay?.trim() || undefined,
     };
   }
-  throw new Error('Missing callback type while mapping');
+  throw new Error(i18n.t('missedCallbackError'));
 }
 
 function fileToBase64String(file: File) {

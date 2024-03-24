@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { Button, Accordion } from '@mantine/core';
 import { validateJSONArray } from 'src/mockingbird/infrastructure/helpers/forms';
@@ -16,10 +17,11 @@ type Props = {
 };
 
 export default function Form(props: Props) {
+  const { t } = useTranslation();
   const {
     actions,
     data,
-    submitText = 'Создать',
+    submitText = t('source.formSubmitTextDefault'),
     disabled = false,
     onSubmit: onSubmitParent,
   } = props;
@@ -36,7 +38,7 @@ export default function Form(props: Props) {
     <form onSubmit={handleSubmit(onSubmit)}>
       <Input
         name="name"
-        label="Название"
+        label={t('source.nameLabel')}
         control={control as any}
         disabled={disabled || Boolean(data)}
         required
@@ -44,7 +46,7 @@ export default function Form(props: Props) {
       />
       <Input
         name="description"
-        label="Описание"
+        label={t('source.descriptionLabel')}
         control={control as any}
         disabled={disabled}
         required
@@ -52,7 +54,7 @@ export default function Form(props: Props) {
       />
       <InputJson
         name="request"
-        label="Запрос"
+        label={t('source.requestLabel')}
         control={control as any}
         disabled={disabled}
         required
@@ -60,7 +62,7 @@ export default function Form(props: Props) {
       />
       <InputJson
         name="init"
-        label="init"
+        label={t('source.initLabel')}
         control={control as any}
         disabled={disabled}
         validate={validateJSONArray}
@@ -68,7 +70,7 @@ export default function Form(props: Props) {
       />
       <InputJson
         name="shutdown"
-        label="shutdown"
+        label={t('source.shutdownLabel')}
         control={control as any}
         disabled={disabled}
         validate={validateJSONArray}
@@ -76,7 +78,7 @@ export default function Form(props: Props) {
       />
       <InputJson
         name="reInitTriggers"
-        label="reInitTriggers"
+        label={t('source.reInitTriggersLabel')}
         control={control as any}
         disabled={disabled}
         validate={validateJSONArray}
@@ -85,7 +87,7 @@ export default function Form(props: Props) {
       {actions && (
         <Accordion variant="contained" mb="md">
           <Accordion.Item value="actions">
-            <Accordion.Control>Действия</Accordion.Control>
+            <Accordion.Control>{t('source.actionsText')}</Accordion.Control>
             <Accordion.Panel>{actions}</Accordion.Panel>
           </Accordion.Item>
         </Accordion>

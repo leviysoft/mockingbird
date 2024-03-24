@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { Button } from '@mantine/core';
 import { Input } from 'src/mockingbird/components/form/Input';
@@ -15,9 +16,10 @@ type Props = {
 };
 
 export default function Form(props: Props) {
+  const { t } = useTranslation();
   const {
     data,
-    submitText = 'Создать',
+    submitText = t('destination.formSubmitTextDefault'),
     disabled = false,
     onSubmit: onSubmitParent,
   } = props;
@@ -34,7 +36,7 @@ export default function Form(props: Props) {
     <form onSubmit={handleSubmit(onSubmit)}>
       <Input
         name="name"
-        label="Название"
+        label={t('destination.nameLabel')}
         control={control as any}
         disabled={disabled || Boolean(data)}
         required
@@ -42,7 +44,7 @@ export default function Form(props: Props) {
       />
       <Input
         name="description"
-        label="Описание"
+        label={t('destination.descriptionLabel')}
         control={control as any}
         disabled={disabled}
         required
@@ -50,7 +52,7 @@ export default function Form(props: Props) {
       />
       <InputJson
         name="request"
-        label="Запрос"
+        label={t('destination.requestLabel')}
         control={control as any}
         disabled={disabled}
         required
@@ -58,7 +60,7 @@ export default function Form(props: Props) {
       />
       <InputJson
         name="init"
-        label="init"
+        label={t('destination.initLabel')}
         control={control as any}
         validate={validateJSONArray}
         disabled={disabled}
@@ -66,7 +68,7 @@ export default function Form(props: Props) {
       />
       <InputJson
         name="shutdown"
-        label="shutdown"
+        label={t('destination.shutdownLabel')}
         control={control as any}
         validate={validateJSONArray}
         disabled={disabled}

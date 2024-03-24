@@ -7,9 +7,15 @@
   }, {
     "pattern":"\\Qcats/effect/concurrent/Ref$SyncRef.class\\E"
   }, {
+    "pattern":"\\Qcats/instances/ListInstances$$anon$1.class\\E"
+  }, {
     "pattern":"\\Qcats/instances/VectorInstances$$anon$1.class\\E"
   }, {
     "pattern":"\\Qcats/syntax/ApplicativeErrorOps$.class\\E"
+  }, {
+    "pattern":"\\Qcom/oracle/truffle/js/lang/JavaScriptLanguage.class\\E"
+  }, {
+    "pattern":"\\Qcom/oracle/truffle/regex/RegexLanguage.class\\E"
   }, {
     "pattern":"\\Qeu/timepit/fs2cron/package$.class\\E"
   }, {

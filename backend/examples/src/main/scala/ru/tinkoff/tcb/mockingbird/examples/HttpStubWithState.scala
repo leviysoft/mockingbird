@@ -68,7 +68,7 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
             |    }
             |  },
             |  "seed": {
-            |    "timestamp": "%{now(yyyy-MM-dd'T'HH:mm:ss.nn'Z')}"
+            |    "timestamp": "%{now(\"yyyy-MM-dd'T'HH:mm:ss.nn'Z'\")}"
             |  }
             |}""".stripMargin.some,
         headers = Seq("Content-Type" -> "application/json"),
@@ -152,7 +152,7 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
             |    "_data.id": {"==": "${id}"}
             |  },
             |  "seed": {
-            |    "timestamp": "%{now(yyyy-MM-dd'T'HH:mm:ss.nn'Z')}"
+            |    "timestamp": "%{now(\"yyyy-MM-dd'T'HH:mm:ss.nn'Z'\")}"
             |  }
             |}""".stripMargin.some,
         headers = Seq("Content-Type" -> "application/json"),

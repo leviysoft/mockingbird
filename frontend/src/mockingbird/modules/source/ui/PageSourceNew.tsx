@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUrl } from '@tramvai/module-router';
 import { useActions, useStoreSelector } from '@tramvai/state';
 import PageHeader from 'src/components/PageHeader/PageHeader';
@@ -12,6 +13,7 @@ import { mapFormDataToSource } from '../utils';
 import type { SourceFormData } from '../types';
 
 export default function MockNew() {
+  const { t } = useTranslation();
   const url = useUrl();
   const serviceId = Array.isArray(url.query.service)
     ? url.query.service[0]
@@ -30,8 +32,8 @@ export default function MockNew() {
   return (
     <Page>
       <PageHeader
-        title="Создание источника"
-        backText="К списку источников"
+        title={t('source.createHeaderTitle')}
+        backText={t('source.createHeaderBackText')}
         backPath={getPathSources(serviceId)}
       />
       <Form disabled={status === 'loading'} onSubmit={onCreate} />

@@ -10,12 +10,17 @@ import org.scalatest.OptionValues
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
+import ru.tinkoff.tcb.mockingbird.config.JsSandboxConfig
 import ru.tinkoff.tcb.utils.circe.*
 import ru.tinkoff.tcb.utils.circe.optics.JLens
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
+import ru.tinkoff.tcb.utils.resource.readStr
+import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 
 class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValues {
   test("Fill template") {
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
+
     val template = Json.obj(
       "description" := "${description}",
       "topic" := "${extras.topic}",
@@ -28,6 +33,18 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
 
     template.isTemplate shouldBe true
 
+    val template2 = Json.obj(
+      "description" := "%{description}",
+      "topic" := "%{extras.topic}",
+      "comment" := "%{extras.comments[0].text}",
+      "meta" := Json.obj(
+        "field1" := "%{extras.fields[0]}"
+      ),
+      "composite" := "%{extras.topic + ': ' + description}"
+    )
+
+    template2.isTemplate shouldBe true
+
     val values = Json.obj(
       "description" := "Some description",
       "extras" := Json.obj(
@@ -39,9 +56,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
 
     values.isTemplate shouldBe false
 
-    val sut = template.substitute(values)
-
-    sut shouldBe Json.obj(
+    val expected = Json.obj(
       "description" := "Some description",
       "topic" := "Main topic",
       "comment" := "First nah!",
@@ -50,9 +65,19 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
       ),
       "composite" := "Main topic: Some description"
     )
+
+    val sut = template.substitute(values)
+
+    sut shouldBe expected
+
+    val sut2 = template2.substitute(values)
+
+    sut2 shouldBe expected
   }
 
   test("Absent fields") {
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
+
     val template = Json.obj(
       "value" := "${description}"
     )
@@ -63,6 +88,8 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Substitute object") {
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
+
     val template = Json.obj("value" := "${message}")
 
     val sut = template.substitute(Json.obj("message" := Json.obj("peka" := "name")))
@@ -71,6 +98,8 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Convert to string") {
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
+
     val template = Json.obj(
       "a" := "$:{b1}",
       "b" := "$:{b2}",
@@ -95,6 +124,8 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Convert from string") {
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
+
     val template = Json.obj(
       "a" := "$~{b1}",
       "b" := "$~{b2}",
@@ -139,17 +170,22 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Failover test") {
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
+
     Json.Null.substitute(Json.Null)
     Json.Null.substitute(Json.obj())
     Json.obj().substitute(Json.Null)
     Json.obj().substitute(Json.obj())
   }
 
-  test("Simple eval") {
+  test("JavaScript eval") {
     val datePattern = "yyyy-MM-dd"
     val dFormatter  = DateTimeFormatter.ofPattern(datePattern)
     val pattern     = "yyyy-MM-dd'T'HH:mm:ss"
     val formatter   = DateTimeFormatter.ofPattern(pattern)
+
+    val prelude                          = readStr("prelude.js")
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
 
     val template = Json.obj(
       "a" := "%{randomString(10)}",
@@ -158,12 +194,10 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
       "bi" := "%{randomInt(3, 8)}",
       "c" := "%{randomLong(5)}",
       "ci" := "%{randomLong(3, 8)}",
-      "d" := "%{UUID}",
-      "e" := s"%{now($pattern)}",
-      "f" := s"%{today($datePattern)}"
+      "d" := "%{UUID()}",
+      "e" := s"%{now(\"$pattern\")}",
+      "f" := s"%{today('$datePattern')}"
     )
-
-    template.isTemplate shouldBe true
 
     val res = template.eval
 
@@ -199,8 +233,11 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Formatted eval") {
+    val prelude                          = readStr("prelude.js")
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig(), prelude = Option(prelude))
+
     val template = Json.obj(
-      "fmt" := "%{randomInt(10)}: %{randomLong(10)} | %{randomString(12)}"
+      "fmt" := "%{randomInt(10) + ': ' + randomLong(10) + ' | ' + randomString(12)}"
     )
 
     template.isTemplate shouldBe true
@@ -211,6 +248,8 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
   }
 
   test("Json patcher") {
+    implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
+
     val target = Json.obj(
       "f1" := "v1",
       "a2" := "e1" :: "e2" :: "e3" :: Nil,

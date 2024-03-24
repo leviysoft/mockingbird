@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tramvai/module-router';
 import { Paper, Anchor, Text } from '@mantine/core';
 import {
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export default function ServiceItem({ execApiPath, item }: Props) {
+  const { t } = useTranslation();
   const { name, suffix } = item;
   const navigate = useNavigate(getPathMocks(suffix));
   const navigateSources = useNavigate(getPathSources(suffix));
@@ -46,7 +48,7 @@ export default function ServiceItem({ execApiPath, item }: Props) {
             type="button"
             onClick={navigateSources}
           >
-            Источники
+            {t('services.sources')}
           </Anchor>
           <Anchor
             size="sm"
@@ -54,7 +56,7 @@ export default function ServiceItem({ execApiPath, item }: Props) {
             type="button"
             onClick={navigateDestinations}
           >
-            Получатели
+            {t('services.destinations')}
           </Anchor>
         </div>
       </div>

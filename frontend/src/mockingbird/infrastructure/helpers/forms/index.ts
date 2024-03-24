@@ -1,4 +1,5 @@
 import type { FieldErrors, FieldError } from 'react-hook-form';
+import i18n from 'src/mockingbird/i18n';
 
 export function extractError(name: string, errors: FieldErrors): string | null {
   const error = errors[name];
@@ -10,14 +11,14 @@ function getErrorMessage(error: FieldError) {
   const { type, message } = error;
   switch (type) {
     case 'required':
-      return 'Поле обязательное';
+      return i18n.t('validation.required');
     case 'validate':
       return message;
   }
 }
 
 export function validateJSON(value: string) {
-  const message = 'Невалидный json-объект';
+  const message = i18n.t('validation.invalidJson');
   if (!value) return;
   try {
     if (!isObject(JSON.parse(value))) return message;
@@ -27,7 +28,7 @@ export function validateJSON(value: string) {
 }
 
 export function validateJSONArray(value: string) {
-  const message = 'Невалидный json-массив';
+  const message = i18n.t('validation.invalidArray');
   if (!value) return;
   try {
     if (!Array.isArray(JSON.parse(value))) return message;

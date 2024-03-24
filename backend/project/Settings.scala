@@ -98,7 +98,8 @@ object Settings {
       IgnoredPackage("io.netty.channel.epoll")
     ),
     dockerize := ciEnabled,
-    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
+    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
+    Test / fork := true
   )
 
   def docker(

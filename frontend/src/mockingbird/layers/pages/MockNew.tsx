@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUrl } from '@tramvai/module-router';
 import { SegmentedControl } from '@mantine/core';
 import PageHeader from 'src/components/PageHeader/PageHeader';
@@ -25,6 +26,7 @@ const TYPES = [
 ];
 
 export default function MockNew() {
+  const { t } = useTranslation();
   const url = useUrl();
   const serviceId = Array.isArray(url.query.service)
     ? url.query.service[0]
@@ -42,8 +44,8 @@ export default function MockNew() {
   return (
     <div className={styles.root}>
       <PageHeader
-        title="Создание мока"
-        backText="К списку моков"
+        title={t('pages.mock.mockHeaderCreateText')}
+        backText={t('pages.mock.mockHeaderBackText')}
         backPath={getPathMocks(serviceId)}
         right={
           <SegmentedControl

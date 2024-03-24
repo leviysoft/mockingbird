@@ -1,17 +1,18 @@
 import { mapSelectItem } from 'src/mockingbird/infrastructure/helpers/forms';
+import i18n from 'src/mockingbird/i18n';
 import type { TFormCallbackMessage, TFormCallbackHTTP } from './types';
 
 export const SCOPES = [
   {
-    label: 'Вечный',
+    label: i18n.t('pages.mock.scopesPersistentLabel'),
     value: 'persistent',
   },
   {
-    label: 'Эфемерный',
+    label: i18n.t('pages.mock.scopesEphemeralLabel'),
     value: 'ephemeral',
   },
   {
-    label: 'N-разовый',
+    label: i18n.t('pages.mock.scopesCountdownLabel'),
     value: 'countdown',
   },
 ];

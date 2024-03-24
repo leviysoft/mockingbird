@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from '@tramvai/module-router';
 import { useActions, useStoreSelector } from '@tramvai/state';
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function CreatePopup({ opened, onClose }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { status, id, errorMessage } = useStoreSelector(
     createServiceStore,
@@ -30,19 +32,19 @@ export default function CreatePopup({ opened, onClose }: Props) {
     if (status === 'complete' && id) {
       addToast({
         type: 'success',
-        title: 'Сервис успешно создан',
+        title: t('services.createSuccess'),
         timer: 3000,
       });
       navigate(getPathMocks(id));
     } else if (status === 'error' && errorMessage) {
       addToast({
         type: 'error',
-        title: 'Произошла ошибка при создании',
+        title: t('services.createError'),
         children: errorMessage,
         timer: 5000,
       });
     }
-  }, [status, id, errorMessage, addToast, navigate]);
+  }, [t, status, id, errorMessage, addToast, navigate]);
   const { control, handleSubmit } = useForm<Service>({
     defaultValues: {
       name: '',
@@ -52,25 +54,30 @@ export default function CreatePopup({ opened, onClose }: Props) {
   });
   const onSubmit = useCallback((data: Service) => create(data), [create]);
   return (
-    <Popup size="md" opened={opened} onClose={onClose} title="Создание сервиса">
+    <Popup
+      size="md"
+      opened={opened}
+      onClose={onClose}
+      title={t('services.title')}
+    >
       <form onSubmit={handleSubmit(onSubmit)}>
         <Input
           name="name"
-          label="Название"
+          label={t('services.nameLabel')}
           control={control as any}
           required
           mb="sm"
         />
         <Input
           name="suffix"
-          label="Суффикс"
+          label={t('services.suffixLabel')}
           control={control as any}
           required
           mb="sm"
         />
         <Group position="right">
           <Button type="submit" disabled={status === 'loading'}>
-            Создать
+            {t('services.submitText')}
           </Button>
         </Group>
       </form>

@@ -2,6 +2,7 @@ import {
   parseJSON,
   stringifyJSON,
 } from 'src/mockingbird/infrastructure/utils/forms';
+import i18n from 'src/mockingbird/i18n';
 import { DEFAULT_REQUEST } from './refs';
 import type { Destination, DestinationFormData } from './types';
 
@@ -11,7 +12,7 @@ export function mapDestinationToFormData(
   if (!data)
     return {
       name: 'test_out',
-      description: 'Получатель ***',
+      description: i18n.t('destination.inputDescription'),
       request: stringifyJSON(DEFAULT_REQUEST),
       init: stringifyJSON([]),
       shutdown: stringifyJSON([]),

@@ -1,0 +1,181 @@
+{
+  "models": {
+    "mock": {
+      "createSuccess": "Мок успешно создан",
+      "updateSuccess": "Мок успешно обновлен",
+      "deleteSuccess": "Мок успешно удален"
+    },
+    "mockCreate": {
+      "httpSuccess": "Стаб успешно создан",
+      "scenarioSuccess": "Сценарий успешно создан",
+      "grpcSuccess": "GRPC успешно создан"
+    }
+  },
+  "destination": {
+    "createSuccess": "Получатель успешно создан",
+    "updateSuccess": "Получатель успешно обновлен",
+    "inputDescription": "Получатель ***",
+    "formSubmitTextDefault": "Создать",
+    "formSubmitText": "Сохранить",
+    "nameLabel": "Название",
+    "descriptionLabel": "Описание",
+    "requestLabel": "Запрос",
+    "initLabel": "init",
+    "shutdownLabel": "shutdown",
+    "editHeaderTitle": "Редактирование получателя",
+    "editHeaderBackText": "К списку получателей",
+    "createHeaderTitle": "Создание получателя",
+    "createHeaderBackText": "К списку получателей"
+  },
+  "destinations": {
+    "listHeaderTitle": "Получатели сервиса",
+    "listHeaderBackText": "К списку сервисов",
+    "listCreate": "Создать"
+  },
+  "services": {
+    "tryAgain": "Попробуйте еще раз",
+    "createSuccess": "Сервис успешно создан",
+    "createError": "Произошла ошибка при создании",
+    "title": "Создание сервиса",
+    "nameLabel": "Название",
+    "suffixLabel": "Суффикс",
+    "submitText": "Создать",
+    "sources": "Источники",
+    "destinations": "Получатели",
+    "listTitle": "Сервисы",
+    "createText": "Создать"
+  },
+  "source": {
+    "createSuccess": "Источник успешно создан",
+    "updateSuccess": "Источник успешно обновлен",
+    "deleteSuccess": "Источник успешно удален",
+    "formSubmitTextDefault": "Создать",
+    "formSubmitText": "Сохранить",
+    "nameLabel": "Название",
+    "descriptionLabel": "Описание",
+    "requestLabel": "Запрос",
+    "initLabel": "init",
+    "shutdownLabel": "shutdown",
+    "reInitTriggersLabel": "reInitTriggers",
+    "actionsText": "Действия",
+    "actionTitle": "Удалить навсегда",
+    "actionWarning": "Источник будет немедленно удален, действие необратимо",
+    "actionText": "Удалить",
+    "editHeaderTitle": "Редактирование источника",
+    "editHeaderBackText": "К списку источников",
+    "createHeaderTitle": "Создание источника",
+    "createHeaderBackText": "К списку источников",
+    "inputDescription": "Источник ***"
+  },
+  "sources": {
+    "listHeaderTitle": "Источники сервиса",
+    "listHeaderBackText": "К списку сервисов",
+    "listCreate": "Создать"
+  },
+  "pages": {
+    "mock": {
+      "editCallbackText": "Редактирование коллбэка",
+      "createCallbackText": "Создание коллбэка",
+      "responseModeLabel": "Тип ответа",
+      "persistLabel": "Данные, записываемые в базу",
+      "destinationLabel": "Получатель событий",
+      "outputLabel": "Ответ",
+      "typeLabel": "Тип",
+      "delayLabel": "Задержка",
+      "pattern": "Паттерн",
+      "editText": "Сохранить",
+      "createText": "Создать",
+      "cancelText": "Отмена",
+      "callbacksTitle": "Коллбэки",
+      "grpcSubmitTextDefault": "Создать",
+      "grpcRequestTitle": "Запрос",
+      "nameLabel": "Название",
+      "labelsLabel": "Лейблы",
+      "scopeLabel": "Время жизни",
+      "timesLabel": "Количество срабатываний",
+      "methodNameLabel": "Метод",
+      "requestCodecsLabel": "Proto файл",
+      "requestSchemaLabel": "Proto схема",
+      "requestClassLabel": "Класс",
+      "requestPredicatesLabel": "Предикаты",
+      "responseCodecsLabel": "Proto файл",
+      "responseSchemaLabel": "Proto схема",
+      "responseClassLabel": "Класс",
+      "requestLabel": "Запрос",
+      "responseLabel": "Ответ",
+      "stateLabel": "Предикат для поиска состояния",
+      "seedLabel": "Генерация переменных",
+      "actionsTitle": "Действия",
+      "formHttpSubmitTextDefault": "Создать",
+      "pathLabel": "Путь",
+      "isPathPatternLabel": "Путь-регулярка",
+      "scenarioSubmitTextDefault": "Создать",
+      "scenarioSourceTitle": "Источник",
+      "sourceLabel": "Источник событий",
+      "inputLabel": "Запрос",
+      "showAsJson": "Показать как JSON",
+      "jsonRequestDescription": "Чтобы ваш МОК наверняка работал, рекомендуем предварительно\nсохранить, если вы вносили правки",
+      "scopesPersistentLabel": "Вечный",
+      "scopesEphemeralLabel": "Эфемерный",
+      "scopesCountdownLabel": "N-разовый",
+      "stubInputDescription": "Стаб ***",
+      "scenarioInputDescription": "Сценарий ***",
+      "grpcInputDescription": "GRPC ***",
+      "missedCallbackError": "Missed callback type while mapping",
+      "left": "Осталось",
+      "callSingle": "вызов",
+      "callPlural1": "вызова",
+      "callPlural2": "вызовов",
+      "mockHeaderTitle": "Редактирование",
+      "mockHeaderCreateText": "К списку моков",
+      "mockHeaderBackText": "К списку моков",
+      "mockListHeaderBackText": "К списку сервисов",
+      "mockHeaderTitleHttp": "Редактирование HTTP",
+      "mockHeaderTitleScenario": "Редактирование scenario",
+      "mockHeaderTitleGrpc": "Просмотр GRPC",
+      "mockHeaderTitleDefault": "Редактирование",
+      "actionDeleteTitle": "Удалить навсегда",
+      "actionDeleteWarning": "Мок будет немедленно удален, действие необратимо",
+      "actionDeleteText": "Удалить",
+      "mockUnknownType": "Неизвестный тип",
+      "searchPlaceholder": "Поиск",
+      "typePlaceholder": "Тип",
+      "filterPlaceholder": "Фильтр по лейблам",
+      "loadMore": "Загрузить еще"
+    },
+    "notFound": "Страница не найдена",
+    "goBack": "Вернуться на главную"
+  },
+  "components": {
+    "copy": {
+      "success": "Скопировано",
+      "error": "Не удалось скопировать",
+      "textEmptyError": "copyToClipboard: text can not be null",
+      "copyError": "Copy to clipboard failed"
+    },
+    "list": {
+      "textDefault": "Данных нет",
+      "loadError": "Ошибка при загрузке данных",
+      "tryAgain": "Попробовать снова"
+    }
+  },
+  "notifications": {
+    "createError": "Произошла ошибка при создании",
+    "updateError": "Произошла ошибка при обновлении",
+    "removeError": "Произошла ошибка при удалении"
+  },
+  "form": {
+    "attachFile": {
+      "defaultPlaceholderSingle": "Выберите файл",
+      "defaultPlaceholderPlural": "Выберите файлы"
+    },
+    "inputSearchTagged": {
+      "label": "+ Добавить"
+    }
+  },
+  "validation": {
+    "required": "Поле обязательное",
+    "invalidJson": "Невалидный json-объект",
+    "invalidArray": "Невалидный json-массив"
+  }
+}

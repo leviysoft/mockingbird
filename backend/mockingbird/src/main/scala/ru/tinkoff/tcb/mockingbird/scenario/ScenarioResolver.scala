@@ -24,8 +24,13 @@ import ru.tinkoff.tcb.mockingbird.model.SourceConfiguration
 import ru.tinkoff.tcb.predicatedsl.Keyword
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.id.SID
+import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 
-class ScenarioResolver(scenarioDAO: ScenarioDAO[Task], stateDAO: PersistentStateDAO[Task]) {
+class ScenarioResolver(
+    scenarioDAO: ScenarioDAO[Task],
+    stateDAO: PersistentStateDAO[Task],
+    implicit val jsSandbox: GraalJsSandbox
+) {
   private val log = MDCLogging.`for`[WLD](this)
 
   private type StateSpec = Map[JsonOptic, Map[Keyword.Json, Json]]
@@ -104,8 +109,9 @@ class ScenarioResolver(scenarioDAO: ScenarioDAO[Task], stateDAO: PersistentState
 object ScenarioResolver {
   val live = ZLayer {
     for {
-      sd  <- ZIO.service[ScenarioDAO[Task]]
-      ssd <- ZIO.service[PersistentStateDAO[Task]]
-    } yield new ScenarioResolver(sd, ssd)
+      sd        <- ZIO.service[ScenarioDAO[Task]]
+      ssd       <- ZIO.service[PersistentStateDAO[Task]]
+      jsSandbox <- ZIO.service[GraalJsSandbox]
+    } yield new ScenarioResolver(sd, ssd, jsSandbox)
   }
 }

@@ -7,12 +7,10 @@ import {
   reset,
 } from '../reducers/createStore';
 
-
 type ServiceRequestParams = {
-  name: string,
-  suffix: string
+  name: string;
+  suffix: string;
 };
-
 
 export const createAction = createActionCore({
   name: 'CREATE_SERVICE_ACTION',
@@ -36,14 +34,12 @@ export const createAction = createActionCore({
   },
 });
 
-
 function normalizeRequest(params: ServiceRequestParams): ServiceRequestParams {
   return {
     name: params.name.trim(),
-    suffix: params.suffix.trim()
+    suffix: params.suffix.trim(),
   };
 }
-
 
 export const resetCreateStateAction = createActionCore({
   name: 'RESET_CREATE_SERVICE_ACTION',

@@ -4,6 +4,7 @@ import { useController } from 'react-hook-form';
 import type { FileInputProps } from '@mantine/core';
 import { FileInput } from '@mantine/core';
 import { extractError } from 'src/mockingbird/infrastructure/helpers/forms';
+import { useTranslation } from 'react-i18next';
 
 type Props = FileInputProps & {
   name: string;
@@ -20,6 +21,7 @@ export default function AttachFile(props: Props) {
     single = false,
     ...restProps
   } = props;
+  const { t } = useTranslation();
   const { field, formState, fieldState } = useController({
     name,
     control,
@@ -38,7 +40,9 @@ export default function AttachFile(props: Props) {
     },
     [onChangeField]
   );
-  const defaultPlaceholder = single ? 'Выберите файл' : 'Выберите файлы';
+  const defaultPlaceholder = single
+    ? t('form.attachFile.defaultPlaceholderSingle')
+    : t('form.attachFile.defaultPlaceholderPlural');
   const uiPlaceholder = restProps.placeholder || defaultPlaceholder;
   const uiError =
     extractError(name, formState.errors) || fieldState.error?.message;

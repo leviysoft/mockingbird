@@ -1,7 +1,7 @@
 package ru.tinkoff.tcb.utils.transformation
 
-import java.util.UUID
-import scala.util.Random
+import scala.util.Failure
+import scala.util.Success
 import scala.util.Try
 import scala.util.control.TailCalls
 import scala.util.control.TailCalls.TailRec
@@ -21,6 +21,7 @@ import kantan.xpath.implicits.*
 
 import ru.tinkoff.tcb.utils.json.json2StringFolder
 import ru.tinkoff.tcb.utils.regex.OneOrMore
+import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 import ru.tinkoff.tcb.utils.transformation.json.jsonTemplater
 import ru.tinkoff.tcb.xpath.*
 
@@ -48,13 +49,13 @@ package object xml {
           elem.attributes.exists(attr =>
             attr.value match {
               case Seq(Text(SubstRx(Xexpr(_)))) => true
-              case Seq(Text(FunRx()))           => true
+              case Seq(Text(CodeRx(_)))         => true
               case Seq(Text(SubstRxs()))        => true
               case _                            => false
             }
           ) || elem.child.exists(_.isTemplate)
         case Text(SubstRx(Xexpr(_))) => true
-        case Text(FunRx())           => true
+        case Text(CodeRx(_))         => true
         case Text(SubstRxs())        => true
         case _                       => false
       }
@@ -101,7 +102,7 @@ package object xml {
         }.result
       }
 
-    def substitute(values: Json): Node =
+    def substitute(values: Json)(implicit sandbox: GraalJsSandbox): Node =
       jsonTemplater(values).pipe { templater =>
         transform {
           case elem: Elem =>
@@ -119,24 +120,12 @@ package object xml {
         }.result
       }
 
-    def eval: Node =
-      transform {
-        case Text(RandStr(len)) =>
-          Text(Random.alphanumeric.take(len.toInt).mkString)
-        case Text(RandAlphabetStr(alphabet, minLen, maxLen)) =>
-          Text(
-            List.fill(Random.between(minLen.toInt, maxLen.toInt))(alphabet(Random.nextInt(alphabet.length))).mkString
-          )
-        case Text(RandInt(max)) =>
-          Text(Random.nextInt(max.toInt).toString)
-        case Text(RandIntInterval(min, max)) =>
-          Text(Random.between(min.toInt, max.toInt).toString)
-        case Text(RandLong(max)) =>
-          Text(Random.nextLong(max.toLong).toString)
-        case Text(RandLongInterval(min, max)) =>
-          Text(Random.between(min.toLong, max.toLong).toString)
-        case Text(RandUUID()) =>
-          Text(UUID.randomUUID().toString)
+    def eval(implicit sandbox: GraalJsSandbox): Node =
+      transform { case tx @ Text(CodeRx(code)) =>
+        sandbox.eval(code) match {
+          case Success(value)     => Text(value.foldWith(json2StringFolder))
+          case Failure(exception) => throw exception
+        }
       }.result
 
     def inlineXmlFromCData: Node =
@@ -144,7 +133,9 @@ package object xml {
         xml
       }.result
 
-    def patchFromValues(jValues: Json, xValues: Node, schema: Map[XmlZoom, String]): Node = {
+    def patchFromValues(jValues: Json, xValues: Node, schema: Map[XmlZoom, String])(implicit
+        sandbox: GraalJsSandbox
+    ): Node = {
       val jt = jsonTemplater(jValues)
       val nt = nodeTemplater(<wrapper>{xValues}</wrapper>)
 

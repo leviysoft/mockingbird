@@ -6,6 +6,7 @@ import cats.tagless.finalAlg
 import io.circe.Json
 import kantan.xpath.Node as KNode
 
+import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 import ru.tinkoff.tcb.utils.transformation.json.*
 import ru.tinkoff.tcb.utils.transformation.xml.*
 
@@ -17,8 +18,12 @@ import ru.tinkoff.tcb.utils.transformation.xml.*
 }
 
 object Substitute {
-  implicit val jsonSJson: Substitute[Json, Json]  = (a: Json, b: Json) => a.substitute(b)
-  implicit val jsonSNode: Substitute[Json, KNode] = (a: Json, b: KNode) => a.substitute(b)
-  implicit val nodeSJson: Substitute[Node, Json]  = (a: Node, b: Json) => a.substitute(b)
-  implicit val nodeSnode: Substitute[Node, KNode] = (a: Node, b: KNode) => a.substitute(b)
+  implicit def jsonSJson(implicit sandbox: GraalJsSandbox): Substitute[Json, Json] = (a: Json, b: Json) =>
+    a.substitute(b)
+  implicit def jsonSNode(implicit sandbox: GraalJsSandbox): Substitute[Json, KNode] = (a: Json, b: KNode) =>
+    a.substitute(b)
+  implicit def nodeSJson(implicit sandbox: GraalJsSandbox): Substitute[Node, Json] = (a: Node, b: Json) =>
+    a.substitute(b)
+  implicit def nodeSnode(implicit sandbox: GraalJsSandbox): Substitute[Node, KNode] = (a: Node, b: KNode) =>
+    a.substitute(b)
 }
