@@ -29,8 +29,11 @@ trait GrpcRequestHandler {
   def exec(bytes: Array[Byte]): RIO[WLD & RequestContext, Array[Byte]]
 }
 
-class GrpcRequestHandlerImpl(stateDAO: PersistentStateDAO[Task], stubResolver: GrpcStubResolver, implicit val jsSandbox: GraalJsSandbox)
-    extends GrpcRequestHandler {
+class GrpcRequestHandlerImpl(
+    stateDAO: PersistentStateDAO[Task],
+    stubResolver: GrpcStubResolver,
+    implicit val jsSandbox: GraalJsSandbox
+) extends GrpcRequestHandler {
   override def exec(bytes: Array[Byte]): RIO[WLD & RequestContext, Array[Byte]] =
     for {
       context <- ZIO.service[RequestContext]
