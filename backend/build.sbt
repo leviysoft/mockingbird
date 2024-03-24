@@ -34,7 +34,7 @@ val dataAccess = (project in file("dataAccess"))
       "com.chuusai"                  %% "shapeless"                       % "2.3.3",
       "org.julienrf"                 %% "enum-labels"                     % "3.1",
       "tf.tofu"                      %% "derevo-core"                     % Versions.derevo,
-      "com.softwaremill.magnolia1_2" %% "magnolia"                        % "1.1.2",
+      "com.softwaremill.magnolia1_2" %% "magnolia"                        % "1.1.8",
       "com.google.code.findbugs"      % "jsr305"                          % "3.0.2" % Optional
     ) ++ Dependencies.scalatest ++ Dependencies.scalacheck ++ Dependencies.json ++ Dependencies.refined,
     libraryDependencies ++= Dependencies.reflect(scalaVersion.value),

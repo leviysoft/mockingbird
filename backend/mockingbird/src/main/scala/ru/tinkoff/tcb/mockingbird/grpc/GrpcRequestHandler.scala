@@ -4,15 +4,19 @@ import io.circe.Json
 import io.circe.syntax.KeyOps
 import io.grpc.CallOptions
 import io.grpc.ManagedChannelBuilder
+import mouse.option.*
 import scalapb.zio_grpc.RequestContext
 import scalapb.zio_grpc.ZManagedChannel
 import scalapb.zio_grpc.client.ClientCalls
 import zio.Duration
+import zio.interop.catz.core.*
 
 import ru.tinkoff.tcb.mockingbird.api.Tracing
 import ru.tinkoff.tcb.mockingbird.api.WLD
+import ru.tinkoff.tcb.mockingbird.dal.PersistentStateDAO
 import ru.tinkoff.tcb.mockingbird.error.StubSearchError
 import ru.tinkoff.tcb.mockingbird.grpc.GrpcExractor.FromGrpcProtoDefinition
+import ru.tinkoff.tcb.mockingbird.misc.Renderable.ops.*
 import ru.tinkoff.tcb.mockingbird.model.FillResponse
 import ru.tinkoff.tcb.mockingbird.model.GProxyResponse
 import ru.tinkoff.tcb.mockingbird.model.PersistentState
@@ -24,7 +28,8 @@ trait GrpcRequestHandler {
   def exec(bytes: Array[Byte]): RIO[WLD & RequestContext, Array[Byte]]
 }
 
-class GrpcRequestHandlerImpl(stubResolver: GrpcStubResolver) extends GrpcRequestHandler {
+class GrpcRequestHandlerImpl(stateDAO: PersistentStateDAO[Task], stubResolver: GrpcStubResolver)
+    extends GrpcRequestHandler {
   override def exec(bytes: Array[Byte]): RIO[WLD & RequestContext, Array[Byte]] =
     for {
       context <- ZIO.service[RequestContext]
@@ -42,6 +47,13 @@ class GrpcRequestHandlerImpl(stubResolver: GrpcStubResolver) extends GrpcRequest
         "seed" := seed,
         "state" := state.data
       )
+      persist = stub.persist
+      _ <- persist
+        .cata(spec => stateDAO.upsertBySpec(state.id, spec.fill(data)).map(_.successful), ZIO.succeed(true))
+      _ <- persist
+        .map(_.keys.map(_.path).filter(_.startsWith("_")).toVector)
+        .filter(_.nonEmpty)
+        .cata(_.traverse(stateDAO.createIndexForDataField), ZIO.unit)
       responseSchema = stub.responseSchema
       response <- stub.response match {
         case FillResponse(rdata, delay) =>
@@ -85,7 +97,8 @@ class GrpcRequestHandlerImpl(stubResolver: GrpcStubResolver) extends GrpcRequest
 }
 
 object GrpcRequestHandlerImpl {
-  val live: URLayer[GrpcStubResolver, GrpcRequestHandler] = ZLayer.fromFunction(new GrpcRequestHandlerImpl(_))
+  val live: URLayer[PersistentStateDAO[Task] & GrpcStubResolver, GrpcRequestHandlerImpl] =
+    ZLayer.fromFunction(new GrpcRequestHandlerImpl(_, _))
 }
 
 object GrpcRequestHandler {
