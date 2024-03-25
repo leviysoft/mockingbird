@@ -1,19 +1,16 @@
-# Работа с очередями
+# Working with Queues
 
-Mockingbird взаимодействует с брокерами сообщений через HTTP API, благодаря чему теоретически поддерживаются любые возможные MQ.
-На практике некоторе брокеры требуют установки дополнительных sidecar-коробок, как, например, HTTP-Bridge для WebsphereMQ или rest-proxy для Kafka.
-Здесь мы рассмотрим примеры настройки mockingbird для работы с различными MQ.
-Примеры ниже являются шаблонами, по которым можно самостоятельно настроить Mockingbird через UI
+Mockingbird interacts with message brokers through an HTTP API, theoretically supporting any possible MQ. In practice, some brokers require the installation of additional sidecar solutions, such as an HTTP-Bridge for WebsphereMQ or a rest-proxy for Kafka. Here, we will look at examples of configuring Mockingbird to work with various MQs. The examples below are templates that you can use to configure Mockingbird through the UI.
 
 ## RabbitMQ
 
-RabbitMQ имеет встроенный rest API, благодаря чему установка доплнительных решений не требуется.
+RabbitMQ has a built-in rest API, eliminating the need for additional solutions.
 
-Официальная документация: https://www.rabbitmq.com/management.html#http-api
+Official documentation: https://www.rabbitmq.com/management.html#http-api
 
-Пример конфигурации source (mockingbird читает из очереди):
+Example configuration for source (mockingbird reads from a queue):
 ```
-Запрос:
+Request:
 
 {
   "body": "{\"count\":1,\"ackmode\":\"ack_requeue_false\",\"encoding\":\"auto\"}",
@@ -28,20 +25,20 @@ RabbitMQ имеет встроенный rest API, благодаря чему �
 }
 ```
 
-Назначение большинства полей понятно из названий, но назначение некоторых поля стоит раскрыть подробно:
-- `jenumerate` - наличие этого поля означает, что в ответе метода может быть несколько сообщений, значение представляет собой путь до поля с массивом. В данном случае массив находится непосредственно в корне ответа
-- `jextract` - путь до содержимого сообщения в ответе. В данном случае это поле `payload`
-- `jstringdecode` - признак того, что сообщение является json-строкой, в которой содержится экранированый JSON. При установке jstringdecode в true этот JSON будет распаршен
+The purpose of most fields is clear from their names, but some require detailed explanation:
+- `jenumerate` - the presence of this field means that the method response can contain multiple messages, and the value represents the path to the array field. In this case, the array is directly at the root of the response.
+- `jextract` - the path to the message content in the response. In this case, it is the `payload` field.
+- `jstringdecode` - indicates that the message is a json-string containing escaped JSON. Setting `jstringdecode` to true will parse this JSON.
 
-Использование этих трёх полей имеет смысл только для API, возвращающих JSON и может в ином случае приводить к ошибкам
+Using these three fields makes sense only for APIs that return JSON and may otherwise lead to errors.
 
-Пример конфигурации destination (mockingbird пишет в очередь):
+Example configuration for destination (mockingbird writes to a queue):
 ```
-Запрос:
+Request:
 
 {
   "body": {
-    "payload": "${_message}", // сюда подставляется ответ, который сформировал мок
+    "payload": "${_message}", // here, the mock's response is inserted
     "payload_encoding": "string",
     "properties": {},
     "routing_key": "<routing_key>"
@@ -55,16 +52,16 @@ RabbitMQ имеет встроенный rest API, благодаря чему �
 }
 ```
 
-Назначение большинства полей понятно из названий, но назначение некоторых поля стоит раскрыть подробно:
-- `stringifybody` - означает, что ответ, сформированый моком, нужно заэкранировать и передать в шаблонизатор как JSON строку
+The purpose of most fields is clear from their names, but some require detailed explanation:
+- `stringifybody` - means that the mock's response should be escaped and passed to the templating engine as a JSON string.
 
 ## WebsphereMQ
 
-Для работы с WebsphereMQ требуется установка [IBM MQ bridge for HTTP](https://www.ibm.com/docs/en/ibm-mq/8.0?topic=mq-bridge-http)
+Working with WebsphereMQ requires the installation of [IBM MQ bridge for HTTP](https://www.ibm.com/docs/en/ibm-mq/8.0?topic=mq-bridge-http).
 
-Пример конфигурации source (mockingbird читает из очереди):
+Example configuration for source (mockingbird reads from a queue):
 ```
-Запрос:
+Request:
 
 {
   "bypassCodes": [504],
@@ -76,12 +73,12 @@ RabbitMQ имеет встроенный rest API, благодаря чему �
 }
 ```
 
-Назначение большинства полей понятно из названий, но назначение некоторых поля стоит раскрыть подробно:
-- `bypassCodes` - коды ответа сервера, которые не следует считать ошибочными. В данном случае 504 это признак отсутсвия сообщений, что является нормой
+The purpose of most fields is clear from their names, but some require detailed explanation:
+- `bypassCodes` - server response codes that should not be considered errors. In this case, 504 indicates no messages, which is normal.
 
-Пример конфигурации destination (mockingbird пишет в очередь):
+Example configuration for destination (mockingbird writes to a queue):
 ```
-Запрос:
+Request:
 
 {
   "headers": {
@@ -96,15 +93,15 @@ RabbitMQ имеет встроенный rest API, благодаря чему �
 
 ## Kafka
 
-Для работы с Kafka требуется установить и настроить [Kafka REST Proxy](https://github.com/confluentinc/kafka-rest)
+Working with Kafka requires the installation and configuration of the [Kafka REST Proxy](https://github.com/confluentinc/kafka-rest).
 
-Чтение из топиков кафки с помощью Kafka REST Proxy требует дополнительного созданию (и удаления) консьюмеров и подписок, для этого предусмотрены блоки Init и Shutdown.
+Reading from Kafka topics via the Kafka REST Proxy requires additional creation (and deletion) of consumers and subscriptions, for which the Init and Shutdown blocks are provided.
 
-`<consumer_name>` и `<consumer_instance_name>` - произвольные уникальные в рамках конфига имена
+`<consumer_name>` and `<consumer_instance_name>` are arbitrary unique names within the config.
 
-Пример конфигурации source (mockingbird читает JSON из топика):
+Example configuration for source (mockingbird reads JSON from a topic):
 ```
-Запрос:
+Request:
 
 {
   "headers": {
@@ -116,7 +113,7 @@ RabbitMQ имеет встроенный rest API, благодаря чему �
   "url": "http://<kafka_rest_proxy_host>/consumers/<consumer_name>/instances/<consumer_instance_name>/records"
 }
 
-Init: 
+Init:
 
 [
   {
@@ -157,9 +154,9 @@ ReInit triggers:
 ]
 ```
 
-Пример конфигурации source (mockingbird читает Avro из топика):
+Example configuration for source (mockingbird reads Avro from a topic):
 ```
-Запрос:
+Request:
 
 {
   "headers": {
@@ -212,21 +209,21 @@ ReInit triggers:
 ]
 ```
 
-Назначение большинства полей понятно из названий, но назначение некоторых поля стоит раскрыть подробно:
-- `jenumerate` - наличие этого поля означает, что в ответе метода может быть несколько сообщений, значение представляет собой путь до поля с массивом. В данном случае массив находится непосредственно в корне ответа 
-- `jextract` - путь до содержимого сообщения в ответе. В данном случае это поле `value`
+The purpose of most fields is clear from their names, but the purpose of some fields is worth detailing:
+- `jenumerate` - the presence of this field means that the method response can contain multiple messages, with the value representing the path to the array field. In this case, the array is directly at the root of the response.
+- `jextract` - the path to the content of the message in the response. In this case, it is the `value` field.
 
-kafka-rest-proxy на данный момент (май 2022) [не поддерживает](https://github.com/confluentinc/kafka-rest/issues/620) топики, в которых сообщение сериализуется в Avro, а ключ - нет
+As of May 2022, kafka-rest-proxy [does not support](https://github.com/confluentinc/kafka-rest/issues/620) topics in which the message is serialized in Avro but the key is not.
 
-Пример конфигурации destination (mockingbird пишет JSON в топик):
+Example configuration for destination (mockingbird writes JSON to a topic):
 ```
-Запрос:
+Request:
 
 {
   "body": {
     "records": [
       {
-        "value": "${_message}" //сюда подставляется ответ, который сформировал мок
+        "value": "${_message}" // here, the mock's response is inserted
       }
     ]
   },
@@ -238,20 +235,20 @@ kafka-rest-proxy на данный момент (май 2022) [не поддер
 }
 ```
 
-Пример конфигурации destination (mockingbird пишет Avro в топик):
+Example configuration for destination (mockingbird writes Avro to a topic):
 ```
-Запрос:
+Request:
 
 {
   "body": {
-    "key_schema_id": <id схемы ключа из registry (целое число)>,
+    "key_schema_id": <key schema id from registry (integer)>,
     "records": [
       {
         "key": "${_message.key}",
         "value": "${_message.value}"
       }
     ],
-    "value_schema_id": <id схемы значения из registry (целое число)>
+    "value_schema_id": <value schema id from registry (integer)>
   },
   "headers": {
     "Content-Type": "application/vnd.kafka.avro.v2+json"
@@ -261,13 +258,13 @@ kafka-rest-proxy на данный момент (май 2022) [не поддер
 }
 ```
 
-Дополнительные пояснения:
-данный пример предполагает, что ответ мока выглядит следующим образом:
+Additional explanations:
+This example assumes that the mock's response looks as follows:
 ```
 {
-  "key": <содержимое ключа>,
-  "value": <содержимое сообщения>
+  "key": <key content>,
+  "value": <message content>
 }
 ```
 
-kafka-rest-proxy на данный момент (май 2022) [не поддерживает](https://github.com/confluentinc/kafka-rest/issues/620) топики, в которых сообщение сериализуется в Avro, а ключ - нет
+As of May 2022, kafka-rest-proxy [does not support](https://github.com/confluentinc/kafka-rest/issues/620) topics in which the message is serialized in Avro but the key is not.
