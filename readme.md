@@ -1,39 +1,39 @@
-<img align="left" src="img/mascot.png" height="150px" style="padding-left: 20px"/>
+<img align="left" src="img/mascot.png" height="150px" style="padding-right: 50px"/>
 
 # mockingbird
 
-mockingbird - сервис эмуляции REST-сервисов и сервисов с интерфейсами-очередями
+mockingbird - a service for emulating REST services and queue-interface services
 
-[Руководство по инсталляции](deployment.md)
+[Installation Guide](deployment.md)
 
-[Руководство по настройке](configuration.md)
+[Configuration Guide](configuration.md)
 
-[Работа с очередями](message-brokers.md)
+[Working with Message Brokers](message-brokers.md)
 
-## Общие принципы работы
+[Readme in Russian](readme_ru.md)
 
-mockingbird поддерживает следующие сценарии:
+## General Principles of Operation
 
-* прогон конкретного кейса с конкретным набором событий и HTTP/GRPC ответов
-* постоянная имитация happy-path для обеспечения автономности контура(ов)
+mockingbird supports the following scenarios:
 
-Типы конфигураций:
-* countdown - автономные конфигурации для тестирования конкретного сценария. Имеют наивысший приоритет при разрешении неоднозначностей. Каждый мок срабатывает n раз (количество задаётся при создании). Автоматически удаляются в полночь.
-* ephemeral - конфигурации, автоматически удаляемые в полночь. Если одновременно вызывают метод/приходит сообщение, для которого подходит countdown и ephemeral моки - сработает countdown.
-* persistent - конфигурация, предназначеная для постоянной работы. Имеет наименьший приоритет
+* Execution of a specific case with a specific set of events and HTTP/GRPC responses
+* Constant emulation of a happy-path to ensure autonomy of the stage environment(s)
 
->Пример небольшого кейса (короткая заявка) - в конце спецификации
+Types of configurations:
+* countdown - standalone configurations for testing a specific scenario. They have the highest priority when resolving ambiguities. Each mock is triggered n times (the number is set during creation). Automatically deleted at midnight.
+* ephemeral - configurations that are automatically deleted at midnight. If a method/message is called/arrives simultaneously, for which both countdown and ephemeral mocks are suitable - countdown will be triggered.
+* persistent - configuration intended for continuous operation. Has the lowest priority
 
-## Сервисы
+## Services
 
-Для упорядочения моков в UI и минимизации количества конфликтных ситуаций в mockingbird реализованы т.н. сервисы. Каждый мок (как HTTP так и сценарий) всегда принадлежит к какому-то из сервисом.
-Сервисы создаются заранее и хранятся в базе. Сервис имеет suffix (являющийся по совместительству уникальным id сервиса) и человекочитаемый name.
+To organize mocks in the UI and minimize the number of conflict situations, so-called services are implemented in mockingbird. Each mock (both HTTP and scenario) always belongs to one of the services.
+Services are created in advance and stored in the database. A service has a suffix (which also serves as the unique service id) and a human-readable name.
 
-## Шаблонизатор JSON
+## JSON Templating
 
-Для достижения гибкости при сохранении относительной простоты конфигов в сервисе реализован JSON шаблонизатор. Для начала простой пример:
+To achieve flexibility while maintaining the relative simplicity of configurations, a JSON templating feature is implemented in the service. To start, here's a simple example:
 
-Шаблон:
+Template:
 ```javascript
 {
   "description": "${description}",
@@ -45,7 +45,7 @@ mockingbird поддерживает следующие сценарии:
 }
 ```
 
-Значения для подстановки:
+Values for substitution:
 ```javascript
 {
   "description": "Some description",
@@ -59,7 +59,7 @@ mockingbird поддерживает следующие сценарии:
 }
 ```
 
-Результат:
+Result:
 ```javascript
 {
   "description": "Some description",
@@ -71,15 +71,15 @@ mockingbird поддерживает следующие сценарии:
 }
 ```
 
-В данный момент поддерживается следующий синтаксис:
-* `${a.[0].b}` - подстановка значения (JSON)
-* `${/a/b/c}` - подстановка значения (XPath)
+Currently, the following syntax is supported:
+* `${a.[0].b}` - value substitution (JSON)
+* `${/a/b/c}` - value substitution (XPath)
 
-ВНИМАНИЕ! НЕ ИСПОЛЬЗУЙТЕ НЕЙМСПЕЙСЫ В XPATH ВЫРАЖЕНИЯХ
+WARNING! DO NOT USE NAMESPACES IN XPATH EXPRESSIONS
 
-## Шаблонизатор XML
+## XML Templating
 
-Шаблон:
+Template:
 ```
 <root>
     <tag1>${/r/t1}</tag1>
@@ -87,7 +87,7 @@ mockingbird поддерживает следующие сценарии:
 </root>
 ```
 
-Значения для подстановки:
+Values for substitution:
 ```
 <r>
     <t1>test</t1>
@@ -95,7 +95,7 @@ mockingbird поддерживает следующие сценарии:
 </r>
 ```
 
-Результат:
+Result:
 ```
 <root>
     <tag1>test</tag1>
@@ -103,126 +103,124 @@ mockingbird поддерживает следующие сценарии:
 </root>
 ```
 
-## Состояния (state)
+## States (state)
 
-Для поддержки сложных сценариев сервис поддерживает сохранение произвольных состояний. Состояние - документ с произвольной схемой, технически состояние - документ в mongodb. Запись новых состояний может происходить:
-* при записи в state (секция persist) с пустым (или отсутствующим) предикатом (секция state)
+To support complex scenarios, the service supports saving arbitrary states. A state is a document with an arbitrary schema, technically a state is a document in MongoDB. Writing new states can occur:
+* when writing to state (the persist section) with an empty (or missing) predicate (the state section)
 
-## Манипуляции со state
+## State Manipulations
 
-State аккумулятивно дописывается. Разрешено переписывание полей.
+State is cumulatively appended. Overwriting fields is allowed.
 
-Поля, по которым будем производиться поиск (используемые в предикатах) должны начинаться с "_".
-> для таких полей будет автоматически создаваться sparse индекс
+Fields used for searching (used in predicates) must start with "_".
+> a sparse index will be automatically created for such fields
 
-Префиксы:
-* `seed` - значения из блока seed (рандомизируемые на старте заявки)
-* `state` - текущий state
-* `req` - тело запроса (режимы json, jlens, xpath)
-* `message` - тело собщения (в сценариях)
-* `query` - query параметры (в заглушках)
-* `pathParts` - значения, извлекаемые из URL (в заглушках) см. `Экстрация данных из URL`
-* `extracted` - извлечённые значения
-* `headers` - HTTP заголовки
-
-```javascript
-{
-  "a": "Просто строка", //В поле "a" записывается константа (может быть любое JSON значение)
-  "b": "${req.fieldB}", //В поле "b" записывается значение из поля fieldB запроса
-  "c": "${state.c}", //В поле "c" записывается значение из поля "c" текущего состояния
-  "d": "${req.fieldA}: ${state.a}" //В поле d запишется строка, содержащая req.fieldA и state.a
-}
-```
-
-## Поиск state
-
-Предикаты для поиска state перечисляются в блоке `state`. Пустой объект (`{}`) в поле state недопустим.
-Для поиска state можно использовать данные запроса (без префикса), query параметры (префикс `__query`), значения, извлекаемые из URL (префикс `__segments`) и HTTP заголовки (префикс `__headers`)
-
-Пример:
+Prefixes:
+* `seed` - values from the seed block (randomized at the start of the application)
+* `state` - the current state
+* `req` - the request body (modes json, jlens, xpath)
+* `message` - the message body (in scenarios)
+* `query` - query parameters (in stubs)
+* `pathParts` - values extracted from the URL (in stubs) see `Data Extraction from URL`
+* `extracted` - extracted values
+* `headers` - HTTP headers
 
 ```javascript
 {
-  "_a": "${fieldB}", //поле из тела запроса
-  "_b": "${__query.arg1}", //query параметр
-  "_c": "${__segments.id}", //сегмент URL, см. `Экстрация данных из URL`
-  "_d": "${__headers.Accept}" //HTTP заголовок
+  "a": "Just a string", //The field "a" is assigned a constant (can be any JSON value)
+  "b": "${req.fieldB}", //The field "b" is assigned the value from the fieldB of the request
+  "c": "${state.c}", //The field "c" is assigned the value from the "c" field of the current state
+  "d": "${req.fieldA}: ${state.a}" //The field d will contain a string consisting of req.fieldA and state.a
 }
 ```
 
+## State Search
+
+Predicates for state search are listed in the `state` block. An empty object (`{}`) in the state field is not allowed.
+For state search, request data (without prefix), query parameters (prefix `__query`), values extracted from the URL (prefix `__segments`), and HTTP headers (prefix `__headers`) can be used
+
+Example:
+
+```javascript
+{
+  "_a": "${fieldB}", //field from the request body
+  "_b": "${__query.arg1}", //query parameter
+  "_c": "${__segments.id}", //URL segment, see `Data Extraction from URL`
+  "_d": "${__headers.Accept}" //HTTP header
+}
+```
 
 ## Seeding
 
-Иногда возникает необходимость сгенерировать случайное значение и сохранить и/или вернуть его в результате работы мока.
-Для поддержки таких сценариев сделано поле seed, позволяющее задать переменные, которые будут сгенерированы
-при инициализации мока. Это позволяет избежать необходимости пересоздавать моки с захардкожеными id
+Sometimes there is a need to generate a random value and save and/or return it as a result of the mock's operation.
+To support such scenarios, a seed field is provided, allowing to set variables that will be generated
+at the mock's initialization. This avoids the need to recreate mocks with hardcoded ids
 
-В seed'ах поддерживается выполнение JavaScript, для поддержки обратной совместимости с синтаксисом псевдофункций определены следующие функции:
-* `%{randomString(n)}` - подстановка случайной строки длиной n
-* `%{randomString("ABCDEF1234567890", m, n)}` - подстановка случайной строки, состоящей из символов `ABCDEF1234567890` длиной в интервале [m, n)
-* `%{randomNumericString(n)}` - подстановка случайной строки, состоящей только из цифр, длиной n
-* `%{randomInt(n)}` - подстановка случайного Int в диапазоне [0, n)
-* `%{randomInt(m,n)}` - подстановка случайного Int в диапазоне [m, n)
-* `%{randomLong(n)}` - подстановка случайного Long в диапазоне [0, n)
-* `%{randomLong(m,n)}` - подстановка случайного Long в диапазоне [m, n)
-* `%{UUID()}` - подстановка случайного UUID
-* `%{now("yyyy-MM-dd'T'HH:mm:ss")}` - текущее время в заданном [формате](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)
-* `%{today("yyyy-MM-dd")}` - текущая дата в заданном [формате](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)
+JavaScript evaluation is supported in seeds. The following functions are defined for backwards compatibility with "pseudofunctions":
+* `%{randomString(n)}` - substitution of a random string of length n
+* `%{randomString("ABCDEF1234567890", m, n)}` - substitution of a random string consisting of `ABCDEF1234567890` characters in the range [m, n)
+* `%{randomNumericString(n)}` - substitution of a random string consisting only of digits, of length n
+* `%{randomInt(n)}` - substitution of a random Int in the range [0, n)
+* `%{randomInt(m,n)}` - substitution of a random Int in the range [m, n)
+* `%{randomLong(n)}` - substitution of a random Long in the range [0, n)
+* `%{randomLong(m,n)}` - substitution of a random Long in the range [m, n)
+* `%{UUID}` - substitution of a random UUID
+* `%{now(yyyy-MM-dd'T'HH:mm:ss)}` - the current time in the specified [format](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)
+* `%{today(yyyy-MM-dd)}` - the current date in the specified [format](https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html)
 
-Можно определять строки со сложным форматом: `%{randomInt(10) +': ' + randomLong(10) + ' | '  + {randomString(12)}`, поддерживаются все псевдофункции из списка выше
+Complex formatted strings can be defined: `%{randomInt(10)}: %{randomLong(10)} | %{randomString(12)}`, all pseudo-functions from the list above are supported
 
-## Резолвинг заглушек/сценариев
+## Resolving Stubs/Scenarios
 
-> Найденые заглушки - кандидаты, оставшиеся после валидации URL, заголовков и тела запроса
-> Найденые сценарии - кандидаты, оставшиеся после валидации тела сообщения
+> Found stubs - candidates remaining after validation of URL, headers, and request body
+> Found scenarios - candidates remaining after validation of the message body
 
-| Найденые заглушки (сценарии) | Требуется состояние | Найдено состояний | Результат |
-| ---------------------------  | ------------------- | ----------------- | --------- |
-| №1                           | нет                 | -                 | Сработает №1 |
-| №1                           | да                  | 0                 | Ошибка |
-| №1                           | да                  | 1                 | Сработает №1 |
-| №1<br>№2                     | нет<br>нет          | -                 | Ошибка |
-| №1<br>№2                     | нет<br>да           | -<br>0            | Сработает №1 |
-| №1<br>№2                     | нет<br>да           | -<br>1            | Сработает №2 |
-| №1<br>№2                     | нет<br>да           | -<br>2 (и более)  | Ошибка |
-| №1<br>№2                     | да<br>да            | 0<br>0            | Ошибка |
-| №1<br>№2                     | да<br>да            | 0<br>1            | Сработает №2 |
-| №1<br>№2                     | да<br>да            | 0<br>2 (и более)  | Ошибка |
-| №1<br>№2                     | да<br>да            | 1<br>1 (и более)  | Ошибка |
-| №1<br>№2<br>№3               | да<br>да<br>да      | 0<br>1<br>0       | Сработает №2 |  
-| №1<br>№2<br>№3               | да<br>да<br>да      | 0<br>1<br>1       | Ошибка |    
-| №1<br>№2<br>№3               | да<br>да<br>да      | 0<br>2<br>0       | Ошибка |           
+| Found Stubs (Scenarios)      | State Required      | States Found       | Result         |
+| ---------------------------- | ------------------- | ------------------ | -------------- |
+| №1                           | No                  | -                  | №1 is triggered |
+| №1                           | Yes                 | 0                  | Error          |
+| №1                           | Yes                 | 1                  | №1 is triggered |
+| №1<br>№2                     | No<br>No            | -                  | Error          |
+| №1<br>№2                     | No<br>Yes           | -<br>0             | №1 is triggered |
+| №1<br>№2                     | No<br>Yes           | -<br>1             | №2 is triggered |
+| №1<br>№2                     | No<br>Yes           | -<br>2 (and more)  | Error          |
+| №1<br>№2                     | Yes<br>Yes          | 0<br>0             | Error          |
+| №1<br>№2                     | Yes<br>Yes          | 0<br>1             | №2 is triggered |
+| №1<br>№2                     | Yes<br>Yes          | 0<br>2 (and more)  | Error          |
+| №1<br>№2                     | Yes<br>Yes          | 1<br>1 (and more)  | Error          |
+| №1<br>№2<br>№3               | Yes<br>Yes<br>Yes   | 0<br>1<br>0        | №2 is triggered |  
+| №1<br>№2<br>№3               | Yes<br>Yes<br>Yes   | 0<br>1<br>1        | Error |    
+| №1<br>№2<br>№3               | Yes<br>Yes<br>Yes   | 0<br>2<br>0        | Error |           
 
-## Эмуляция REST сервисов
+## Emulating REST Services
 
-Алгоритм работы:
+Workflow:
+1. Search for a mock by URL/HTTP-verb/headers
+2. Body validation
+3. Search for state by predicate
+4. Substitution of values in the response template
+5. State modification
+6. Sending the response
 
-1. Поиск мока по URL/HTTP-verb/заголовков
-2. Валидация body
-3. Поиск state по предикату
-4. Подстановка значений в шаблон ответа
-5. Модификация state
-6. Отдача response
+### Configuration of HTTP Stubs
 
-### Конфигурация HTTP заглушек
+HTTP headers are validated for exact match values, extra headers are not considered an error
 
-HTTP заголовки валидируются на полное соответствие значений, лишние заголовки не являются ошибкой
+Request body validation in HTTP stubs can work in the following modes:
+* no_body - the request must be without a body
+* any_body - the request body must be non-empty, while it is not parsed or checked
+* raw - the request body is not parsed and is checked for full correspondence with the content of request.body
+* json - the request body must be a valid JSON and is checked for correspondence with the content of request.body
+* xml - the request body must be a valid XML and is checked for correspondence with the content of request.body
+* jlens - the request body must be a valid JSON and is validated according to conditions described in request.body
+* xpath - the request body must be a valid XML and is validated according to conditions described in request.body
+* web_form - the request body must be in x-www-form-urlencoded format and is validated according to conditions described in request.body
+* multipart - the request body must be in multipart/form-data format. Validation rules for parts are configured individually (see the section below)
 
-Валидация тела запросы в HTTP заглушках может работать в следующих режимах:
-* no_body - запрос должен быть без тела
-* any_body - тело запроса должно быть не пустым, при этом никак не парсится и не проверяется
-* raw - тело запроса никак не парсится и проверяется на полное соответствие с содержимым request.body
-* json - тело запроса должно быть валидным JSON'ом и проверяется на соответствие с содержимым request.body
-* xml - тело запроса должно быть валидным XML и проверяется на соответствие с содержимым request.body
-* jlens - тело запроса должно быть валидным JSON'ом и валидируется по условиям, описаным в request.body
-* xpath - тело запроса должно быть валидным XML и валидируется по условиям, описаным в request.body
-* web_form - тело запроса должно быть в формате x-www-form-urlencoded и валидируется по условиям, описаным в request.body
-* multipart - тело запроса должно быть в формате multipart/form-data. Правила валидации частей конфигурируются индивидуально (см. раздел ниже) 
-
-ВНИМАНИЕ! multipart запросы необходимо выполнять на отдельный метод -
+ATTENTION! multipart requests must be made to a separate method -
 /api/mockingbird/execmp
 
-Для ответов поддерживаются следующие режимы:
+For responses, the following modes are supported:
 * raw
 * json
 * xml
@@ -232,19 +230,16 @@ HTTP заголовки валидируются на полное соотве�
 * xml-proxy
 * no_body
 
-Режим `no_body` в ответе нужен если заглушка возвращает код 204 или 304. Данные коды выделяются от остальных тем, что у них не может быть никакого тела в ответе, данное поведение описано в [RFC 7231](https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.5) и [RFC 7232](https://datatracker.ietf.org/doc/html/rfc7232#section-4.1). Режим `no_body` можно использовать и с остальными HTTP кодами, но для указных он является обязательным.
+The `no_body` mode in the response is needed if the stub returns a 204 or 304 code. These codes are distinguished from others by the fact that they cannot have any body in the response, this behavior is described in [RFC 7231](https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.5) and [RFC 7232](https://datatracker.ietf.org/doc/html/rfc7232#section-4.1). The `no_body` mode can also be used with other HTTP codes, but it is mandatory for the specified ones.
 
-Режимы request и response полностью независимы друг от друга (можно сконфигурировать ответ xml'ем на json запрос при желании, кроме режимов json-proxy и xml-proxy).
+Request and response modes are completely independent of each other (you can configure a response in XML to a JSON request if desired, except for json-proxy and xml-proxy modes).
 
-В поле delay можно передать корректный FiniteDuration не дольше 30 секунд
+In the delay field, you can pass a correct FiniteDuration no longer than 30 seconds
 
-### Экстрация данных из URL
-Бывает, что URL содержит какой-нибудь идентификатор не как параметр, а как непосредственно часть пути. В таких случаях становится невозможным
-описать persistent заглушку из-за невозможности полного совпадения пути. На помощь приходит поле pathPattern, в которое можно передать регулярку,
-на соответствие которой будет проверяться путь. Отмечу, что хоть сопоставление и производится в монге эффективным способом, злоупотребять этой
-возможностью не стоит и при возможности сопоставления по полному совпадению не следует использовать pathPattern
+### Data Extraction from URL
+Sometimes, a URL contains an identifier not as a parameter but as a direct part of the path. In such cases, it becomes impossible to describe a persistent stub due to the inability to have a full path match. This is where the `pathPattern` field comes in handy, into which a regex can be passed, and the path will be checked for a match against this regex. It should be noted that although the matching is done in MongoDB in an efficient manner, this feature should not be abused, and the `pathPattern` should not be used if matching by full equality is possible.
 
-Пример:
+Example:
 ```javascript
 {
   "name": "Sample stub",
@@ -264,43 +259,43 @@ HTTP заголовки валидируются на полное соотве�
   }
 }
 ```
-То, что нужно извлечь из пути, нужно делать _именованой_ группой, групп может быть сколько угодно, впоследствии на них можно ссылаться через `pathParts.<имя_группы>`
+Anything that needs to be extracted from the path should be done with a _named_ group, and there can be as many groups as needed. Later on, these can be referred to through `pathParts.<group_name>`.
 
-### Экстракторы
-В некоторых случаях нужно подставить в ответ данные, которые невозможно извлечь простыми средствами. Для этих целей были добавлены экстракторы
+### Extractors
+In some cases, it's necessary to insert into the response data that cannot be extracted by simple means. For these purposes, extractors have been added.
 
-#### Экстрактор xcdata
+#### xcdata Extractor
 
-Достаёт значения из XML, лежащего в CDATA
+Extracts values from XML located within CDATA.
 
-конфигурация:
+Configuration:
 ```javascript
 {
   "type": "xcdata",
-  "prefix": "/root/inner/tag", //Путь до тэга с CDATA
-  "path": "/path/to" //Путь до нужного тэга
+  "prefix": "/root/inner/tag", // Path to the tag with CDATA
+  "path": "/path/to" // Path to the desired tag
 }
 ```
 
-#### Экстрактор jcdata
+#### jcdata Extractor
 
-Достаёт значения из JSON, лежащего в CDATA
+Extracts values from JSON located within CDATA.
 
-конфигурация:
+Configuration:
 ```javascript
 {
   "type": "jcdata",
-  "prefix": "/root/inner/tag", //Путь до тэга с CDATA
-  "path": "path.to" //Путь до нужного значения
+  "prefix": "/root/inner/tag", // Path to the tag with CDATA
+  "path": "path.to" // Path to the desired value
 }
 ```
 
-#### CDATA inlining
-Иногда приходится иметь дело с запросами, в которых внутри CDATA лежит XML. В таких случаях можно заинлайнить содержимое DATA с помощью параметра `inlineCData` (поддерживается в `xpath` и `xml`)
+#### CDATA Inlining
+Sometimes you have to deal with requests in which XML is nested inside CDATA. In such cases, you can inline the CDATA content using the `inlineCData` parameter (supported in `xpath` and `xml`).
 
-### Примеры
+### Examples
 
-#### Полное совпадение, режим json
+#### Exact Match, json Mode
 
 ```javascript
 {
@@ -308,7 +303,7 @@ HTTP заголовки валидируются на полное соотве�
     "method": "POST",
     "path": "/pos-loans/api/cl/get_partner_lead_info",
     "state": {
-      // Предикаты
+      // Predicates
     },
     "request": {
         "headers": {"Content-Type": "application/json"},
@@ -319,7 +314,7 @@ HTTP заголовки валидируются на полное соотве�
         }
     },
     "persist": {
-      // Модификации состояния
+      // State modifications
     },
     "response": {
         "code": 200,
@@ -337,27 +332,27 @@ HTTP заголовки валидируются на полное соотве�
 }
 ```
 
-#### Полное совпадение, режим raw
+#### Exact Match, raw Mode
 
 ```javascript
 {
     "name": "Sample stub",
     "method": "POST",
-    "path": "/pos-loans/api/evil/soap/service"
+    "path": "/pos-loans/api/evil/soap/service",
     "state": {
-      // Предикаты
+      // Predicates
     },
     "request": {
         "headers": {"Content-Type": "application/xml"},
-        "mode": "raw"
+        "mode": "raw",
         "body": "<xml><request type=\"rqt\"></request></xml>"
     },
     "persist": {
-      // Модификации состояния
+      // State modifications
     },
     "response": {
         "code": 200,
-        "mode": "raw"
+        "mode": "raw",
         "body": "<xml><response type=\"rqt\"></response></xml>",
         "headers": {"Content-Type": "application/xml"},
         "delay": "1 second"
@@ -365,7 +360,7 @@ HTTP заголовки валидируются на полное соотве�
 }
 ```
 
-#### Валидация по условиям, режим jlens
+#### Condition Validation, jlens Mode
 
 ```javascript
 {
@@ -373,7 +368,7 @@ HTTP заголовки валидируются на полное соотве�
     "method": "POST",
     "path": "/pos-loans/api/cl/get_partner_lead_info",
     "state": {
-      // Предикаты
+      // Predicates
     },
     "request": {
         "headers": {"Content-Type": "application/json"},
@@ -383,7 +378,7 @@ HTTP заголовки валидируются на полное соотве�
         }
     },
     "persist": {
-      // Модификации состояния
+      // State modifications
     },
     "response": {
         "code": 200,
@@ -401,9 +396,9 @@ HTTP заголовки валидируются на полное соотве�
 }
 ```
 
-#### Валидация по условиям, режим xpath
+#### Condition Validation, xpath Mode
 
-ВНИМАНИЕ! НЕ ИСПОЛЬЗУЙТЕ НЕЙМСПЕЙСЫ В XPATH ВЫРАЖЕНИЯХ
+WARNING! DO NOT USE NAMESPACES IN XPATH EXPRESSIONS
 
 ```javascript
 {
@@ -411,7 +406,7 @@ HTTP заголовки валидируются на полное соотве�
     "method": "POST",
     "path": "/pos-loans/api/cl/get_partner_lead_info",
     "state": {
-      // Предикаты
+      // Predicates
     },
     "request": {
         "headers": {"Content-Type": "application/xml"},
@@ -419,14 +414,14 @@ HTTP заголовки валидируются на полное соотве�
         "body": {
             "/payload/response/id": {"==": 42}
         },
-        "extractors": {"name": {...}, ...} //опционально
+        "extractors": {"name": {...}, ...} //optional
     },
     "persist": {
-      // Модификации состояния
+      // State modifications
     },
     "response": {
         "code": 200,
-        "mode": "raw"
+        "mode": "raw",
         "body": "<xml><response type=\"rst\"></response></xml>",
         "headers": {"Content-Type": "application/xml"},
         "delay": "1 second"
@@ -434,19 +429,19 @@ HTTP заголовки валидируются на полное соотве�
 }
 ```
 
-#### Валидация по условиям, режим multipart
+#### Condition Validation, multipart Mode
 
-ВНИМАНИЕ! multipart запросы необходимо выполнять на отдельный метод -
+WARNING! multipart requests must be performed on a separate method -
 /api/mockingbird/execmp
 
-Режимы валидании part:
-* `any` - значение никак не валидируется
-* `raw` - полное соответствие
-* `json` - полное соответствие, значение парсится как Json
-* `xml` - полное соответствие, значение парсится как XML
-* `urlencoded` - аналогично режиму `web_form` для валидации всего тела
-* `jlens` - проверка Json по условиям
-* `xpath` - проверка XML по условиям
+Part validation modes:
+* `any` - value is not validated
+* `raw` - exact match
+* `json` - exact match, value parsed as Json
+* `xml` - exact match, value parsed as XML
+* `urlencoded` - similar to `web_form` mode for validating the entire body
+* `jlens` - Json condition check
+* `xpath` - XML condition check
 
 ```javascript
 {
@@ -454,26 +449,26 @@ HTTP заголовки валидируются на полное соотве�
     "method": "POST",
     "path": "/test/multipart",
     "state": {
-      // Предикаты
+      // Predicates
     },
     "request": {
         "headers": {},
         "mode": "multipart",
         "body": {
             "part1": {
-              "mode": "json", //режим валидации
-              "headers": {}, //заголовки part
-              "value": {} //спецификация значения для валидатора
+              "mode": "json", //validation mode
+              "headers": {}, //part headers
+              "value": {} //value specification for the validator
             },
             "part2": {
               ...
             }
         },
-        "bypassUnknownParts": true //флаг, позволяющий игнорировать все partы, отсутвующие в спецификации валидатора
-                                   //по умолчанию флаг включен, можно передавать только для отключения (false)
+        "bypassUnknownParts": true //flag allowing to ignore all parts not present in the validator's specification
+                                   //by default, the flag is enabled, can be passed only to disable (false)
     },
     "persist": {
-      // Модификации состояния
+      // State modifications
     },
     "response": {
         "code": 200,
@@ -491,7 +486,7 @@ HTTP заголовки валидируются на полное соотве�
 }
 ```
 
-#### Простое проксирование запроса
+#### Simple Request Proxying
 
 ```javascript
 {
@@ -499,10 +494,10 @@ HTTP заголовки валидируются на полное соотве�
   "method": "POST",
   "path": "/pos-loans/api/cl/get_partner_lead_info",
   "state": {
-      // Предикаты
+      // Predicates
   },
   "request": {
-    // Спецификация запроса
+    // Request specification
   },
   "response": {
     "mode": "proxy",
@@ -511,7 +506,7 @@ HTTP заголовки валидируются на полное соотве�
 }
 ```
 
-#### Проксирование с модификацией JSON ответа
+#### Proxying with JSON Response Modification
 
 ```javascript
 {
@@ -519,10 +514,10 @@ HTTP заголовки валидируются на полное соотве�
   "method": "POST",
   "path": "/pos-loans/api/cl/get_partner_lead_info",
   "state": {
-      // Предикаты
+      // Predicates
   },
   "request": {
-    // Спецификация запроса, mode json или jlens
+    // Request specification, mode json or jlens
   },
   "response": {
     "mode": "json-proxy",
@@ -534,7 +529,7 @@ HTTP заголовки валидируются на полное соотве�
 }
 ```
 
-#### Проксирование с модификацией XML ответа
+#### Proxying with XML Response Modification
 
 ```javascript
 {
@@ -542,10 +537,10 @@ HTTP заголовки валидируются на полное соотве�
   "method": "POST",
   "path": "/pos-loans/api/cl/get_partner_lead_info",
   "state": {
-      // Предикаты
+      // Predicates
   },
   "request": {
-    // Спецификация запроса, mode xml или xpath
+    // Request specification, mode xml or xpath
   },
   "response": {
     "mode": "xml-proxy",
@@ -557,63 +552,60 @@ HTTP заголовки валидируются на полное соотве�
 }
 ```
 
-### DSL предикатов валидации JSON и XML
+### DSL for JSON and XML Validation Predicates
 
-в режимах jlens и xpath поддерживается следующее:
+In jlens and xpath modes, the following is supported:
 
 ```javascript
 {
-  "a": {"==": "some value"}, //полное соответствие
-  "b": {"!=": "some value"}, //не равно
-  "c": {">": 42} | {">=": 42} | {"<": 42} | {"<=": 42}, //сравнения, только для чисел, комбинируются
-  "d": {"~=": "\d+"}, //сопоставление с regexp,
-  "e": {"size": 10}, //длина, для массивов и строк
-  "f": {"exists": true} //проверка существования
+  "a": {"==": "some value"}, //exact match
+  "b": {"!=": "some value"}, //not equal
+  "c": {">": 42} | {">=": 42} | {"<": 42} | {"<=": 42}, //comparisons, for numbers only, can be combined
+  "d": {"~=": "\\d+"}, //regexp match
+  "e": {"size": 10}, //length, for arrays and strings
+  "f": {"exists": true} //existence check
 }
 ```
-Ключами в таких объектах является либо путь в json ("a.b.[0].c") либо xpath ("/a/b/c")
-Замечание: в данный момент функции сравнения могут некорректно работать с xpath, указывающими на XML атрибуты.
-Обойти проблему можно проверкой на существование/несуществование:
+Keys in such objects are either a path in json ("a.b.[0].c") or xpath ("/a/b/c").
+Note: Currently, comparison functions may not work correctly with xpath pointing to XML attributes.
+The problem can be bypassed by checking for existence/non-existence:
 ```/tag/otherTag/[@attr='2']": {"exists": true}```
 
-в режиме jlens дополнительно поддерживаются следующие операции:
+In jlens mode, the following operations are additionally supported:
 ```javascript
 {
-    "g": {"[_]": ["1", 2, true]}, //поле должно содержать одно из перечисленых значений
-    "h": {"![_]": ["1", 2, true]}, //поле НЕ должно содержать ни одно из перечисленых знаечний
-    "i": {"&[_]": ["1", 2, true]} // поле должно быть массивом и содержать все перечисленные значения (при этом порядок не важен)
+    "g": {"[_]": ["1", 2, true]}, //the field must contain one of the listed values
+    "h": {"![_]": ["1", 2, true]}, //the field must NOT contain any of the listed values
+    "i": {"&[_]": ["1", 2, true]} //the field must be an array containing all listed values (order does not matter)
 }
 ```
 
-в режиме xpath дополнительно поддерживаются следующие операции:
+In xpath mode, the following operations are additionally supported:
 ```javascript
-  "/some/tag": {"cdata": {"==": "test"}}, //валидация на полное совпадение CDATA, аргумент должен быть СТРОКОЙ
-  "/some/tag": {"cdata": {"~=": "\d+"}}, //валидация DATA регуляркой, аргумент должен быть СТРОКОЙ
-  "/some/tag": {"jcdata": {"a": {"==": 42}}}, //валидируем содержимое CDATA как JSON, поддерживаются все доступные предикаты
-  "/other/tag": {"xcdata": {"/b": {"==": 42}}} //валидируем содержимое CDATA как XML, поддерживаются все доступные предикаты
+  "/some/tag": {"cdata": {"==": "test"}}, //validation for exact match of CDATA, argument must be a STRING
+  "/some/tag": {"cdata": {"~=": "\d+"}}, //CDATA regex validation, argument must be a STRING
+  "/some/tag": {"jcdata": {"a": {"==": 42}}}, //validating CDATA content as JSON, all available predicates are supported
+  "/other/tag": {"xcdata": {"/b": {"==": 42}}} //validating CDATA content as XML, all available predicates are supported
 ```
 
-в режиме web_form поддерживаются ТОЛЬКО следующие операции:
+In web_form mode, ONLY the following operations are supported:
 `==`, `!=`, `~=`, `size`, `[_]`, `![_]`, `&[_]`
 
-## Эмуляция GRPC сервисов
+## Emulating GRPC Services
 
-Как это устроено под капотом:
-При создании мока вложеные в запрос proto файлы парсятся и преобразуются в json-представление protobuf схемы. В базе хранится именно json-представление,
-а не оригинальный proto файл. Первое срабатывание мока может занимать немного больше времени, чем последующие, т.к. при первом срабатывании из
-json-представляения генерируется декодер protobuf сообщений. После декодирования данные преобразуются в json, который проверяется json-предикатами,
-задаными в поле requestPredicates. Если условия выполняются - то json из response.data (в режиме fill) сериализуется в protobuf и отдаётся в качестве ответа.
+How it works under the hood:
+When creating a mock, the proto files nested in the request are parsed and transformed into a json representation of the protobuf schema. The database stores the json representation, not the original proto file. The first triggering of the mock may take a little longer than subsequent ones because a protobuf message decoder is generated from the json representation on the first trigger. After decoding, the data is transformed into json, which is checked by json predicates specified in the requestPredicates field. If the conditions are met, then the json from response.data (in fill mode) is serialized into protobuf and returned as a response.
 
-Алгоритм работы:
+Workflow:
 
-1. Поиск мока(-ов) по имени метода
-2. Валидация body
-3. Поиск state по предикату
-4. Подстановка значений в шаблон ответа
-5. Модификация state
-6. Отдача response
+1. Search for mocks by method name
+2. Body validation
+3. Search for state by predicate
+4. Substituting values in the response template
+5. State modification
+6. Response delivery
 
-### Конфигурация GRPC заглушек
+### Configuration of GRPC Stubs
 
 ```javascript
 {
@@ -622,20 +614,20 @@ json-представляения генерируется декодер protob
     "service": "test",
     "methodName": "/pos-loans/api/cl/get_partner_lead_info",
     "seed": {
-        "integrationId": "%{randomString(20)}" //пример
+        "integrationId": "%{randomString(20)}" //example
     },
     "state": {
-      // Предикаты
+      // Predicates
     },
-    "requestCodecs": "..", //proto-файл схемы запроса в base64
-    "requestClass": "..", //имя типа запроса из proto файла
-    "responseCodecs": "..", //proto-файл схемы ответа в base64
-    "responseClass": "..", //имя типа ответа из proto файла
+    "requestCodecs": "..", //request schema proto-file in base64
+    "requestClass": "..", //name of the request type from proto file
+    "responseCodecs": "..", //response schema proto-file in base64
+    "responseClass": "..", //name of the response type from proto file
     "requestPredicates": {
         "meta.id": {"==": 42}
     },
     "persist": {
-      // Модификации состояния
+      // State modifications
     },
     "response": {
         "mode": "fill",
@@ -651,53 +643,53 @@ json-представляения генерируется декодер protob
 }
 ```
 
-## Эмуляция шинных сервисов
+## Emulating Bus Services
 
-Алгоритм работы:
+Workflow:
 
-1. Поиск мока по source
-2. Поиск state по предикату
-3. Валидация входящего сообщения
-4. Подстановка значений в шаблон ответа
-5. Модификация state
-6. Отправка response
-7. Выполнение колбеков (см. раздел "конфигурация колбеков")
+1. Search for the mock by source.
+2. Search for state by predicate.
+3. Validate incoming message.
+4. Substitute values into the response template.
+5. Modify state.
+6. Send response.
+7. Execute callbacks (see the "callbacks configuration" section).
 
-### Конфигурация
+### Configuration
 
-[Работа с очередями](message-brokers.md)
+[Working with Message Brokers](message-brokers.md)
 
-### Конфигурация мока
+### Mock Configuration
 
-Для input поддерживаются режимы:
+Supported modes for input:
 * raw
 * json
 * xml
 * jlens
 * xpath
 
-Для output поддерживаются режимы:
+Supported modes for output:
 * raw
 * json
 * xml
 
 ```javascript
 {
-  "name": "Пришла весна", 
+  "name": "Spring has come",
   "service": "test",
-  "source": "rmq_example_autobroker_decision", //source из конфига
+  "source": "rmq_example_autobroker_decision", //source from the config
   "input": {
-    "mode": .. //как для HTTP заглушек
-    "payload": .. //как body для HTTP заглушек
+    "mode": .. //as for HTTP stubs
+    "payload": .. //as body for HTTP stubs
   },
   "state": {
-    // Предикаты
+    // Predicates
   },
-  "persist": { //Опционально
-    // Модификации состояния
+  "persist": { //Optional
+    // State modifications
   },
-  "destination": "rmq_example_q1", // destination из конфига, опционально
-  "output": { //Опционально  
+  "destination": "rmq_example_q1", // destination from the config, optional
+  "output": { //Optional  
     "mode": "raw",
     "payload": "..",
     "delay": "1 second"
@@ -706,24 +698,24 @@ json-представляения генерируется декодер protob
 }
 ```
 
-### Конфигурация колбеков
+### Callback Configuration
 
-Для имитации поведения реального мира иногда нужно выполнить вызов HTTP сервиса (пример - забрать GBO когда приходит сообщение) или отправлять дополнительные сообщения в очереди. Для этого можно использовать колбеки. Результат вызова сервиса можно при необходимости распарсить и сохранить в состояние. Коллбеки используют состяние вызвавшего.
+To mimic the behavior of the real world, sometimes it is necessary to call an HTTP service (for example, to fetch GBO when a message arrives) or to send additional messages to queues. For this purpose, callbacks can be used. The result of the service call can be parsed and saved in the state if necessary. Callbacks use the state of the caller.
 
-#### Вызов HTTP метода
+#### Calling an HTTP Method
 
-Для request поддерживаются режимы
+Supported modes for request:
 * no_body
 * raw
 * json
 * xml
 
-Для response поддерживаются режимы
+Supported modes for response:
 * json
 * xml
 
->Обратите внимание!
->В всю цепочку колбеков передаётся первоначальный стейт, он не изменяется блоком perist (!!!)
+>Please note!
+>The initial state is passed along the entire chain of callbacks, and it is not modified by the persist block (!!!)
 
 ```javascript
 {
@@ -738,18 +730,18 @@ json-представляения генерируется декодер protob
       "account_number": "228"
     }
   },
-  "responseMode": "json" | "xml", //Обязательно только при наличии блока persist
-  "persist": { //Опционально
-    // Модификации состояния
+  "responseMode": "json" | "xml", //Mandatory only if the persist block is present
+  "persist": { //Optional
+    // State modifications
   },
-  "delay": "1 second", //Задержка ПЕРЕД выполнением колбека, опционально
-  "callback": { .. } //Опционально
+  "delay": "1 second", //Delay BEFORE executing the callback, optional
+  "callback": { .. } //Optional
 }
 ```
 
-#### Отправка сообщения
+#### Sending a Message
 
-Для output поддерживаются режимы:
+Supported modes for output:
 * raw
 * json
 * xml
@@ -757,11 +749,11 @@ json-представляения генерируется декодер protob
 ```javascript
 {
   "type": "message",
-  "destination": "rmq_example_q1", // destination из конфига
+  "destination": "rmq_example_q1", // destination from the config
   "output": {
     "mode": "raw",
     "payload": ".."
   },
-  "callback": { .. } //Опционально
+  "callback": { .. } //Optional
 }
 ```

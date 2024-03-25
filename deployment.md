@@ -1,30 +1,30 @@
-# Руководство по инсталляции mockingbird
+# Mockingbird Installation Guide
 
-Требования к окружению:
-- mongodb версии 4.2 и выше. В целом mockingbird запустится и с 3.x, но как минимум не будут работать моки с pathPattern
-- 512 MB памяти для контейнера (абсолютный минимум в районе 300 MB)
+Environment requirements:
+- MongoDB version 4.2 or higher. In general, mockingbird will run on 3.x, but at least mocks with pathPattern won't work.
+- 512 MB of memory for the container (the absolute minimum is around 300 MB).
 
-mockingbird доступен в двух вариантах
-- native приложение
+mockingbird is available in two variants:
+- native application
 
 `ghcr.io/tinkoff/mockingbird:<TAG>-native`
 
-Рекомендуемый образ для большинства случаев. Представляет собой скомпилированное в native-image с помощью GraalVM Scala приложение
+The recommended image for most cases. It is a Scala application compiled into a native image using GraalVM.
 
-- образ на классической JVM
+- image on classic JVM
 
 `ghcr.io/tinkoff/mockingbird:<TAG>`
 
-Для обоих вариантов: HTTP порт 8228, GRPC порт 9000
+For both variants: HTTP port 8228, GRPC port 9000.
 
 ## mockingbird-native
 
-При запуске образа нужно передать в CMD параметры. Типовой набор, с которого можно начать:
+When launching the image, parameters need to be passed in CMD. A typical set to start with is:
 
 `-server -Xms256m -Xmx256m -XX:MaxDirectMemorySize=128m -Dconfig.file=/opt/mockingbird-native/qa.conf -Dlog.level=DEBUG -Dlog4j.formatMsgNoLookups=true`
 
-Так-же необходимо примонтировать по пути `/opt/mockingbird-native/conf/secrets.conf` файл конфигурации mockingbird.
-Минимальная конфигурация выглядит следующим образом:
+Also, the mockingbird configuration file needs to be mounted at the path `/opt/mockingbird-native/conf/secrets.conf`.
+The minimal configuration looks like this:
 
 ```
 {
@@ -43,18 +43,18 @@ mockingbird доступен в двух вариантах
   }
 }
 ```
-Подробнее о secrets.conf можно узнать из [руководства по настройке](configuration.md)
+More about `secrets.conf` can be learned from the [configuration guide](configuration.md).
 
-Логи приложение пишет в /opt/log/mockingbird-native
+The application logs to /opt/log/mockingbird-native.
 
 ## mockingbird
 
-Этот образ содержит приложение на классической JVM, поэтому параметры передаются через переменную окружения JAVA_OPTS.
-Пример типовых настроек
+This image contains the application on the classic JVM, so parameters are passed through the JAVA_OPTS environment variable.
+Example of typical settings:
 
 `-server -XX:+AlwaysActAsServerClassMachine -Xms256m -Xmx256m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=128m -XX:ReservedCodeCacheSize=128m -XX:+PerfDisableSharedMem -Dconfig.resource=qa.conf -Dlog.level=DEBUG -Dlog4j.formatMsgNoLookups=true`
 
-Так-же необходимо примонтировать по пути `/opt/mockingbird/conf/secrets.conf` файл конфигурации mockingbird.
-Формат и содержимое `/opt/mockingbird/conf/secrets.conf` полностью идентичны оному для mockingbird-native
+Also, the mockingbird configuration file needs to be mounted at the path `/opt/mockingbird/conf/secrets.conf`.
+The format and contents of `/opt/mockingbird/conf/secrets.conf` are fully identical to those for mockingbird-native.
 
-Логи приложение пишет в /opt/log/mockingbird
+The application logs to /opt/log/mockingbird.

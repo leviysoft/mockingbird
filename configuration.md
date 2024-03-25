@@ -1,6 +1,6 @@
-# Конфигурация mockingbird
+# Mockingbird Configuration
 
-Mockingbird конфигурируется посредством файла secrets.conf, имеющего следующий вид:
+Mockingbird is configured via the secrets.conf file, which has the following structure:
 
 ```
 {
@@ -45,21 +45,21 @@ Mockingbird конфигурируется посредством файла sec
 }
 ```
 
-### Секция server
+### Server Section
 
-Здесь указыватся ориджены для CORS. Эти настройки влияют на работоспособность UI Mockingbird, а также swagger-ui
+This section specifies origins for CORS. These settings affect the functionality of UI Mockingbird as well as swagger-ui.
 
-healthCheckRoute - необязательный параметр, позволяет настроить эндпоинт, всегда отдающий 200 OK, полезно для healthcheck
+healthCheckRoute - an optional parameter that allows configuring an endpoint always returning 200 OK, useful for health checks.
 
-### Секция security
+### Security Section
 
-Обязательная секция. Здесь указывается secret - ключ шифрования для конфигураций source и destination.
-Рекомендуется использовать достаточно длинный ключ (от 40 символов)
+Mandatory section. Here the secret is specified - the encryption key for the configurations of source and destination.
+It is recommended to use a sufficiently long key (at least 40 characters).
 
-### Секция mongodb
+### MongoDB Section
 
-Обязательная секция. Здесь указывается uri для подключения к mongodb, которую будет использовать mockingbird.
-Здесь же можно переопределить названия коллекций, которые будет создавать mockingbird (в примере перечислены все возможные поля со значениями по-умолчанию, не обязательно указывать все):
+Mandatory section. Here the URI for connecting to MongoDB is specified, which Mockingbird will use.
+Here you can also override the names of collections that Mockingbird will create (all possible fields with default values are listed in the example, it is not necessary to specify all).
 
 ```
 {
@@ -79,11 +79,11 @@ healthCheckRoute - необязательный параметр, позволя
 }
 ```
 
-### Секция proxy
+### Proxy Section
 
-В данной секции можно указать заголовки, которые mockingbird будет отбрасывать при работе в режимах proxy и json-proxy
+In this section, you can specify headers that Mockingbird will discard when operating in proxy and json-proxy modes.
 
-Пример типовой конфигурации:
+Example of a typical configuration:
 
 ```
 {
@@ -100,31 +100,31 @@ healthCheckRoute - необязательный параметр, позволя
 }
 ```
 
-В поле insecureHosts можно указать список хостов, для которых не будет выполняться проверка сертификатов. Это может быть полезно
-для случаев развёртывания во внутренней инфраструктуре.
+In the insecureHosts field, you can specify a list of hosts for which certificate validation will not be performed. This can be useful for deployments within internal infrastructure.
 
-Флаг logOutgoingRequests позволяет включить логирование запросов к удаленному серверу, когда http заглушка работет в режиме прокси. Запрос пишется в лог в виде команды curl с заголовками и телом запроса.
+The logOutgoingRequests flag allows enabling logging of requests to the remote server when the HTTP mock is operating in proxy mode. The request is logged in the form of a curl command with headers and request body.
 
-Так-же в этой секции можно указать настройки прокси сервера. Эти настройки влияют на ВСЕ http запросы, которые делаем mockingbird, т.е.:
-- запросы к внешнему серверу с proxy моках
-- запросы в source и destination (включая init/shutdown)
+Also, in this section, you can specify proxy server settings. These settings affect ALL HTTP requests made by Mockingbird, including:
 
-Назначения полей:
-- type - тип прокси сервера
-- host - хост
-- port - порт
-- nonProxy - (опционально) перечень доменов (масок доменов), запросы к которым НЕ НУЖНО проксировать
-- onlyProxy - (опционально) перечень доменов (масок доменов), запросы к которым НУЖНО проксировать.
-Если указать одновременно nonProxy и onlyProxy, то nonProxy будет иметь приоритет
-- auth - (опционально) параметры авторизации
+- requests to external servers with proxy mocks
+- requests to source and destination (including init/shutdown)
 
-Можно указывать как домены, так и маски: "localhost", "*.local", "127.*"
+Field purposes:
+- type - proxy server type
+- host - host
+- port - port
+- nonProxy - (optional) a list of domains (domain masks) to which requests DO NOT need to be proxied
+- onlyProxy - (optional) a list of domains (domain masks) to which requests NEED to be proxied. 
+  If both nonProxy and onlyProxy are specified simultaneously, nonProxy will take precedence.
+- auth - (optional) authentication parameters
 
-### Секция tracing
+Both domains and masks can be specified: "localhost", ".local", "127."
 
-Данная секция описывает какие поля будут фигурировать в логах и в заголовках ответа.
+### Tracing Section
 
-Пример конфигурации:
+This section describes which fields will appear in the logs and in the response headers.
+
+Example configuration:
 
 ```
 {
@@ -144,15 +144,15 @@ healthCheckRoute - необязательный параметр, позволя
 }
 ```
 
-Поле `required` - массив строковых значений, ключи которые будут добавлены к логам, в качестве значений будут сгенерированы UUID.
+The `required` field is an array of string values, the keys of which will be added to the logs, and UUIDs will be generated as values.
 
-Поле `incomingHeaders` - указывает какие заголовки будут извлечены из входящих запросов и в какие поля логов будут записаны значения. Извлечение заголовков делается без учета регистра, т.е. `X-Trace-Id` и `x-trace-id` эквиваленты.
+The `incomingHeaders` field specifies which headers will be extracted from incoming requests and into which log fields the values will be written. Header extraction is case-insensitive, meaning `X-Trace-Id` and `x-trace-id` are equivalent.
 
-Поле `outcomingHeaders` задает значения каких полей трасировки из будут возвращены в заголовках ответа.
+The `outcomingHeaders` field sets the values of which tracing fields will be returned in the response headers.
 
-В приведенном выше примере, для полей указанных в поле `required` будут сгенерированы UUID. Из запросов извлекаются значения заголовков `X-Trace-ID` и `X-Request-ID`. Значения записываются в поле с именем `traceId`. Значение поля `traceId` будет или сгенерировано, или взято из соотвествующего заголовка запроса. В случае, если оба заголовка присуствуют в запросе, то одно значение перепишет другое, порядок обработки заголовков неопределен. К ответам мокингберда будут добавлены заголовки `X-Correlation-ID` и `X-Trace-ID`. Если какое-то поле трасировки только указано в секциях `incomingHeaders` и `outcomingHeaders`, то в заголовках ответа оно будет добавлено лишь в том случае, если было в запросе. Все значения полей трассировки добавляются к логам, при условии наличия значений.
+In the example provided above, UUIDs will be generated for the fields specified in the `required` field. Values of the `X-Trace-ID` and `X-Request-ID` headers are extracted from requests and written into a field named `traceId`. The value of the `traceId` field will either be generated or taken from the corresponding request header. If both headers are present in the request, one value will overwrite the other; the order of header processing is undefined. Mockingbird responses will include the headers `X-Correlation-ID` and `X-Trace-ID`. If a tracing field is only specified in the `incomingHeaders` and `outcomingHeaders` sections, it will be added to the response headers only if it was present in the request. All tracing field values are added to the logs, provided there are values available.
 
-Конфигурация поле трасировки по-умолчанию следующая:
+Default tracing configuration is as follows:
 ```
 {
   "tracing": {
@@ -164,13 +164,11 @@ healthCheckRoute - необязательный параметр, позволя
   }
 }
 ```
+### Custom Fields in JSON Logs
 
+To describe your `logback.xml` file and pass it to the application via VM Options, use `-Dlogback.configurationFile=...`.
 
-### Custom Fields в JSON логах
-
-Необходимо описать свой `logback.xml` файл и передать его в приложение через VM Options как `-Dlogback.configurationFile=...`.
-
-Пример конфигурации со своими полями, в значении `customFields` можно использовать интерполяцию переменных окружения:
+Below is an example configuration with custom fields. In the `customFields` value, you can use environment variable interpolation:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
