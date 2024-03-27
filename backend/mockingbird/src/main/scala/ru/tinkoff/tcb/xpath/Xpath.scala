@@ -15,13 +15,18 @@ import ru.tinkoff.tcb.bson.BsonEncoder
 import ru.tinkoff.tcb.bson.BsonKeyDecoder
 import ru.tinkoff.tcb.bson.BsonKeyEncoder
 
-final case class Xpath(raw: String, toXPathExpr: XPathExpression) {
+/*
+ * toXPathExpr inside extra braces is important. It's exclude this value
+ * from hash and equals method. XPathExpression doesn't have correct equals
+ * method, it is comparable only by reference.
+ */
+final case class Xpath(raw: String)(val toXPathExpr: XPathExpression) {
   override def toString: String = raw
 }
 
 object Xpath {
   def fromString(pathStr: String): Try[Xpath] =
-    Try(xPathFactory.newXPath().compile(pathStr)).map(Xpath(pathStr, _))
+    Try(xPathFactory.newXPath().compile(pathStr)).map(Xpath(pathStr))
 
   def unapply(str: String): Option[Xpath] =
     fromString(str).toOption
