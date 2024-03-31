@@ -50,7 +50,7 @@ final class StubResolver(
   ): RIO[WLD, Option[(HttpStub, Option[PersistentState])]] =
     (
       for {
-        _ <- log.info("Поиск заглушек для запроса {} типа {}", path, scope)
+        _ <- log.info("Searching stubs for request to {} of type {}", path, scope)
         pathPatternExpr = Expression[HttpStub](
           None,
           "$expr" -> BsonDocument(
@@ -71,29 +71,29 @@ final class StubResolver(
         )
         candidates0 <- stubDAO.findChunk(condition, 0, Int.MaxValue)
         _ <- ZIO.when(candidates0.isEmpty)(
-          log.info("Не найдены обработчики для запроса {} типа {}", path, scope) *> ZIO.fail(EarlyReturn)
+          log.info("Can't find any handler for {} of type {}", path, scope) *> ZIO.fail(EarlyReturn)
         )
-        _ <- log.info("Кандидаты: {}", candidates0.map(_.id))
+        _ <- log.info("Candidates are: {}", candidates0.map(_.id))
         candidates1 = candidates0.filter(_.request.checkQueryParams(queryObject))
         _ <- ZIO.when(candidates1.isEmpty)(
           log.warn(
-            "После проверки query параметров не осталось кандидатов, проверьте параметры: {}",
+            "After checking query parameters, there are no candidates left. Please verify the parameters: {}",
             queryObject.noSpaces
           ) *> ZIO.fail(EarlyReturn)
         )
-        _ <- log.info("После проверки query параметров: {}", candidates1.map(_.id))
+        _ <- log.info("After query parameters check: {}", candidates1.map(_.id))
         candidates2 = candidates1.filter(_.request.checkHeaders(headers))
         _ <- ZIO.when(candidates2.isEmpty)(
-          log.warn("После проверки заголовков не осталось кандидатов, проверьте заголовки: {}", headers) *>
+          log.warn("After checking headers, there are no candidates left. Please verify the headers: {}", headers) *>
             ZIO.fail(EarlyReturn)
         )
-        _ <- log.info("После проверки заголовков: {}", candidates2.map(_.id))
+        _ <- log.info("After headers check: {}", candidates2.map(_.id))
         candidates3 = candidates2.filter(_.request.checkBody(body))
         _ <- ZIO.when(candidates3.isEmpty)(
-          log.warn("После проверки тела запроса не осталось кандидатов, проверьте тело запроса: {}", body) *>
+          log.warn("After checking the request body, there are no candidates left. Please verify the request body: {}", body) *>
             ZIO.fail(EarlyReturn)
         )
-        _ <- log.info("После валидации тела: {}", candidates3.map(_.id))
+        _ <- log.info("After body check: {}", candidates3.map(_.id))
         candidates4 <- candidates3.traverse { stubc =>
           val bodyJson = stubc.request.extractJson(body)
           val bodyXml  = stubc.request.extractXML(body)
@@ -116,20 +116,20 @@ final class StubResolver(
             )
         }
         _ <- ZIO.when(candidates4.exists(_._2.size > 1))(
-          log.error("Для одной или нескольких заглушек найдено более одного подходящего состояния") *>
-            ZIO.fail(StubSearchError("Для одной или нескольких заглушек найдено более одного подходящего состояния"))
+          log.error("For one or more stubs, multiple suitable states were found") *>
+            ZIO.fail(StubSearchError("For one or more stubs, multiple suitable states were found"))
         )
         _ <- ZIO.when(candidates4.count(_._2.nonEmpty) > 1)(
-          log.error("Для более чем одной заглушки нашлось подходящее состояние") *>
-            ZIO.fail(StubSearchError("Для более чем одной заглушки нашлось подходящее состояние"))
+          log.error("For more than one stub, suitable states were found") *>
+            ZIO.fail(StubSearchError("For more than one stub, suitable states were found"))
         )
         _ <- ZIO.when(candidates4.size > 1 && candidates4.forall(c => c._1.state.isDefined && c._2.isEmpty))(
-          log.error("Ни для одной заглушки не найдено подходящего состояния") *>
-            ZIO.fail(StubSearchError("Ни для одной заглушки не найдено подходящего состояния"))
+          log.error("No suitable state found for any stub") *>
+            ZIO.fail(StubSearchError("No suitable state found for any stub"))
         )
         _ <- ZIO.when(candidates4.size > 1 && candidates4.forall(_._1.state.isEmpty))(
-          log.error("Найдено более одной не требующей состояния заглушки") *>
-            ZIO.fail(StubSearchError("Найдено более одной не требующей состояния заглушки"))
+          log.error("More than one stateless stub found") *>
+            ZIO.fail(StubSearchError("More than one stateless stub found"))
         )
         res = candidates4.find(_._2.size == 1) orElse candidates4.find(_._1.state.isEmpty)
       } yield res.map { case (stub, states) => stub -> states.headOption }
@@ -149,11 +149,11 @@ final class StubResolver(
 
   private def findStates(id: SID[?], spec: StateSpec): RIO[WLD, Vector[PersistentState]] =
     for {
-      _      <- log.info("Поиск state для {} по условию {}", id, spec.renderJson.noSpaces)
+      _      <- log.info("Searching state for {} by condition {}", id, spec.renderJson.noSpaces)
       states <- stateDAO.findBySpec(spec)
       _ <-
-        if (states.nonEmpty) log.info("Найдены состояния для {}: {}", id, states.map(_.id))
-        else log.info("Не найдено подходящих состояний для {}", id)
+        if (states.nonEmpty) log.info("Found states for {}: {}", id, states.map(_.id))
+        else log.info("Unable to find suitable states for {}", id)
     } yield states
 }
 

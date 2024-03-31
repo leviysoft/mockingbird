@@ -74,11 +74,11 @@ final class ScenarioEngine(
 
     for {
       _ <- Tracing.update(_.addToPayload(("source" -> source)))
-      _ <- log.info("Получено сообщение из {}", source)
+      _ <- log.info("Got message from {}", source)
       (scenario, stateOp) <- f(Scope.Countdown)
         .filterOrElse(_.isDefined)(f(Scope.Ephemeral).filterOrElse(_.isDefined)(f(Scope.Persistent)))
-        .someOrFail(ScenarioSearchError(s"Не удалось подобрать сценарий для сообщения из $source"))
-      _ <- log.info("Выполнение сценария '{}'", scenario.name)
+        .someOrFail(ScenarioSearchError(s"Failed to match a scenario for the message from $source"))
+      _ <- log.info("Executing scenario '{}'", scenario.name)
       seed     = scenario.seed.map(_.eval)
       bodyJson = scenario.input.extractJson(message)
       bodyXml  = scenario.input.extractXML(message)
@@ -97,7 +97,7 @@ final class ScenarioEngine(
         .fold(ZIO.attempt(()))(_.traverse_(stateDAO.createIndexForDataField))
       dests <- fetcher.getDestinations
       _ <- ZIO.when(scenario.destination.isDefined && !dests.exists(_.name == scenario.destination.get))(
-        ZIO.fail(ScenarioExecError(s"Не сконфигурирован destination с именем ${scenario.destination.get}"))
+        ZIO.fail(ScenarioExecError(s"Destination with the name ${scenario.destination.get} is not configured"))
       )
       destOut = scenario.destination.flatMap(dn => dests.find(_.name == dn)) zip scenario.output
       _ <- ZIO.when(destOut.isDefined) {
@@ -121,10 +121,10 @@ final class ScenarioEngine(
       case MessageCallback(destinationId, output, callback, delay) =>
         for {
           _     <- ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get)))
-          _     <- log.info("Выполняется MessageCallback с destinationId={}", destinationId)
+          _     <- log.info("Executing MessageCallback with destinationId={}", destinationId)
           dests <- fetcher.getDestinations
           _ <- ZIO.when(!dests.exists(_.name == destinationId))(
-            ZIO.fail(CallbackError(s"Не сконфигурирован destination с именем ${destinationId}"))
+            ZIO.fail(CallbackError(s"Destination with the name $destinationId is not configured"))
           )
           destination = dests.find(_.name == destinationId).get
           _ <- sendTo(destination, output, data, xdata)
@@ -134,7 +134,7 @@ final class ScenarioEngine(
         for {
           _ <- ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get)))
           requestUrl = request.url.value.substitute(data, xdata)
-          _ <- log.info("Выполняется HttpCallback на {}", requestUrl)
+          _ <- log.info("Executing HttpCallback to {}", requestUrl)
           res <-
             basicRequest
               .headers(request.headers)
@@ -149,8 +149,8 @@ final class ScenarioEngine(
               )
               .response(asString)
               .send(httpBackend)
-              .filterOrElseWith(_.isSuccess)(r => ZIO.fail(CallbackError(s"$requestUrl ответил ошибкой: $r")))
-          bodyStr = res.body.getOrElse(throw new UnsupportedOperationException("Не может быть"))
+              .filterOrElseWith(_.isSuccess)(r => ZIO.fail(CallbackError(s"$requestUrl responded with error: $r")))
+          bodyStr = res.body.getOrElse(throw new UnsupportedOperationException("Can't happen"))
           jsonBody =
             responseMode
               .contains(CallbackResponseMode.Json)
@@ -210,9 +210,9 @@ final class ScenarioEngine(
       .response(asString)
       .send(httpBackend)
       .filterOrElseWith(_.isSuccess)(r =>
-        ZIO.fail(ScenarioExecError(s"Destination ${dest.name} ответил ошибкой: $r"))
+        ZIO.fail(ScenarioExecError(s"Destination ${dest.name} responded with error: $r"))
       ) *>
-      log.info("Отправлен ответ в {}", dest.name)
+      log.info("Response sent to {}", dest.name)
 
   private def b64Enc(s: String): String =
     new String(Base64.getEncoder.encode(s.getBytes(Charset.defaultCharset())), Charset.defaultCharset())

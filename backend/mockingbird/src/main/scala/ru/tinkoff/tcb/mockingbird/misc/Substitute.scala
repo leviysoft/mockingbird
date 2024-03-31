@@ -11,7 +11,7 @@ import ru.tinkoff.tcb.utils.transformation.json.*
 import ru.tinkoff.tcb.utils.transformation.xml.*
 
 /**
- * Свидетельство того, что B можно подставить в A
+ * "Proof that B can be substituted into A
  */
 @finalAlg trait Substitute[A, B] {
   def substitute(a: A, b: B): A

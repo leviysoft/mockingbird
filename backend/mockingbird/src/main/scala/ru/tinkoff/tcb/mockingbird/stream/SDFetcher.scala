@@ -30,9 +30,9 @@ final class SDFetcher(
       .awakeEvery[RIO[WLD, *]](eventConfig.reloadInterval)
       .evalMap(_ => sourceDAO.getAll)
       .evalTap(sourceCache.set)
-      .evalMap(srcs => log.info("Получены источники: {}", srcs.map(_.name)))
+      .evalMap(srcs => log.info("Sources received: {}", srcs.map(_.name)))
       .handleErrorWith { case NonFatal(t) =>
-        Stream.eval(log.errorCause("Ошибка при загрузке источников", t)) ++
+        Stream.eval(log.errorCause("Error loading sources", t)) ++
           Stream.sleep[RIO[WLD, *]](eventConfig.reloadInterval) ++ reloadSrc
       }
 
@@ -42,9 +42,9 @@ final class SDFetcher(
       .awakeEvery[RIO[WLD, *]](eventConfig.reloadInterval)
       .evalMap(_ => destinationDAO.getAll)
       .evalTap(destionationCache.set)
-      .evalMap(dsts => log.info("Получены приёмники: {}", dsts.map(_.name)))
+      .evalMap(dsts => log.info("Destinations received: {}", dsts.map(_.name)))
       .handleErrorWith { case NonFatal(t) =>
-        Stream.eval(log.errorCause("Ошибка при загрузке приёмников", t)) ++
+        Stream.eval(log.errorCause("Error loading destinations", t)) ++
           Stream.sleep[RIO[WLD, *]](eventConfig.reloadInterval) ++ reloadDest
       }
 

@@ -39,7 +39,7 @@ class ScenarioResolver(
       scope: Scope
   ): RIO[WLD, Option[(Scenario, Option[PersistentState])]] =
     (for {
-      _ <- log.info("Поиск сценариев для источника {} типа {}", source, scope)
+      _ <- log.info("Searching for scenarios for source {} of type {}", source, scope)
       condition0 = prop[Scenario](_.source) === source && prop[Scenario](_.scope) === scope
       condition = (scope == Scope.Countdown).fold(
         condition0 && prop[Scenario](_.times) > Option(refineMV[NonNegative](0)),
@@ -47,16 +47,16 @@ class ScenarioResolver(
       )
       scenarios0 <- scenarioDAO.findChunk(condition, 0, Int.MaxValue)
       _ <- ZIO.when(scenarios0.isEmpty)(
-        log.info("Не найдены обработчики для источника {} типа {}", source, scope) *>
+        log.info("No handlers found for source {} of type {}", source, scope) *>
           ZIO.fail(EarlyReturn)
       )
-      _ <- log.info("Кандидаты: {}", scenarios0.map(_.id))
+      _ <- log.info("Candidates are: {}", scenarios0.map(_.id))
       scenarios1 = scenarios0.filter(_.input.checkMessage(message))
       _ <- ZIO.when(scenarios1.isEmpty)(
-        log.warn("После валидации сообщения не осталось кандидатов, проверьте сообщение: {}", message) *>
+        log.warn("After validating the message, there are no candidates left. Please verify the message: {}", message) *>
           ZIO.fail(EarlyReturn)
       )
-      _ <- log.info("После валидации сообщения: {}", scenarios1.map(_.id))
+      _ <- log.info("After message validation: {}", scenarios1.map(_.id))
       scenarios2 <- scenarios1.traverse { scenc =>
         val bodyJson = scenc.input.extractJson(message)
         val bodyXml  = scenc.input.extractXML(message)
@@ -67,22 +67,22 @@ class ScenarioResolver(
           )
       }
       _ <- ZIO.when(scenarios2.exists(_._2.size > 1))(
-        log.error("Для одного или нескольких сценариев найдено более одного подходящего состояния") *>
+        log.error("For one or more scenarios, multiple suitable states were found") *>
           ZIO.fail(
-            ScenarioSearchError("Для одного или нескольких сценариев найдено более одного подходящего состояния")
+            ScenarioSearchError("For one or more scenarios, multiple suitable states were found")
           )
       )
       _ <- ZIO.when(scenarios2.count(_._2.nonEmpty) > 1)(
-        log.error("Для более чем одного сценария нашлось подходящее состояние") *>
-          ZIO.fail(ScenarioSearchError("Для более чем одного сценария нашлось подходящее состояние"))
+        log.error("For more than one scenario, suitable states were found") *>
+          ZIO.fail(ScenarioSearchError("For more than one scenario, suitable states were found"))
       )
       _ <- ZIO.when(scenarios2.size > 1 && scenarios2.forall(c => c._1.state.isDefined && c._2.isEmpty))(
-        log.error("Ни для одного сценария не найдено подходящего состояния") *>
-          ZIO.fail(ScenarioSearchError("Ни для одного сценария не найдено подходящего состояния"))
+        log.error("No suitable states found for any scenario") *>
+          ZIO.fail(ScenarioSearchError("No suitable states found for any scenario"))
       )
       _ <- ZIO.when(scenarios2.size > 1 && scenarios2.forall(_._1.state.isEmpty))(
-        log.error("Найдено более одного не требующего состояния сценария") *>
-          ZIO.fail(ScenarioSearchError("Найдено более одного не требующего состояния сценария"))
+        log.error("More than one stateless scenario found") *>
+          ZIO.fail(ScenarioSearchError("More than one stateless scenario found"))
       )
       res = scenarios2.find(_._2.size == 1) orElse scenarios2.find(_._1.state.isEmpty)
     } yield res.map { case (scenario, states) => scenario -> states.headOption }).catchSome { case EarlyReturn =>
@@ -98,11 +98,11 @@ class ScenarioResolver(
 
   private def findStates(id: SID[?], spec: StateSpec): RIO[WLD, Vector[PersistentState]] =
     for {
-      _      <- log.info("Поиск state для {} по условию {}", id, spec.renderJson.noSpaces)
+      _      <- log.info("Searching for state for {} based on condition {}", id, spec.renderJson.noSpaces)
       states <- stateDAO.findBySpec(spec)
       _ <-
-        if (states.nonEmpty) log.info("Найдены состояния для {}: {}", id, states.map(_.id))
-        else log.info("Не найдено подходящих состояний для {}", id)
+        if (states.nonEmpty) log.info("States found for {}: {}", id, states.map(_.id))
+        else log.info("No suitable states found for {}", id)
     } yield states
 }
 

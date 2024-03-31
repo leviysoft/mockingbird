@@ -108,7 +108,7 @@ object GrpcStub {
   } yield ()
 
   private val stateNonEmpty: Rule[GrpcStub] =
-    _.state.exists(_.isEmpty).valueOrZero(Vector("Предикат state не может быть пустым"))
+    _.state.exists(_.isEmpty).valueOrZero(Vector("The state predicate cannot be empty"))
 
   val validationRules: Rule[GrpcStub] = Vector(stateNonEmpty).reduce(_ |+| _)
 }

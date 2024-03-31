@@ -82,7 +82,7 @@ final class ResourceManager(
       .mapError {
         case Right(err) => err
         case Left(err) =>
-          ResourceManagementError(s"Запрос на ${req.url.asString} завершился ошибкой ($err)")
+          ResourceManagementError(s"The request to ${req.url.asString} ended with an error ($err)")
       }
 
   def reinitialize(sourceId: SID[SourceConfiguration]): URIO[WLD, Unit] =

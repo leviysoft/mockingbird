@@ -73,20 +73,20 @@ class GrpcStubResolverImpl(
           )
       }
     _ <- ZIO.when(candidates.exists(_._2.size > 1))(
-      log.error("Для одной или нескольких заглушек найдено более одного подходящего состояния") *>
-        ZIO.fail(StubSearchError("Для одной или нескольких заглушек найдено более одного подходящего состояния"))
+      log.error("For one or more stubs, multiple suitable states were found") *>
+        ZIO.fail(StubSearchError("For one or more stubs, multiple suitable states were found"))
     )
     _ <- ZIO.when(candidates.count(_._2.nonEmpty) > 1)(
-      log.error("Для более чем одной заглушки нашлось подходящее состояние") *>
-        ZIO.fail(StubSearchError("Для более чем одной заглушки нашлось подходящее состояние"))
+      log.error("For more than one stub, suitable states were found") *>
+        ZIO.fail(StubSearchError("For more than one stub, suitable states were found"))
     )
     _ <- ZIO.when(candidates.size > 1 && candidates.forall(c => c._1.state.isDefined && c._2.isEmpty))(
-      log.error("Ни для одной заглушки не найдено подходящего состояния") *>
-        ZIO.fail(StubSearchError("Ни для одной заглушки не найдено подходящего состояния"))
+      log.error("No suitable state found for any stub") *>
+        ZIO.fail(StubSearchError("No suitable state found for any stub"))
     )
     _ <- ZIO.when(candidates.size > 1 && candidates.forall(_._1.state.isEmpty))(
-      log.error("Найдено более одной не требующей состояния заглушки") *>
-        ZIO.fail(StubSearchError("Найдено более одной не требующей состояния заглушки"))
+      log.error("More than one stateless stub found") *>
+        ZIO.fail(StubSearchError("More than one stateless stub found"))
     )
     res = candidates.find(_._2.size == 1) orElse candidates.find(_._1.state.isEmpty)
   } yield res.map { case (stub, states) =>
@@ -100,7 +100,7 @@ class GrpcStubResolverImpl(
       )
       .catchSome { case e @ (_: InvalidProtocolBufferException | ParsingFailure(_, _)) =>
         log.infoCause(
-          "Ошибка разбора gRPC запроса {} для заглушки {}",
+          "Failed to parse gRPC request {} for stub {}",
           e,
           stub.requestClass,
           stub.id
@@ -109,7 +109,7 @@ class GrpcStubResolverImpl(
       }
       .tapError(e =>
         log.errorCause(
-          "Ошибка разбора gRPC запроса {} для заглушки {}",
+          "Failed to parse gRPC request {} for stub {}",
           e,
           stub.requestClass,
           stub.id
@@ -119,11 +119,11 @@ class GrpcStubResolverImpl(
 
   private def findStates(id: SID[GrpcStub], spec: StateSpec): RIO[WLD, Vector[PersistentState]] =
     for {
-      _      <- log.info("Поиск state для {} по условию {}", id, spec.renderJson.noSpaces)
+      _      <- log.info("Searching for state for {} based on condition {}", id, spec.renderJson.noSpaces)
       states <- stateDAO.findBySpec(spec)
       _ <-
-        if (states.nonEmpty) log.info("Найдены состояния для {}: {}", id, states.map(_.id))
-        else log.info("Не найдено подходящих состояний для {}", id)
+        if (states.nonEmpty) log.info("States found for {}: {}", id, states.map(_.id))
+        else log.info("No suitable states found for {}", id)
     } yield states
 }
 

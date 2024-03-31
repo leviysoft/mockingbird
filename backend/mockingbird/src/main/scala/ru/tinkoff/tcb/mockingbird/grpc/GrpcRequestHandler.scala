@@ -42,7 +42,7 @@ class GrpcRequestHandlerImpl(
       _ <- Tracing.update(_.addToPayload("service" -> grpcServiceName))
       (stub, req, stateOp) <- f(Scope.Countdown)
         .filterOrElse(_.isDefined)(f(Scope.Ephemeral).filterOrElse(_.isDefined)(f(Scope.Persistent)))
-        .someOrFail(StubSearchError(s"Не удалось подобрать заглушку для $grpcServiceName"))
+        .someOrFail(StubSearchError(s"Can't find any stub for $grpcServiceName"))
       _ <- Tracing.update(_.addToPayload("name" -> stub.name))
       seed = stub.seed.map(_.eval)
       state <- ZIO.fromOption(stateOp).orElse(PersistentState.fresh)

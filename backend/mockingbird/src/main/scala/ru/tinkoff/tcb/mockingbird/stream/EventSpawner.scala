@@ -87,7 +87,7 @@ final class EventSpawner(
         .fromEither(response.body)
         .mapError[Exception](err =>
           (if (reInit) SourceFault(_) else EventProcessingError(_))(
-            s"Запрос на ${req.url.asString} завершился ошибкой ($err)"
+            s"The request to ${req.url.asString} ended with an error ($err)"
           )
         )
       processed <- ZIO.fromEither {
@@ -112,7 +112,7 @@ final class EventSpawner(
               res <- fetch(sourceConf.request, sourceConf.reInitTriggers.map(_.toVector).orEmpty)
                 .mapError[Exception](SpawnError(sourceConf.name, _))
               neRes = res.filter(_.nonEmpty)
-              _ <- ZIO.when(neRes.nonEmpty)(log.info(s"Отправлено в обработку: ${neRes.length}"))
+              _ <- ZIO.when(neRes.nonEmpty)(log.info(s"Sent for processing: ${neRes.length}"))
               _ <- ZIO
                 .validateDiscard(neRes) {
                   engine.perform(sourceConf.name, _)
@@ -145,17 +145,17 @@ final class EventSpawner(
     case SpawnError(sid, SourceFault(_)) =>
       rm.reinitialize(sid.asInstanceOf[SID[SourceConfiguration]])
     case EventProcessingError(err) =>
-      log.warn(s"Ошибка при обработке события: $err")
+      log.warn(s"Error processing the event: $err")
     case ScenarioExecError(err) =>
-      log.warn(s"Ошибка при выполнении сценария: $err")
+      log.warn(s"Error executing the scenario: $err")
     case ScenarioSearchError(err) =>
-      log.warn(s"Ошибка при поиске сценария: $err")
+      log.warn(s"Error searching for the scenario: $err")
     case CallbackError(err) =>
-      log.warn(s"Ошибка при выполнении колбэка: $err")
+      log.warn(s"Error executing the callback: $err")
     case SpawnError(sid, err) =>
-      log.errorCause(s"Ошибка при получении события из {}", err, sid)
+      log.errorCause(s"Error retrieving event from {}", err, sid)
     case NonFatal(t) =>
-      log.errorCause("Ошибка при получении события", t)
+      log.errorCause("Error retrieving event", t)
   }
 }
 
