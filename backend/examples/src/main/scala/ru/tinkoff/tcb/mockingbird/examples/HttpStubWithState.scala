@@ -374,7 +374,7 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
         HttpResponseExpected(
           code = CheckInteger(400).some,
           body = CheckString(
-            "ru.tinkoff.tcb.mockingbird.error.StubSearchError: Could not find stub for [Post] /alpha/state1/get"
+            "ru.tinkoff.tcb.mockingbird.error.StubSearchError: Can't find any stub for [Post] /alpha/state1/get"
           ).some
         )
       )
