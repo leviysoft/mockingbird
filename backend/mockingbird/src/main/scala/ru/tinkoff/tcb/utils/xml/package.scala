@@ -41,8 +41,7 @@ package object xml {
       Encoder.encodeString.coerce
 
     /*
-      Для ускорения чтения здесь не производится валидация,
-      предполагается, что данные записаны уже провалидированными
+      Validation is not performed here to speed up reading
      */
     implicit val xmlStringBsonDecoder: BsonDecoder[XMLString] =
       BsonDecoder[String].coerce

@@ -68,7 +68,7 @@ object XmlPredicate {
 
   /**
    * @param description
-   *   Имеет вид: {"/xpath": <predicate description>]
+   *   Looks like: {"/xpath": <predicate description>]
    * @return
    */
   def apply(

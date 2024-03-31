@@ -43,9 +43,9 @@ object XmlExtractor {
 
 /**
  * @param prefix
- *   Путь до CDATA
+ *   Path to CDATA
  * @param path
- *   Путь внутри CDATA
+ *   Path inside CDATA
  */
 @derive(decoder, encoder)
 final case class XMLCDataExtractor(prefix: Xpath, path: Xpath) extends XmlExtractor {
@@ -59,9 +59,9 @@ final case class XMLCDataExtractor(prefix: Xpath, path: Xpath) extends XmlExtrac
 
 /**
  * @param prefix
- *   Путь до CDATA
+ *   Path to CDATA
  * @param path
- *   Путь внутри CDATA
+ *   Path inside CDATA
  */
 @derive(decoder, encoder)
 final case class JsonCDataExtractor(prefix: Xpath, path: JsonOptic) extends XmlExtractor {

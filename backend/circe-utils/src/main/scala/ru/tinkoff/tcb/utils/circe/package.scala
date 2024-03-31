@@ -71,20 +71,20 @@ package object circe {
       transformKeys(in => "_([a-z\\d])".r.replaceAllIn(in, _.group(1).toUpperCase)).result
 
     /**
-     * Производит слияние двух json объектов
+     * Merges two Json objects
      *
      * json1 :+ json2
      *
-     * В случае совпадения значений по определённому ключу приоритетными являются значения из json1
+     * In case of conflicts values from json1 take precedence
      */
     @inline def :+(other: Json): Json = merge(other, json, false)
 
     /**
-     * Производит слияние двух json объектов
+     * Merges two Json objects
      *
      * json1 +: json2
      *
-     * В случае совпадения значений по определённому ключу приоритетными являются значения из json2
+     * In case of conflicts values from json2 take precedence
      */
     @inline def +:(other: Json): Json = merge(other, json, false)
 

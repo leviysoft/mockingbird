@@ -11,7 +11,7 @@ import org.xml.sax.ext.DefaultHandler2
 import org.xml.sax.ext.LexicalHandler
 
 /*
-  Хак с обработкой CDATA принадлежит перу славного индуса Kolmar
+  CDATA processing hack by Kolmar
   https://stackoverflow.com/a/35483778
  */
 object SafeXML extends XMLLoader[Elem] {
