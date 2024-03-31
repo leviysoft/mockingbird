@@ -33,28 +33,11 @@ sealed trait XmlExtractor {
 }
 object XmlExtractor {
   val types: Map[String, String] = Map(
-    nameOfType[XMLCDataExtractor]  -> "xcdata",
     nameOfType[JsonCDataExtractor] -> "jcdata",
   ).withDefault(identity)
 
   implicit val customConfiguration: TapirConfig =
     TapirConfig.default.withDiscriminator("type").copy(toEncodedName = types)
-}
-
-/**
- * @param prefix
- *   Path to CDATA
- * @param path
- *   Path inside CDATA
- */
-@derive(decoder, encoder)
-final case class XMLCDataExtractor(prefix: Xpath, path: Xpath) extends XmlExtractor {
-  def apply(node: Node): Either[XPathError, Json] =
-    node
-      .evalXPath[String](prefix.toXPathExpr)
-      .flatMap(_.trim().asNode)
-      .flatMap(_.evalXPath[String](path.toXPathExpr))
-      .map(Json.fromString)
 }
 
 /**

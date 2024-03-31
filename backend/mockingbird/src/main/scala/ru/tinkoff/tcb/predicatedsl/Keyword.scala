@@ -41,7 +41,6 @@ object Keyword
   case object AllIn extends Keyword("&[_]", "$all") with JsonKeyword with FormKeyword
   case object Cdata extends Keyword("cdata", "") with XmlKeyword
   case object JCdata extends Keyword("jcdata", "") with XmlKeyword
-  case object XCdata extends Keyword("xcdata", "") with XmlKeyword
 
   val values = findValues
 
