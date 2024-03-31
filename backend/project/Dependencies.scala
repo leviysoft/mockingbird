@@ -25,12 +25,12 @@ object Dependencies {
     "cats-kernel"
   ).map("org.typelevel" %% _ % Versions.cats)
 
-  val catsTagless = Seq("org.typelevel" %% "cats-tagless-macros" % "0.12")
+  val catsTagless = Seq("org.typelevel" %% "cats-tagless-macros" % "0.15.0")
 
   val zio = Seq(
     "dev.zio" %% "zio"                 % Versions.zio,
     "dev.zio" %% "zio-managed"         % Versions.zio,
-    "dev.zio" %% "zio-interop-cats"    % "22.0.0.0",
+    "dev.zio" %% "zio-interop-cats"    % "23.1.0.1",
     "dev.zio" %% "zio-interop-twitter" % "21.2.0.2.2",
     "dev.zio" %% "zio-test"            % Versions.zio % Test,
     "dev.zio" %% "zio-test-sbt"        % Versions.zio % Test

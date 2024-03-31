@@ -15,7 +15,7 @@ ThisBuild / semanticdbEnabled := true
 val utils = (project in file("utils"))
   .settings(Settings.common)
   .settings(
-    libraryDependencies ++= Dependencies.zio ++ Dependencies.scalatest ++ Dependencies.metrics
+    libraryDependencies ++= Dependencies.cats ++ Dependencies.zio ++ Dependencies.scalatest ++ Dependencies.metrics
   )
 
 val circeUtils = (project in file("circe-utils"))
@@ -67,7 +67,7 @@ val mockingbird = (project in file("mockingbird"))
       "com.lihaoyi"                   %% "scalatags"           % "0.9.1",
       "tf.tofu"                       %% "derevo-circe"        % Versions.derevo,
       "org.webjars.npm"                % "swagger-ui-dist"     % "3.32.5",
-      "eu.timepit"                    %% "fs2-cron-core"       % "0.2.2",
+      "eu.timepit"                    %% "fs2-cron-cron4s"     % "0.9.0",
       "com.softwaremill.sttp.client4" %% "zio"                 % Versions.sttp,
       "com.softwaremill.sttp.client4" %% "circe"               % Versions.sttp,
       "org.apache.tika"                % "tika-core"           % "2.1.0",
@@ -196,6 +196,7 @@ val examples = (project in file("examples"))
     ).flatten,
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio-cli" % "0.5.0",
+      "org.typelevel" %% "cats-effect" % "3.5.4"
     ),
     Test / parallelExecution := false,
   )

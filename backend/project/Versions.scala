@@ -1,5 +1,5 @@
 object Versions {
-  val cats             = "2.7.0"
+  val cats             = "2.10.0"
   val mongoScalaDriver = "4.4.0"
   val tapir            = "1.9.2"
   val derevo           = "0.13.0"
