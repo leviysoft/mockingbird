@@ -154,7 +154,7 @@ class MarkdownGeneratorSuite extends AnyFunSuite with Matchers {
         |
         |```
         |
-        |The response contains a randomly obtained fact from the server
+        |The response contains a random fact obtained from the server
         |
         |Response:
         |```
