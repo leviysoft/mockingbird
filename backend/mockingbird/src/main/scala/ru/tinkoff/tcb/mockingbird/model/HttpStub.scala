@@ -35,34 +35,34 @@ import ru.tinkoff.tcb.validation.Rule
 @derive(bsonDecoder, bsonEncoder, encoder, decoder, schema)
 final case class HttpStub(
     @BsonKey("_id")
-    @description("id мока")
+    @description("Mock id")
     id: SID[HttpStub],
-    @description("Время создания мока")
+    @description("Mock creation time")
     created: Instant,
-    @description("Тип конфигурации")
+    @description("Scope")
     scope: Scope,
-    @description("Количество возможных срабатываний. Имеет смысл только для scope=countdown")
+    @description("The number of possible triggers. Only relevant for scope=countdown")
     times: Option[Int Refined NonNegative],
     serviceSuffix: String,
-    @description("Название мока")
+    @description("Mock name")
     name: String Refined NonEmpty,
-    @description("HTTP метод")
+    @description("HTTP method")
     method: HttpMethod,
-    @description("Суффикс пути, по которому срабатывает мок")
+    @description("The path suffix where the mock triggers")
     path: Option[String Refined NonEmpty],
     pathPattern: Option[Regex],
     seed: Option[Json],
-    @description("Предикат для поиска состояния")
+    @description("State search predicate")
     state: Option[Map[JsonOptic, Map[Keyword.Json, Json]]],
-    @description("Спецификация запроса")
+    @description("Request specification")
     request: HttpStubRequest,
-    @description("Данные, записываемые в базу")
+    @description("Persisted data")
     persist: Option[Map[JsonOptic, Json]],
-    @description("Спецификация ответа")
+    @description("Response specification")
     response: HttpStubResponse,
-    @description("Спецификация колбека")
+    @description("Callback specification")
     callback: Option[Callback],
-    @description("Тэги")
+    @description("tags")
     labels: Seq[String]
 )
 
@@ -70,24 +70,24 @@ object HttpStub extends CallbackChecker {
   private val pathOrPattern: Rule[HttpStub] = stub =>
     (stub.path, stub.pathPattern) match {
       case Some(_) <*> None | None <*> Some(_) => Vector.empty
-      case Some(_) <*> Some(_)                 => Vector("Может быть указан путь либо шаблон пути")
-      case None <*> None                       => Vector("Должен быть указан путь либо шаблон пути")
+      case Some(_) <*> Some(_)                 => Vector("A path or path pattern may be specified")
+      case None <*> None                       => Vector("A path or path pattern must be specified")
     }
 
   private val stateNonEmpty: Rule[HttpStub] =
-    _.state.exists(_.isEmpty).valueOrZero(Vector("Предикат state не может быть пустым"))
+    _.state.exists(_.isEmpty).valueOrZero(Vector("The state predicate cannot be empty"))
 
   private val persistNonEmpty: Rule[HttpStub] =
-    _.persist.exists(_.isEmpty).valueOrZero(Vector("Спецификация persist не может быть пустой"))
+    _.persist.exists(_.isEmpty).valueOrZero(Vector("The persist specification cannot be empty"))
 
   private val jsonProxyReq: Rule[HttpStub] = stub =>
     (stub.request, stub.response) match {
       case (JsonRequest(_, _, _) | JLensRequest(_, _, _), JsonProxyResponse(_, _, _, _)) => Vector.empty
       case (_, JsonProxyResponse(_, _, _, _)) =>
-        Vector(s"${nameOfType[JsonProxyResponse]} может использоваться только совместно с ${nameOfType[JsonRequest]} или ${nameOfType[JLensRequest]}")
+        Vector(s"${nameOfType[JsonProxyResponse]} can only be used together with ${nameOfType[JsonRequest]} or ${nameOfType[JLensRequest]}")
       case (XmlRequest(_, _, _, _, _) | XPathRequest(_, _, _, _, _), XmlProxyResponse(_, _, _, _)) => Vector.empty
       case (_, XmlProxyResponse(_, _, _, _)) =>
-        Vector(s"${nameOfType[XmlProxyResponse]} может использоваться только совместно с ${nameOfType[XmlRequest]} или ${nameOfType[XPathRequest]}")
+        Vector(s"${nameOfType[XmlProxyResponse]} can only be used together with ${nameOfType[XmlRequest]} or ${nameOfType[XPathRequest]}")
       case _ => Vector.empty
     }
 
@@ -97,7 +97,7 @@ object HttpStub extends CallbackChecker {
         stub.response match {
           case EmptyResponse(_, _, _) => Vector.empty
           case _ =>
-            Vector(s"Коды ответов 204 и 304 могут использоваться только с mode '${HttpStubResponse.modes(nameOfType[EmptyResponse])}'")
+            Vector(s"Response codes 204 and 304 can only be used with mode '${HttpStubResponse.modes(nameOfType[EmptyResponse])}'")
         }
       case _ => Vector.empty
     }

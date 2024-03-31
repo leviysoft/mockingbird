@@ -80,7 +80,7 @@ final class PublicApiHandler(
       _ <- Tracing.update(_.addToPayload("path" -> path, "method" -> method.entryName))
       (stub, stateOp) <- f(Scope.Countdown)
         .filterOrElse(_.isDefined)(f(Scope.Ephemeral).filterOrElse(_.isDefined)(f(Scope.Persistent)))
-        .someOrFail(StubSearchError(s"Не удалось подобрать заглушку для [$method] $path"))
+        .someOrFail(StubSearchError(s"Can't find any stub for [$method] $path"))
       _ <- Tracing.update(_.addToPayload("name" -> stub.name))
       seed     = stub.seed.map(_.eval)
       srb      = SimpleRequestBody.subset.getOption(body).map(_.value)
@@ -148,7 +148,7 @@ final class PublicApiHandler(
             ZIO.fail(ex)
           }
           .catchSome { case NonFatal(ex) =>
-            log.errorCause("Ошибка при выполнении колбэка", ex)
+            log.errorCause("Error during callback execution", ex)
           }
           .forkDaemon
       )
