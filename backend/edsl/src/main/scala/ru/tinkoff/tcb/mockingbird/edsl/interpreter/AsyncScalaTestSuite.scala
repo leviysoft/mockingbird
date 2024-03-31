@@ -21,14 +21,13 @@ import ru.tinkoff.tcb.mockingbird.edsl.model.Check.*
 import ru.tinkoff.tcb.mockingbird.edsl.model.ValueMatcher.*
 
 /**
- * Базовый трейт для генерации набора тестов по набору примеров
- * [[ru.tinkoff.tcb.mockingbird.edsl.ExampleSet ExampleSet]].
+ * Base trait for generating a set of tests from an [[ru.tinkoff.tcb.mockingbird.edsl.ExampleSet ExampleSet]].
  *
- * Трейт наследуется от `AsyncFunSuiteLike` из фреймоврка [[https://www.scalatest.org/ ScalaTest]], поэтому внутри можно
- * как дописать дополнительные тесты, так и использовать
- * [[https://www.scalatest.org/user_guide/sharing_fixtures#beforeAndAfter BeforeAndAfter]] и/или
- * [[https://www.scalatest.org/user_guide/sharing_fixtures#composingFixtures BeforeAndAfterEach]] для управления
- * поднятием необходимого для исполнения тестов окружения, в том числе используя
+ * This trait inherits from AsyncFunSuiteLike in the [[https://www.scalatest.org/ ScalaTest]] framework, so you can
+ * add additional tests inside it or use
+ * [[https://www.scalatest.org/user_guide/sharing_fixtures#beforeAndAfter BeforeAndAfter]] and/or
+ * [[https://www.scalatest.org/user_guide/sharing_fixtures#composingFixtures BeforeAndAfterEach]] to manage
+ * the setup of the necessary environment for executing tests, including using
  * [[https://github.com/testcontainers/testcontainers-scala testcontainers-scala]].
  */
 trait AsyncScalaTestSuite extends AsyncFunSuiteLike {
@@ -40,12 +39,12 @@ trait AsyncScalaTestSuite extends AsyncFunSuiteLike {
   private[interpreter] def sttpbackend: SttpBackend[Future] = sttpbackend_
 
   /**
-   * URI относительно которого будут разрешаться пути используемые в примерах
+   * URI relative to which paths used in examples will be resolved
    */
   def baseUri: Uri
 
   /**
-   * Сгенерировать тесты из набора примеров.
+   * Generate tests from the set of examples.
    */
   protected def generateTests(es: ExampleSet[HttpResponseR]): Unit =
     es.examples.foreach { desc =>

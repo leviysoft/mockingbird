@@ -1,23 +1,24 @@
 package ru.tinkoff.tcb.mockingbird.edsl.model
+
 import io.circe.Json
 
 sealed trait ValueMatcher[T] extends Product with Serializable
 object ValueMatcher {
 
   /**
-   * Показывает, что ожидается конкретное значение типа `T`, в случае несовпадения сгенерированный тест упадет с
-   * ошибкой.
+   * Indicates that a specific value of type 'T' is expected, and if there is a mismatch,
+   * the generated test will fail with an error.
    *
    * @param value
-   *   значение используемое для сравнения и отображения при генерации примера ответа от сервера в markdown.
+   *   The value used for comparison and display when generating an example server response in markdown.
    */
   final case class FixedValue[T](value: T) extends ValueMatcher[T]
 
   /**
-   * Показывает, что ожидается любое значение типа `T`.
+   * Indicates that any value of type 'T' is expected.
    *
    * @param example
-   *   Это значение будет отображено в markdown документе при генерации в описании примера ответа от сервера.
+   *   This value will be displayed in the markdown document when generated in the description of the example server response.
    */
   final case class AnyValue[T](example: T) extends ValueMatcher[T]
 
@@ -41,10 +42,10 @@ sealed trait Check extends Product with Serializable
 object Check {
 
   /**
-   * Соответствует любому значению.
+   * Corresponds to any value
    *
    * @param example
-   *   значение, которое будет использоваться как пример при генерации Markdown.
+   *   The value that will be used as an example when generating Markdown.
    * @group CheckCommon
    */
   final case class CheckAny(example: String) extends Check
@@ -60,35 +61,35 @@ object Check {
   final case class CheckInteger(matcher: ValueMatcher[Long]) extends Check
 
   /**
-   * Показывает, что ожидается JSON, реализации этого трейта позволяют детальнее описать ожидания.
+   * Indicates that JSON is expected. Implementations of this trait allow for a more detailed description of expectations.
    * @group CheckJson
    */
   sealed trait CheckJson extends Check
 
   /**
-   * Значение null
+   * null value
    * @group CheckJson
    */
   final case object CheckJsonNull extends CheckJson
 
   /**
-   * Любой валидный JSON.
+   * Any valid JSON.
    *
    * @constructor
    * @param example
-   *   значение, которое будет использоваться как пример при генерации Markdown.
+   *   The value that will be used as an example when generating Markdown.
    * @group CheckJson
    */
   final case class CheckJsonAny(example: Json) extends CheckJson
 
   /**
-   * JSON объект с указанными полями, объект с которым производится сравнение может содержать дополнительные поля.
+   * A JSON object with the specified fields. The object being compared with may contain additional fields.
    * @group CheckJson
    */
   final case class CheckJsonObject(fields: (String, CheckJson)*) extends CheckJson
 
   /**
-   * Массив с указанными элементами, важен порядок. Проверяемы массив может содержать в конце дополнительные элементы.
+   * An array with the specified elements, the order is important. The array being checked may contain additional elements at the end.
    * @group CheckJson
    */
   final case class CheckJsonArray(items: CheckJson*) extends CheckJson

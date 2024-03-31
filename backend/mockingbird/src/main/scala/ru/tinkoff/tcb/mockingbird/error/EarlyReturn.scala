@@ -1,4 +1,4 @@
 package ru.tinkoff.tcb.mockingbird.error
 
-//TODO: заменить все использования на Selective функторы
+//TODO: replace all occurrences with selective functors
 case object EarlyReturn extends Exception
