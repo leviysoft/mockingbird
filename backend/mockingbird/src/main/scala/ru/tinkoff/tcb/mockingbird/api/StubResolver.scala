@@ -90,7 +90,10 @@ final class StubResolver(
         _ <- log.info("After headers check: {}", candidates2.map(_.id))
         candidates3 = candidates2.filter(_.request.checkBody(body))
         _ <- ZIO.when(candidates3.isEmpty)(
-          log.warn("After checking the request body, there are no candidates left. Please verify the request body: {}", body) *>
+          log.warn(
+            "After checking the request body, there are no candidates left. Please verify the request body: {}",
+            body
+          ) *>
             ZIO.fail(EarlyReturn)
         )
         _ <- log.info("After body check: {}", candidates3.map(_.id))
