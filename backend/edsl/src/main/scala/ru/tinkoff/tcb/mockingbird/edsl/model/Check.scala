@@ -6,8 +6,8 @@ sealed trait ValueMatcher[T] extends Product with Serializable
 object ValueMatcher {
 
   /**
-   * Indicates that a specific value of type 'T' is expected, and if there is a mismatch,
-   * the generated test will fail with an error.
+   * Indicates that a specific value of type 'T' is expected, and if there is a mismatch, the generated test will fail
+   * with an error.
    *
    * @param value
    *   The value used for comparison and display when generating an example server response in markdown.
@@ -18,7 +18,8 @@ object ValueMatcher {
    * Indicates that any value of type 'T' is expected.
    *
    * @param example
-   *   This value will be displayed in the markdown document when generated in the description of the example server response.
+   *   This value will be displayed in the markdown document when generated in the description of the example server
+   *   response.
    */
   final case class AnyValue[T](example: T) extends ValueMatcher[T]
 
@@ -61,7 +62,8 @@ object Check {
   final case class CheckInteger(matcher: ValueMatcher[Long]) extends Check
 
   /**
-   * Indicates that JSON is expected. Implementations of this trait allow for a more detailed description of expectations.
+   * Indicates that JSON is expected. Implementations of this trait allow for a more detailed description of
+   * expectations.
    * @group CheckJson
    */
   sealed trait CheckJson extends Check
@@ -89,7 +91,8 @@ object Check {
   final case class CheckJsonObject(fields: (String, CheckJson)*) extends CheckJson
 
   /**
-   * An array with the specified elements, the order is important. The array being checked may contain additional elements at the end.
+   * An array with the specified elements, the order is important. The array being checked may contain additional
+   * elements at the end.
    * @group CheckJson
    */
   final case class CheckJsonArray(items: CheckJson*) extends CheckJson
