@@ -10,17 +10,13 @@ import ru.tinkoff.tcb.utils.circe.optics.*
 class BasicHttpStub[HttpResponseR] extends ExampleSet[HttpResponseR] {
   import ValueMatcher.syntax.*
 
-  val name = "Базовые примеры работы с HTTP заглушками"
+  val name = "Basic examples of working with HTTP stubs"
 
-  example("Persistent, ephemeral и countdown HTTP заглушки") {
+  example("Persistent, ephemeral, and countdown HTTP stubs") {
     for {
-      // TODO: подумать можно ли описать какие-то пререквизиты, чтобы в тестах
-      // автоматически их проверять и возможно исполнять. Например, проверить
-      // и создать сервис, если его нет, запустить сервис до которого будет
-      // mockingbird проксировать запрос и т.п.
-      _ <- describe("Предполагается, что в mockingbird есть сервис `alpha`.")
+      _ <- describe("It is assumed that in mockingbird there is a service `alpha`.")
 
-      _ <- describe("Создаем заглушку в скоупе `persistent`.")
+      _ <- describe("Creating a stub in the persistent `scope`.")
       resp <- sendHttp(
         method = HttpMethod.Post,
         path = "/api/internal/mockingbird/v2/stub",
@@ -57,7 +53,7 @@ class BasicHttpStub[HttpResponseR] extends ExampleSet[HttpResponseR] {
         )
       )
 
-      _ <- describe("Проверяем созданную заглушку.")
+      _ <- describe("Checking the created stub.")
       resp <- sendHttp(
         method = HttpMethod.Get,
         path = "/api/mockingbird/exec/alpha/handler1",
@@ -73,7 +69,7 @@ class BasicHttpStub[HttpResponseR] extends ExampleSet[HttpResponseR] {
         )
       )
 
-      _ <- describe("Для этого же пути, создаем заглушку в скоупе `ephemeral`.")
+      _ <- describe("For the same path, creating a stub in the `ephemeral` scope.")
       resp <- sendHttp(
         method = HttpMethod.Post,
         path = "/api/internal/mockingbird/v2/stub",
@@ -111,7 +107,7 @@ class BasicHttpStub[HttpResponseR] extends ExampleSet[HttpResponseR] {
       )
       idEphemeral = parser.parse(r.body.get).toOption.flatMap((JLens \ "id").getOpt).flatMap(_.asString).get
 
-      _ <- describe("И создаем заглушку в скоупе `countdown` с `times` равным 2.")
+      _ <- describe("And creating a stub in the `countdown` scope with `times` equal to 2.")
       resp <- sendHttp(
         method = HttpMethod.Post,
         path = "/api/internal/mockingbird/v2/stub",
@@ -150,18 +146,15 @@ class BasicHttpStub[HttpResponseR] extends ExampleSet[HttpResponseR] {
       )
 
       _ <- describe(
-        """Заданные заглушки отличаются возвращаемыми ответами, а именно содержимым `body` и `code`,
-        | в целом они могут быть как и полностью одинаковыми так и иметь больше различий.
-        | Скоупы заглушек в порядке убывания приоритета: Countdown, Ephemeral, Persistent""".stripMargin
+        """The specified stubs differ in the responses they return, namely the contents of `body` and `code`,
+        | in general, they can be either completely identical or have more differences.
+        | The scopes of stubs in descending order of priority: Countdown, Ephemeral, Persistent""".stripMargin
       )
 
       _ <- describe(
-        """Так как заглушка `countdown` была создана с `times` равным двум, то следующие два
-          |запроса вернут указанное в ней содержимое.""".stripMargin
+        """Since the countdown stub was created with `times` equal to two, the next two
+          |requests will return the specified content.""".stripMargin
       )
-      // TODO: при генерации Markdown будет дважды добавлен запрос и ожидаемый ответ,
-      // может стоит добавить действие Repeat, чтобы при генерации Markdown в документе
-      // указывалось бы, что данное действие повторяется N раз.
       _ <- Seq
         .fill(2)(
           for {
@@ -184,8 +177,8 @@ class BasicHttpStub[HttpResponseR] extends ExampleSet[HttpResponseR] {
         .sequence
 
       _ <- describe(
-        """Последующие запросы будут возвращать содержимое заглушки `ephemeral`. Если бы её не было,
-          |то вернулся бы ответ от заглушки `persistent`.""".stripMargin
+        """Subsequent requests will return the content of the `ephemeral` stub. If it didn't exist,
+          |the response from the `persistent` stub would be returned..""".stripMargin
       )
       resp <- sendHttp(
         method = HttpMethod.Get,
@@ -202,8 +195,8 @@ class BasicHttpStub[HttpResponseR] extends ExampleSet[HttpResponseR] {
         )
       )
 
-      _ <- describe("""Чтобы получить теперь ответ от `persistent` заглушки нужно или дождаться, когда истекут
-          |сутки с момента её создания или просто удалить `ephemeral` заглушку.""".stripMargin)
+      _ <- describe("""Now to get a response from the `persistent` stub, one must either wait until a day has passed
+          |since its creation or simply delete the `ephemeral` stub.""".stripMargin)
       resp <- sendHttp(
         method = HttpMethod.Delete,
         path = s"/api/internal/mockingbird/v2/stub/$idEphemeral",
@@ -222,7 +215,7 @@ class BasicHttpStub[HttpResponseR] extends ExampleSet[HttpResponseR] {
         )
       )
 
-      _ <- describe("После удаления `ephemeral` заглушки, при запросе вернется результат заглушки `persistent`")
+      _ <- describe("After deleting the `ephemeral` stub, a request will return the result of the `persistent` stub.")
       resp <- sendHttp(
         method = HttpMethod.Get,
         path = "/api/mockingbird/exec/alpha/handler1",
@@ -240,22 +233,22 @@ class BasicHttpStub[HttpResponseR] extends ExampleSet[HttpResponseR] {
     } yield ()
   }
 
-  example("Использование параметров пути в HTTP заглушках") {
+  example("Using path parameters in HTTP stubs") {
     for {
       _ <- describe(
-        """Заглушка может выбираться в том числе и на основании регулярного выражения
-          |в пути, это может быть не очень эффективно с точки зрения поиска такой заглушки.
-          |Поэтому без необходимости, лучше не использовать этот механизм.""".stripMargin
+        """A stub can also be selected based on a regular expression in the path,
+          |which can be inefficient in terms of searching for such a stub.
+          |Therefore, without necessity, it's better not to use this mechanism.""".stripMargin
       )
 
-      _ <- describe("Предполагается, что в mockingbird есть сервис `alpha`.")
+      _ <- describe("It is assumed that in mockingbird there is a service `alpha`.")
 
       _ <- describe(
-        """Скоуп в котором создаются заглушки не важен. В целом скоуп влияет только
-          |на приоритет заглушек. В данном случае заглушка создается в скоупе `countdown`.
-          |В отличие от предыдущих примеров, здесь для указания пути для срабатывания
-          |заглушки используется поле `pathPattern`, вместо `path`. Так же, ответ который
-          |формирует заглушка не статичный, а зависит от параметров пути.""".stripMargin
+        """The scope in which stubs are created does not matter. In general, the scope only affects
+          |the priority of the stubs. In this case, the stub is created in the `countdown` scope.
+          |Unlike previous examples, here the `pathPattern` field is used to specify the path for triggering
+          |the stub, instead of `path`. Also, the response that
+          |the stub generates is not static but depends on the path parameters.""".stripMargin
       )
 
       resp <- sendHttp(
@@ -300,8 +293,8 @@ class BasicHttpStub[HttpResponseR] extends ExampleSet[HttpResponseR] {
       )
 
       _ <- describe(
-        """Теперь сделаем несколько запросов, который приведут к срабатыванию этой заглшки,
-          |чтобы увидеть, что результат действительно зависит от пути.""".stripMargin
+        """Now let's make several requests that will trigger this stub,
+          |to see that the result really depends on the path.""".stripMargin
       )
       resp <- sendHttp(
         method = HttpMethod.Get,
