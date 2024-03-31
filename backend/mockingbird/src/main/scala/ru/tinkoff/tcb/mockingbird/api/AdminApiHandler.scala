@@ -95,7 +95,10 @@ final class AdminApiHandler(
       candidates2 = candidates1.filter(_.state == body.state)
       _ <- ZIO.when(candidates2.nonEmpty)(
         ZIO.fail(
-          DuplicationError("There exists a stub or stubs that match completely in terms of conditions and type", candidates2.map(_.id))
+          DuplicationError(
+            "There exists a stub or stubs that match completely in terms of conditions and type",
+            candidates2.map(_.id)
+          )
         )
       )
       now <- ZIO.clockWith(_.instant)
@@ -317,7 +320,10 @@ final class AdminApiHandler(
       candidates2 = candidates1.filter(_.state == body.state)
       _ <- ZIO.when(candidates2.nonEmpty)(
         ZIO.fail(
-          DuplicationError("There exists a stub or stubs that match completely in terms of conditions and type", candidates2.map(_.id))
+          DuplicationError(
+            "There exists a stub or stubs that match completely in terms of conditions and type",
+            candidates2.map(_.id)
+          )
         )
       )
       now <- ZIO.clockWith(_.instant)
@@ -443,7 +449,10 @@ final class AdminApiHandler(
         .filter(_.state == body.state)
       _ <- ZIO.when(candidates.nonEmpty)(
         ZIO.fail(
-          DuplicationError("There exists a stub or stubs that match completely in terms of conditions and type", candidates.map(_.id))
+          DuplicationError(
+            "There exists a stub or stubs that match completely in terms of conditions and type",
+            candidates.map(_.id)
+          )
         )
       )
       responseSchema <- protobufSchemaResolver.parseDefinitionFrom(responseSchemaBytes)
