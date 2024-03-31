@@ -23,11 +23,11 @@ import ru.tinkoff.tcb.mockingbird.edsl.model.ValueMatcher.*
 /**
  * Base trait for generating a set of tests from an [[ru.tinkoff.tcb.mockingbird.edsl.ExampleSet ExampleSet]].
  *
- * This trait inherits from AsyncFunSuiteLike in the [[https://www.scalatest.org/ ScalaTest]] framework, so you can
- * add additional tests inside it or use
+ * This trait inherits from AsyncFunSuiteLike in the [[https://www.scalatest.org/ ScalaTest]] framework, so you can add
+ * additional tests inside it or use
  * [[https://www.scalatest.org/user_guide/sharing_fixtures#beforeAndAfter BeforeAndAfter]] and/or
- * [[https://www.scalatest.org/user_guide/sharing_fixtures#composingFixtures BeforeAndAfterEach]] to manage
- * the setup of the necessary environment for executing tests, including using
+ * [[https://www.scalatest.org/user_guide/sharing_fixtures#composingFixtures BeforeAndAfterEach]] to manage the setup of
+ * the necessary environment for executing tests, including using
  * [[https://github.com/testcontainers/testcontainers-scala testcontainers-scala]].
  */
 trait AsyncScalaTestSuite extends AsyncFunSuiteLike {
