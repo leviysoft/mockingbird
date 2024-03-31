@@ -77,7 +77,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(service1.isEmpty && service2.isEmpty)(
         ZIO.fail(
           ValidationError(
-            Vector(s"Не удалось подобрать сервис для ${body.path.orElse(body.pathPattern.map(_.regex)).getOrElse("")}")
+            Vector(s"Can't find service for ${body.path.orElse(body.pathPattern.map(_.regex)).getOrElse("")}")
           )
         )
       )
@@ -95,7 +95,7 @@ final class AdminApiHandler(
       candidates2 = candidates1.filter(_.state == body.state)
       _ <- ZIO.when(candidates2.nonEmpty)(
         ZIO.fail(
-          DuplicationError("Существует заглушка(-ки), полностью совпадающая по условиям и типу", candidates2.map(_.id))
+          DuplicationError("There exists a stub or stubs that match completely in terms of conditions and type", candidates2.map(_.id))
         )
       )
       now <- ZIO.clockWith(_.instant)
@@ -119,7 +119,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(service.isEmpty)(
         ZIO.fail(
           ValidationError(
-            Vector(s"Сервис ${body.service} не существует")
+            Vector(s"Service ${body.service} does not exist")
           )
         )
       )
@@ -135,7 +135,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(candidates2.nonEmpty)(
         ZIO.fail(
           DuplicationError(
-            "Существует сценарий(и), полностью совпадающий по источнику, условиям и типу",
+            "There exist scenario(s) that match completely in terms of source, conditions, and type",
             candidates2.map(_.id)
           )
         )
@@ -162,7 +162,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(candidates.nonEmpty)(
         ZIO.fail(
           DuplicationError(
-            s"Существует сервис(ы), имеющий суффикс ${body.suffix.value}",
+            s"There exist service(s) that have a suffix ${body.suffix.value}",
             candidates.map(_.name)
           )
         )
@@ -198,7 +198,7 @@ final class AdminApiHandler(
       _ <- Tracing.update(_.addToPayload("path" -> path, "method" -> method.entryName))
       (stub, _) <- f(Scope.Countdown)
         .filterOrElse(_.isDefined)(f(Scope.Ephemeral).filterOrElse(_.isDefined)(f(Scope.Persistent)))
-        .someOrFail(StubSearchError(s"Не удалось подобрать заглушку для [$method] $path"))
+        .someOrFail(StubSearchError(s"Cant find a stub for [$method] $path"))
     } yield stub.id
   }
 
@@ -208,7 +208,7 @@ final class AdminApiHandler(
     for {
       (scenario, _) <- f(Scope.Countdown)
         .filterOrElse(_.isDefined)(f(Scope.Ephemeral).filterOrElse(_.isDefined)(f(Scope.Persistent)))
-        .someOrFail(ScenarioSearchError(s"Не удалось подобрать сценарий для сообщения из ${body.source}"))
+        .someOrFail(ScenarioSearchError(s"Can't find any scenario for the message from ${body.source}"))
     } yield scenario.id
   }
 
@@ -298,7 +298,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(service1.isEmpty && service2.isEmpty)(
         ZIO.fail(
           ValidationError(
-            Vector(s"Не удалось подобрать сервис для ${body.path.orElse(body.pathPattern.map(_.regex)).getOrElse("")}")
+            Vector(s"Can't find a service for ${body.path.orElse(body.pathPattern.map(_.regex)).getOrElse("")}")
           )
         )
       )
@@ -317,7 +317,7 @@ final class AdminApiHandler(
       candidates2 = candidates1.filter(_.state == body.state)
       _ <- ZIO.when(candidates2.nonEmpty)(
         ZIO.fail(
-          DuplicationError("Существует заглушка(-ки), полностью совпадающая по условиям и типу", candidates2.map(_.id))
+          DuplicationError("There exists a stub or stubs that match completely in terms of conditions and type", candidates2.map(_.id))
         )
       )
       now <- ZIO.clockWith(_.instant)
@@ -344,7 +344,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(service.isEmpty)(
         ZIO.fail(
           ValidationError(
-            Vector(s"Сервис ${body.service} не существует")
+            Vector(s"Service ${body.service} does not exist")
           )
         )
       )
@@ -361,7 +361,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(candidates2.nonEmpty)(
         ZIO.fail(
           DuplicationError(
-            "Существует сценарий(и), полностью совпадающий по источнику, условиям и типу",
+            "There exist scenario(s) that match completely in terms of source, conditions, and type",
             candidates2.map(_.id)
           )
         )
@@ -422,7 +422,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(service.isEmpty)(
         ZIO.fail(
           ValidationError(
-            Vector(s"Сервис ${body.service} не существует")
+            Vector(s"Service ${body.service} does not exist")
           )
         )
       )
@@ -443,7 +443,7 @@ final class AdminApiHandler(
         .filter(_.state == body.state)
       _ <- ZIO.when(candidates.nonEmpty)(
         ZIO.fail(
-          DuplicationError("Существует заглушка(-ки), полностью совпадающая по условиям и типу", candidates.map(_.id))
+          DuplicationError("There exists a stub or stubs that match completely in terms of conditions and type", candidates.map(_.id))
         )
       )
       responseSchema <- protobufSchemaResolver.parseDefinitionFrom(responseSchemaBytes)
@@ -494,7 +494,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(service.isEmpty)(
         ZIO.fail(
           ValidationError(
-            Vector(s"Сервис ${body.service} не существует")
+            Vector(s"Service ${body.service} does not exist")
           )
         )
       )
@@ -502,7 +502,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(candidate.nonEmpty)(
         ZIO.fail(
           DuplicationError(
-            "Существует конфигурация, полностью совпадающая по имени",
+            "There exists a configuration that matches completely by name",
             candidate.map(_.name).toVector
           )
         )
@@ -519,7 +519,7 @@ final class AdminApiHandler(
           ZIO.fail(ex)
         }
         .catchSome { case NonFatal(ex) =>
-          log.errorCause("Ошибка при инициализации", ex)
+          log.errorCause("Initialization error", ex)
         }
         .forkDaemon
     } yield if (res > 0) OperationResult("success", sourceConf.name) else OperationResult("nothing inserted")
@@ -533,7 +533,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(service.isEmpty)(
         ZIO.fail(
           ValidationError(
-            Vector(s"Сервис ${body.service} не существует")
+            Vector(s"Service ${body.service} does not exist")
           )
         )
       )
@@ -550,14 +550,14 @@ final class AdminApiHandler(
           ZIO.fail(ex)
         }
         .catchSome { case NonFatal(ex) =>
-          log.errorCause("Ошибка при деинициализации", ex)
+          log.errorCause("Error during deinitialization", ex)
         } *> ZIO
         .foreachDiscard(confPatch.init.map(_.toVector).getOrElse(Vector.empty))(rm.execute)
         .catchSomeDefect { case NonFatal(ex) =>
           ZIO.fail(ex)
         }
         .catchSome { case NonFatal(ex) =>
-          log.errorCause("Ошибка при инициализации", ex)
+          log.errorCause("Initialization error", ex)
         }).forkDaemon
     } yield if (res.successful) OperationResult("success", confPatch.name) else OperationResult("nothing changed")
 
@@ -571,7 +571,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(scenarios.nonEmpty)(
         ZIO.fail(
           ValidationError(
-            Vector(s"Сценарии ${scenarios.mkString(",")} используют источник ${name}")
+            Vector(s"Scenarios ${scenarios.mkString(",")} are using source ${name}")
           )
         )
       )
@@ -579,18 +579,18 @@ final class AdminApiHandler(
       _ <- ZIO.when(source.isEmpty)(
         ZIO.fail(
           ValidationError(
-            Vector(s"Конфигурация $name не существует")
+            Vector(s"Configuration of name $name does not exist")
           )
         )
       )
-      _ <- sourceDAO.deleteById(name) // TODO: удалять в транзакции
+      _ <- sourceDAO.deleteById(name) // TODO: delete in transaction
       _ <- ZIO
         .foreachDiscard(source.get.shutdown.map(_.toVector).getOrElse(Vector.empty))(rm.execute)
         .catchSomeDefect { case NonFatal(ex) =>
           ZIO.fail(ex)
         }
         .catchSome { case NonFatal(ex) =>
-          log.errorCause("Ошибка при деинициализации", ex)
+          log.errorCause("Error during deinitialization", ex)
         }
         .forkDaemon
     } yield OperationResult("success", None)
@@ -621,7 +621,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(service.isEmpty)(
         ZIO.fail(
           ValidationError(
-            Vector(s"Сервис ${body.service} не существует")
+            Vector(s"Service ${body.service} does not exist")
           )
         )
       )
@@ -629,7 +629,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(candidate.nonEmpty)(
         ZIO.fail(
           DuplicationError(
-            "Существует конфигурация, полностью совпадающая по имени",
+            "There exists a configuration that matches completely by name",
             candidate.map(_.name).toVector
           )
         )
@@ -646,7 +646,7 @@ final class AdminApiHandler(
           ZIO.fail(ex)
         }
         .catchSome { case NonFatal(ex) =>
-          log.errorCause("Ошибка при инициализации", ex)
+          log.errorCause("Initialization error", ex)
         }
         .forkDaemon
     } yield if (res > 0) OperationResult("success", destinationConf.name) else OperationResult("nothing inserted")
@@ -660,7 +660,7 @@ final class AdminApiHandler(
       _ <- ZIO.when(service.isEmpty)(
         ZIO.fail(
           ValidationError(
-            Vector(s"Сервис ${body.service} не существует")
+            Vector(s"Service ${body.service} does not exist")
           )
         )
       )
@@ -677,14 +677,14 @@ final class AdminApiHandler(
           ZIO.fail(ex)
         }
         .catchSome { case NonFatal(ex) =>
-          log.errorCause("Ошибка при деинициализации", ex)
+          log.errorCause("Error during deinitialization", ex)
         } *> ZIO
         .foreachDiscard(confPatch.init.map(_.toVector).getOrElse(Vector.empty))(rm.execute)
         .catchSomeDefect { case NonFatal(ex) =>
           ZIO.fail(ex)
         }
         .catchSome { case NonFatal(ex) =>
-          log.errorCause("Ошибка при инициализации", ex)
+          log.errorCause("Initialization error", ex)
         }).forkDaemon
     } yield if (res.successful) OperationResult("success", confPatch.name) else OperationResult("nothing changed")
 }

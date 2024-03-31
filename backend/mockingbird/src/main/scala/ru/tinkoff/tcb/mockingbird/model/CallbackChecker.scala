@@ -17,16 +17,16 @@ trait CallbackChecker {
       case Some(value) =>
         value match {
           case MessageCallback(dest, _, mcallback, _) =>
-            (destinations(dest) !? Vector(s"$dest не настроен")) ++ checkCallback(mcallback, destinations)
+            (destinations(dest) !? Vector(s"The field ${nameOf[MessageCallback](_.destination)} must be filled")) ++ checkCallback(mcallback, destinations)
           case HttpCallback(_, rm, p, hcallback, _) =>
             (rm, p) match {
               case Some(_) <*> None =>
-                s"Поле ${nameOf[HttpCallback](_.responseMode)} должно быть заполнено ТОЛЬКО при наличии ${nameOf[HttpCallback](_.persist)}" +: checkCallback(
+                s"The field ${nameOf[HttpCallback](_.responseMode)} must be filled in ONLY if ${nameOf[HttpCallback](_.persist)} is present" +: checkCallback(
                   hcallback,
                   destinations
                 )
               case None <*> Some(_) =>
-                s"Поле ${nameOf[HttpCallback](_.responseMode)} должно быть заполнено при наличии ${nameOf[HttpCallback](_.persist)}" +: checkCallback(
+                s"The field ${nameOf[HttpCallback](_.responseMode)} must be filled in if ${nameOf[HttpCallback](_.persist)} is present" +: checkCallback(
                   hcallback,
                   destinations
                 )
