@@ -11,7 +11,6 @@ import mouse.boolean.*
 import sttp.client4.{Backend as SttpBackend, *}
 import sttp.model.Method
 import zio.interop.catz.*
-import zio.interop.catz.implicits.*
 
 import ru.tinkoff.tcb.logging.MDCLogging
 import ru.tinkoff.tcb.mockingbird.api.Tracing
