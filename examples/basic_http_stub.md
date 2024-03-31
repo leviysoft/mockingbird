@@ -1,9 +1,9 @@
-# Базовые примеры работы с HTTP заглушками
-## Persistent, ephemeral и countdown HTTP заглушки
+# Basic examples of working with HTTP stubs
+## Persistent, ephemeral, and countdown HTTP stubs
 
-Предполагается, что в mockingbird есть сервис `alpha`.
+It is assumed that in mockingbird there is a service `alpha`.
 
-Создаем заглушку в скоупе `persistent`.
+Creating a stub in the persistent `scope`.
 ```
 curl \
   --request POST \
@@ -30,11 +30,11 @@ curl \
 
 ```
 
-Ответ:
+Response:
 ```
-Код ответа: 200
+Response code: 200
 
-Тело ответа:
+Response body:
 {
   "status" : "success",
   "id" : "29dfd29e-d684-462e-8676-94dbdd747e30"
@@ -42,7 +42,7 @@ curl \
 
 ```
 
-Проверяем созданную заглушку.
+Checking the created stub.
 ```
 curl \
   --request GET \
@@ -50,19 +50,19 @@ curl \
 
 ```
 
-Ответ:
+Response:
 ```
-Код ответа: 451
+Response code: 451
 
-Заголовки ответа:
+Response headers:
 Content-Type: 'text/plain'
 
-Тело ответа:
+Response body:
 persistent scope
 
 ```
 
-Для этого же пути, создаем заглушку в скоупе `ephemeral`.
+For the same path, creating a stub in the `ephemeral` scope.
 ```
 curl \
   --request POST \
@@ -89,11 +89,11 @@ curl \
 
 ```
 
-Ответ:
+Response:
 ```
-Код ответа: 200
+Response code: 200
 
-Тело ответа:
+Response body:
 {
   "status" : "success",
   "id" : "13da7ef2-650e-4a54-9dca-377a1b1ca8b9"
@@ -101,7 +101,7 @@ curl \
 
 ```
 
-И создаем заглушку в скоупе `countdown` с `times` равным 2.
+And creating a stub in the `countdown` scope with `times` equal to 2.
 ```
 curl \
   --request POST \
@@ -129,11 +129,11 @@ curl \
 
 ```
 
-Ответ:
+Response:
 ```
-Код ответа: 200
+Response code: 200
 
-Тело ответа:
+Response body:
 {
   "status" : "success",
   "id" : "09ec1cb9-4ca0-4142-b796-b94a24d9df29"
@@ -141,12 +141,12 @@ curl \
 
 ```
 
-Заданные заглушки отличаются возвращаемыми ответами, а именно содержимым `body` и `code`,
- в целом они могут быть как и полностью одинаковыми так и иметь больше различий.
- Скоупы заглушек в порядке убывания приоритета: Countdown, Ephemeral, Persistent
+The specified stubs differ in the responses they return, namely the contents of `body` and `code`,
+ in general, they can be either completely identical or have more differences.
+ The scopes of stubs in descending order of priority: Countdown, Ephemeral, Persistent
 
-Так как заглушка `countdown` была создана с `times` равным двум, то следующие два
-запроса вернут указанное в ней содержимое.
+Since the countdown stub was created with `times` equal to two, the next two
+requests will return the specified content.
 ```
 curl \
   --request GET \
@@ -154,14 +154,14 @@ curl \
 
 ```
 
-Ответ:
+Response:
 ```
-Код ответа: 429
+Response code: 429
 
-Заголовки ответа:
+Response headers:
 Content-Type: 'text/plain'
 
-Тело ответа:
+Response body:
 countdown scope
 
 ```
@@ -172,20 +172,20 @@ curl \
 
 ```
 
-Ответ:
+Response:
 ```
-Код ответа: 429
+Response code: 429
 
-Заголовки ответа:
+Response headers:
 Content-Type: 'text/plain'
 
-Тело ответа:
+Response body:
 countdown scope
 
 ```
 
-Последующие запросы будут возвращать содержимое заглушки `ephemeral`. Если бы её не было,
-то вернулся бы ответ от заглушки `persistent`.
+Subsequent requests will return the content of the `ephemeral` stub. If it didn't exist,
+the response from the `persistent` stub would be returned..
 ```
 curl \
   --request GET \
@@ -193,20 +193,20 @@ curl \
 
 ```
 
-Ответ:
+Response:
 ```
-Код ответа: 200
+Response code: 200
 
-Заголовки ответа:
+Response headers:
 Content-Type: 'text/plain'
 
-Тело ответа:
+Response body:
 ephemeral scope
 
 ```
 
-Чтобы получить теперь ответ от `persistent` заглушки нужно или дождаться, когда истекут
-сутки с момента её создания или просто удалить `ephemeral` заглушку.
+Now to get a response from the `persistent` stub, one must either wait until a day has passed
+since its creation or simply delete the `ephemeral` stub.
 ```
 curl \
   --request DELETE \
@@ -215,11 +215,11 @@ curl \
 
 ```
 
-Ответ:
+Response:
 ```
-Код ответа: 200
+Response code: 200
 
-Тело ответа:
+Response body:
 {
   "status" : "success",
   "id" : null
@@ -227,7 +227,7 @@ curl \
 
 ```
 
-После удаления `ephemeral` заглушки, при запросе вернется результат заглушки `persistent`
+After deleting the `ephemeral` stub, a request will return the result of the `persistent` stub.
 ```
 curl \
   --request GET \
@@ -235,30 +235,30 @@ curl \
 
 ```
 
-Ответ:
+Response:
 ```
-Код ответа: 451
+Response code: 451
 
-Заголовки ответа:
+Response headers:
 Content-Type: 'text/plain'
 
-Тело ответа:
+Response body:
 persistent scope
 
 ```
-## Использование параметров пути в HTTP заглушках
+## Using path parameters in HTTP stubs
 
-Заглушка может выбираться в том числе и на основании регулярного выражения
-в пути, это может быть не очень эффективно с точки зрения поиска такой заглушки.
-Поэтому без необходимости, лучше не использовать этот механизм.
+A stub can also be selected based on a regular expression in the path,
+which can be inefficient in terms of searching for such a stub.
+Therefore, without necessity, it's better not to use this mechanism.
 
-Предполагается, что в mockingbird есть сервис `alpha`.
+It is assumed that in mockingbird there is a service `alpha`.
 
-Скоуп в котором создаются заглушки не важен. В целом скоуп влияет только
-на приоритет заглушек. В данном случае заглушка создается в скоупе `countdown`.
-В отличие от предыдущих примеров, здесь для указания пути для срабатывания
-заглушки используется поле `pathPattern`, вместо `path`. Так же, ответ который
-формирует заглушка не статичный, а зависит от параметров пути.
+The scope in which stubs are created does not matter. In general, the scope only affects
+the priority of the stubs. In this case, the stub is created in the `countdown` scope.
+Unlike previous examples, here the `pathPattern` field is used to specify the path for triggering
+the stub, instead of `path`. Also, the response that
+the stub generates is not static but depends on the path parameters.
 ```
 curl \
   --request POST \
@@ -290,11 +290,11 @@ curl \
 
 ```
 
-Ответ:
+Response:
 ```
-Код ответа: 200
+Response code: 200
 
-Тело ответа:
+Response body:
 {
   "status" : "success",
   "id" : "c8c9d92f-192e-4fe3-8a09-4c9b69802603"
@@ -302,8 +302,8 @@ curl \
 
 ```
 
-Теперь сделаем несколько запросов, который приведут к срабатыванию этой заглшки,
-чтобы увидеть, что результат действительно зависит от пути.
+Now let's make several requests that will trigger this stub,
+to see that the result really depends on the path.
 ```
 curl \
   --request GET \
@@ -311,14 +311,14 @@ curl \
 
 ```
 
-Ответ:
+Response:
 ```
-Код ответа: 200
+Response code: 200
 
-Заголовки ответа:
+Response headers:
 Content-Type: 'application/json'
 
-Тело ответа:
+Response body:
 {
   "static_field" : "Fixed part of reponse",
   "obj" : "alpha",
@@ -333,14 +333,14 @@ curl \
 
 ```
 
-Ответ:
+Response:
 ```
-Код ответа: 200
+Response code: 200
 
-Заголовки ответа:
+Response headers:
 Content-Type: 'application/json'
 
-Тело ответа:
+Response body:
 {
   "static_field" : "Fixed part of reponse",
   "obj" : "beta",

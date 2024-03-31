@@ -11,18 +11,18 @@ import ru.tinkoff.tcb.utils.circe.optics.*
 
 class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
 
-  val name = "Использование хранимого состояние в HTTP заглушках"
+  val name = "Utilizing persistent state in HTTP stubs"
 
-  example("Создать, получить и обновить хранимое состояние") {
+  example("Create, retrieve, and update stored state") {
     for {
-      _ <- describe("Предполагается, что в mockingbird есть сервис `alpha`.")
-      _ <- describe("""Для работы с состоянием у HTTP заглушки есть две секции: `persist` и `state`.
-          |Секция `persist` отвечает за сохранение состояния для последующего доступа к
-          |нему. А секция `state` содержит предикаты для поиска состояния. Если указана
-          |только секция `persist`, то каждый раз при срабатывании заглушки в БД будет
-          |записываться новое состояние. А если указаны обе секции, то найденное состояние
-          |будет перезаписано. Состояние - это JSON объект.""".stripMargin)
-      _ <- describe("""В качестве примера, будем хранить как состояние JSON объект вида:
+      _ <- describe("It is assumed that in mockingbird there is a service `alpha`.")
+      _ <- describe("""For working with state in the HTTP stub, there are two sections: `persist` and `state`.
+          |The `persist` section is responsible for saving the state for subsequent access to
+          |it. The `state` section contains predicates for searching for the state. If only
+          |the `persist` section is specified, then each time the stub is triggered, a new state will be
+          |recorded in the database. If both sections are specified, the found state
+          |will be overwritten. The state is a JSON object.""".stripMargin)
+      _ <- describe(""" As an example, we will store as the state a JSON object of the form:
           |```json
           |{
           |  "id": "o1",
@@ -30,8 +30,8 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
           |  "version": 1
           |}
           |```
-          |И дополнительно сохранять время создания и модификации.""".stripMargin)
-      _ <- describe("Для первоначального создания состояния создадим следующую заглушку.")
+          |And additionally save the creation and modification time.""".stripMargin)
+      _ <- describe("To initially create the state, we create the following stub.")
       resp <- sendHttp(
         method = Post,
         path = "/api/internal/mockingbird/v2/stub",
@@ -84,18 +84,18 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
         )
       )
       _ <- describe(
-        """Данная заглушка делает следующее:
-          | * Проверяет, что тело запроса - это JSON объект содержащий как минимум одно
-          |   поле `id`.
-          | * В секции `seed` создается переменная `timestamp` в которую записывается
-          |   текущее время.
-          | * Секция `persist` описывает объект, который будет сохранен как состояние.
-          |   Данные, которые пришли в теле запроса записываются в поле `_data`, в добавок,
-          |   в поле `created` записывает текущее время.
-          | * В ответе возвращаются полученные данные и временная метка.""".stripMargin
+        """This stub does the following:
+          | * Checks that the request body is a JSON object containing at least one
+          |   field `id`.
+          | * In the `seed` section, a `timestamp` variable is created in which
+          |   the current time is recorded.
+          | * The `persist` section describes the object that will be saved as the state.
+          |   The data that came in the request body are recorded in the `_data` field, in addition,
+          |   the `created` field records the current time.
+          | * The response returns the received data and the timestamp.""".stripMargin
       )
       _ <- describe(
-        """В итоге в Mockingbird состояние будет записано как:
+        """As a result, in Mockingbird the state will be recorded as:
           |```json
           |{
           |  "_data": {
@@ -109,9 +109,9 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
           |""".stripMargin
       )
       _ <- describe(
-        """Добавим заглушку для модификации состояния, она будет похожей на предыдущую,
-          |но будет иметь секцию `state` для поиска уже существующего состояния, а в секции
-          |`persist` будет поле `modified` вместо `created`.""".stripMargin
+        """We add a stub for modifying the state, similar to the previous one,
+          |but it has a state section for searching for an existing state,
+          |and in the `persist` section, it has a `modified` field instead of `created`.""".stripMargin
       )
       resp <- sendHttp(
         method = Post,
@@ -168,30 +168,30 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
         )
       )
       _ <- describe(
-        """Для обновления состояния принимаем такие же данные, как и для создания нового.
-          |В секции `state` поля из тела запроса доступны сразу, без дополнительных,
-          |поэтому просто пишем, имя поля `${id}`, в отличии от секций `response`
-          |и `persist`, где доступ к данным запроса осуществляется через переменную `req`.
-          |В случае, если используются именованные параметры пути в `pathPattern`,
-          |то доступ к ним из секции `state` осуществляется через переменную `__segments`.""".stripMargin
+        """To update the state, we accept the same data as for creating a new one.
+          |In the `state` section, fields from the request body are available immediately,
+          |without additional, so we just write the field name `${id}`, unlike in the `response`
+          |and `persist` sections, where access to request data is through the `req` variable.
+          |If named path parameters are used in `pathPattern`,
+          |then access to them from the `state` section is through the `__segments` variable.""".stripMargin
       )
       _ <- describe(
-        """При обновлении состояния, поля перечисленные в секции `persist` дописываются
-          |к тем, что уже есть в найденном состоянии. В случае если поле уже существует, то
-          |оно будет перезаписано. Стоит обратить внимание каким образом дописывается
-          |временная метка `modified`. Она указана как `meta.modified`, такой синтаксис
-          |позволяет перезаписывать не весь объект, а только его часть или добавлять
-          |в него новые поля.""".stripMargin
+        """When updating the state, the fields listed in the `persist` section are appended
+          |to those already in the found state. In case a field already exists, it
+          |will be overwritten. Pay attention to how the modified `timestamp` is appended.
+          |It is indicated as `meta.modified`, this syntax
+          |allows overwriting not the entire object, but only part of it or adding
+          |new fields to it.""".stripMargin
       )
       _ <- describe(
-        """При выборе между двух заглушек, заглушка для которой выполнилось условие поиска
-          |хранимого состояние, т.е. существует состояние удовлетворяющее критериям
-          |указанным в секции `state`, имеет больший приоритет, чем заглушка без условий
-          |выбора состояний. Поэтому первая заглушка будет срабатывать когда в БД ещё нет
-          |хранимого состояния с указанным `id`, а вторая когда такое состояние уже есть. """.stripMargin
+        """When choosing between two stubs, the stub for which the search condition
+          |for the stored state is met, i.e., there exists a state meeting the criteria
+          |specified in the `state` section, has a higher priority than a stub without conditions
+          |for selecting states. Therefore, the first stub will be triggered when there is no
+          |stored state with the specified `id` in the database, and the second when such a state already exists.""".stripMargin
       )
-      _ <- describe("""Теперь создадим заглушку для получения хранимого состояния. Получать состояние
-          |будем отправляя POST запрос с JSON содержащим поле `id`:
+      _ <- describe("""Now we create a stub for retrieving the stored state. We will retrieve the state
+          |by sending a POST request with JSON containing the `id` field:
           |```json
           |{
           |  "id": "o1"
@@ -241,7 +241,7 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
           ).some
         )
       )
-      _ <- describe("Теперь попробуем вызвать заглушку, записывающую новое состояние.")
+      _ <- describe("Now let's try to invoke the stub that writes a new state.")
       resp <- sendHttp(
         method = Post,
         path = "/api/mockingbird/exec/alpha/state1",
@@ -270,7 +270,7 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
       )
       o1v1        = checked.body.flatMap(b => parser.parse(b).toOption).get
       o1v1created = (JLens \ "meta" \ "created").getOpt(o1v1).flatMap(_.asString).get
-      _ <- describe("А теперь получить состояние")
+      _ <- describe("And now retrieve the state")
       resp <- sendHttp(
         method = Post,
         path = "/api/mockingbird/exec/alpha/state1/get",
@@ -293,8 +293,8 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
         )
       )
       _ <- describe(
-        """Теперь модифицируем состояние, изменив значение поля `version` и добавив новое
-          |поле `description`. Поле `name` опустим.""".stripMargin
+        """Now we modify the state, changing the value of the `version` field
+          |and adding a new field `description`. We will omit the `name` field.""".stripMargin
       )
       resp <- sendHttp(
         method = Post,
@@ -330,7 +330,7 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
       )
       o1v2         = checked.body.flatMap(b => parser.parse(b).toOption).get
       o1v2modified = (JLens \ "meta" \ "modified").getOpt(o1v2).flatMap(_.asString).get
-      _ <- describe("И снова запросим состояние объекта `o1`")
+      _ <- describe("And again, we request the state of object `o1`")
       resp <- sendHttp(
         method = Post,
         path = "/api/mockingbird/exec/alpha/state1/get",
@@ -354,15 +354,15 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
         )
       )
       _ <- describe(
-        """Ответ изменился, мы видим новые поля. Так как поле `data` перезаписывалось
-          |целиком, то поле `name` исчезло, в то время как в объекте `meta`
-          |модифицировалось только поле `modified`, поэтому, хотя поле `created` не указано
-          |в секции `persist` заглушки обновляющей сосотояние, оно отсталось.""".stripMargin
+        """The response changed, we see new fields. Since the `data` field was completely overwritten,
+          |the `name` field disappeared, while in the `meta` object,
+          |only the modified field was `modified`, so although the `created` field is not mentioned
+          |in the `persist` section of the stub updating the state, it remained.""".stripMargin
       )
       _ <- describe(
-        """Если попробовать вызвать заглушку читающую состояние объекта которого нет,
-          |то Mockingbird вернет ошибку, в котрой будет сказано, что не найдено подходящие
-          |заглушки.""".stripMargin
+        """If we try to invoke the stub for reading the state of an object that does not exist,
+          |Mockingbird will return an error, stating that no suitable
+          |stubs were found.""".stripMargin
       )
       resp <- sendHttp(
         method = Post,
@@ -374,35 +374,35 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
         HttpResponseExpected(
           code = CheckInteger(400).some,
           body = CheckString(
-            "ru.tinkoff.tcb.mockingbird.error.StubSearchError: Не удалось подобрать заглушку для [Post] /alpha/state1/get"
+            "ru.tinkoff.tcb.mockingbird.error.StubSearchError: Could not find stub for [Post] /alpha/state1/get"
           ).some
         )
       )
       _ <- describe(
-        """Для решения подобной проблемы, надо создать вторую заглушку с таким же `path`,
-          |но с незаполненным `state`. Тогда, в случае отсутствия искомого состояния, будет
-          |отрабатывать она. Это аналогично тому как мы создали заглушку для записи нового
-          |состояния и заглушку для его обновления.""".stripMargin
+        """To solve such a problem, one should create a second stub with the same `path`,
+          |but with an empty `state`. Then, in the absence of the searched state, it
+          |will be triggered. This is similar to how we created a stub for writing a new
+          |state and a stub for its update.""".stripMargin
       )
     } yield ()
   }
 
-  example("Несколько состояний подходящих под условие поиска") {
+  example("Multiple states matching the search condition") {
     for {
       _ <- describe(
-        """В предыдущем примере было рассмотрено создание и модификация состояния,
-          |для этого было создано две соответствующие заглушки. Важно помнить, что если
-          |секция `state` не указана, а указана только секция `persist`, то в БД **всегда**
-          |создается новый объект состояния. При это заглушка с заполненным полем `state`
-          |будет выбрана только в том случае, если в результате поиска по заданным
-          |параметрам из БД вернулся строго один объект с состоянием.""".stripMargin
+        """In the previous example, creating and modifying a state was discussed,
+          |for which two corresponding stubs were created. It is important to remember that if
+          |the `state` section is not specified, and only the `persist` section is, then in the database **always**
+          |a new state object is created. Meanwhile, a stub with a filled `state`
+          |field will be selected only in the case that, as a result of the search by specified
+          |parameters, exactly one state object is returned from the database.""".stripMargin
       )
       _ <- describe(
-        """**ВНИМАНИЕ!** Функции удаления состояний в Mockingbird нет. Неосторожная работа
-          |с состояниями может привести к неработоспособности заглушек и придется удалять
-          |данные напрямую из БД.""".stripMargin
+        """**ATTENTION!** There is no function to delete states in Mockingbird. Careless work
+          |with states can lead to the inoperability of stubs, and it will be necessary to delete
+          |data directly from the database.""".stripMargin
       )
-      _ <- describe("Для демонстрации этого создадим новые заглушки для записи и чтения состояния.")
+      _ <- describe("To demonstrate this, we will create new stubs for writing and reading a state.")
       resp <- sendHttp(
         method = Post,
         path = "/api/internal/mockingbird/v2/stub",
@@ -471,7 +471,7 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
         resp,
         HttpResponseExpected(code = CheckInteger(200).some)
       )
-      _ <- describe("Вызовем заглушку для записи состояния")
+      _ <- describe("We call the stub for writing a state")
       resp <- sendHttp(
         method = Post,
         path = "/api/mockingbird/exec/alpha/state2",
@@ -488,7 +488,7 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
           body = CheckString("OK").some,
         )
       )
-      _ <- describe("Теперь попробуем его получить.")
+      _ <- describe("Now let's try to retrieve it.")
       resp <- sendHttp(
         method = Post,
         path = "/api/mockingbird/exec/alpha/state2/get",
@@ -497,7 +497,7 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
             |}""".stripMargin.some,
         headers = Seq("Content-Type" -> "application/json"),
       )
-      _ <- describe("Тут всё хорошо и мы получили то, что записали.")
+      _ <- describe("Here everything is fine, and we got what we wrote.")
       _ <- checkHttp(
         resp,
         HttpResponseExpected(
@@ -508,7 +508,7 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
           ).some,
         )
       )
-      _ <- describe("Теперь еще раз отправим объект с таким же `bad_id`")
+      _ <- describe("Now we send the object with the same `bad_id` again")
       resp <- sendHttp(
         method = Post,
         path = "/api/mockingbird/exec/alpha/state2",
@@ -525,7 +525,7 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
           body = CheckString("OK").some,
         )
       )
-      _ <- describe("И снова попробуем его получить.")
+      _ <- describe("And try to retrieve it again.")
       resp <- sendHttp(
         method = Post,
         path = "/api/mockingbird/exec/alpha/state2/get",
@@ -534,17 +534,17 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
             |}""".stripMargin.some,
         headers = Seq("Content-Type" -> "application/json"),
       )
-      _ <- describe("А вот тут уже ошибка")
+      _ <- describe("And here we encounter an error")
       _ <- checkHttp(
         resp,
         HttpResponseExpected(
           code = CheckInteger(400).some,
           body = CheckString(
-            "ru.tinkoff.tcb.mockingbird.error.StubSearchError: Для одной или нескольких заглушек найдено более одного подходящего состояния"
+            "ru.tinkoff.tcb.mockingbird.error.StubSearchError: For one or more stubs, multiple suitable states were found"
           ).some,
         )
       )
-      _ <- describe("Для проверки состояний подходящих для под заданное условие, можно выполнить следующий запрос.")
+      _ <- describe("To check for states that fit the given condition, one can perform the following request.")
       resp <- sendHttp(
         method = Post,
         path = "/api/internal/mockingbird/fetchStates",
@@ -555,7 +555,7 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
             |}""".stripMargin.some,
         headers = Seq("Content-Type" -> "application/json"),
       )
-      _ <- describe("В результате будет два объекта")
+      _ <- describe("As a result, there will be two objects")
       _ <- checkHttp(
         resp,
         HttpResponseExpected(
@@ -585,9 +585,9 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
         )
       )
       _ <- describe(
-        """Ручка `/api/internal/mockingbird/fetchStates` возвращает состояния в том виде
-          |как они хранятся в БД, присутствуют поля `id`, `created`, а записанное состояние
-          |хранится в поле `data`.""".stripMargin
+        """The `/api/internal/mockingbird/fetchStates` endpoint returns states as
+          |they are stored in the database, with fields `id`, `created`, and the recorded state
+          |stored in the `data` field.""".stripMargin
       )
     } yield ()
   }

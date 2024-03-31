@@ -44,12 +44,12 @@ class AsyncScalaTestSuiteWholeTest
 
     (mockI
       .apply(_: String, _: Option[Any])(_: source.Position))
-      .expects("Отправить GET запрос", *, *)
+      .expects("Send a GET request.", *, *)
       .once()
 
     (mockI
       .apply(_: String, _: Option[Any])(_: source.Position))
-      .expects("Ответ содержит случайный факт полученный с сервера", *, *)
+      .expects("The response contains a random fact obtained from the server.", *, *)
       .twice()
 
     mockInformer = mockI.some
@@ -74,7 +74,7 @@ class AsyncScalaTestSuiteWholeTest
   }
 
   override protected def afterAll(): Unit = {
-    calledTests shouldBe Vector("fake", "Получение случайного факта о котиках")
+    calledTests shouldBe Vector("fake", "Getting a random fact about kittens")
 
     super.afterAll()
   }
