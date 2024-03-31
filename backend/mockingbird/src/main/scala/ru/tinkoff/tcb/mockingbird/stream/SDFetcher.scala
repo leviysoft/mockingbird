@@ -5,7 +5,6 @@ import scala.util.control.NonFatal
 
 import fs2.Stream
 import zio.interop.catz.*
-import zio.interop.catz.implicits.*
 
 import ru.tinkoff.tcb.logging.MDCLogging
 import ru.tinkoff.tcb.mockingbird.api.WLD

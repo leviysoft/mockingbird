@@ -1,13 +1,12 @@
 package ru.tinkoff.tcb.mockingbird.stream
 
-import eu.timepit.fs2cron.awakeEveryCron
+import eu.timepit.fs2cron.cron4s.Cron4sScheduler
 import eu.timepit.refined.*
 import eu.timepit.refined.numeric.*
 import fs2.Stream
 import tofu.logging.Logging
 import tofu.logging.impl.ZUniversalLogging
 import zio.interop.catz.*
-import zio.interop.catz.implicits.*
 
 import ru.tinkoff.tcb.criteria.*
 import ru.tinkoff.tcb.criteria.Typed.*
@@ -20,7 +19,9 @@ import ru.tinkoff.tcb.mockingbird.model.Scope
 final class EphemeralCleaner(stubDAO: HttpStubDAO[Task], scenarioDAO: ScenarioDAO[Task]) {
   private val log: Logging[UIO] = new ZUniversalLogging(this.getClass.getName)
 
-  private val trigger = awakeEveryCron[Task](midnight)
+  private val cronScheduler = Cron4sScheduler.systemDefault[Task]
+
+  private val trigger = cronScheduler.awakeEvery(midnight)
 
   private val secondsInDay = 60 * 60 * 24
 
