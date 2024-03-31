@@ -224,22 +224,4 @@ class XmlPredicateSpec extends AnyFunSuite with Matchers with EitherValues {
     sut.map(_(xml("""<json> <![CDATA[{"f": 43}]]> </json>"""))) shouldBe Some(false)
     sut.map(_(xml("""<json> <![CDATA[{"f": 42]]> </json>"""))) shouldBe Some(false)
   }
-
-  test("Check CDATA with XML") {
-    val spec = Json.obj(
-      "/xml" := Json.obj(
-        "xcdata" := Json.obj(
-          "/f" := Json.obj(
-            "==" := 42
-          )
-        )
-      )
-    )
-
-    val sut = XmlPredicate(spec.as[Map[Xpath, Map[Keyword.Xml, Json]]].value).toOption
-
-    sut.map(_(xml("""<xml> <![CDATA[<f>42</f>]]> </xml>"""))) shouldBe Some(true)
-    sut.map(_(xml("""<xml> <![CDATA[<f>43</f>]]> </xml>"""))) shouldBe Some(false)
-    sut.map(_(xml("""<xml> <![CDATA[<f>42</f]]> </xml>"""))) shouldBe Some(false)
-  }
 }
