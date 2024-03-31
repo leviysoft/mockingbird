@@ -114,15 +114,15 @@ class MarkdownGeneratorSuite extends AnyFunSuite with Matchers {
     val obtains = markdown(mds).md
     val expected =
       raw"""
-           |Ответ:
+           |Response:
            |```
-           |Код ответа: 418
+           |Response code: 418
            |
-           |Заголовки ответа:
+           |Response headers:
            |Content-Type: 'application/json'
            |token: 'token-example'
            |
-           |Тело ответа:
+           |Response body:
            |{
            |  "foo" : [
            |  ],
@@ -142,10 +142,10 @@ class MarkdownGeneratorSuite extends AnyFunSuite with Matchers {
     val mdg = MarkdownGenerator(uri"https://catfact.ninja")
     val set = new CatsFacts[MarkdownGenerator.HttpResponseR]()
     mdg.generate(set) shouldBe
-      """# Примеры использования ExampleSet
-        |## Получение случайного факта о котиках
+      """# Examples of using ExampleSet
+        |## Getting a random fact about kittens
         |
-        |Отправить GET запрос
+        |Send a GET request
         |```
         |curl \
         |  --request GET \
@@ -154,16 +154,16 @@ class MarkdownGeneratorSuite extends AnyFunSuite with Matchers {
         |
         |```
         |
-        |Ответ содержит случайный факт полученный с сервера
+        |The response contains a randomly obtained fact from the server
         |
-        |Ответ:
+        |Response:
         |```
-        |Код ответа: 200
+        |Response code: 200
         |
-        |Заголовки ответа:
+        |Response headers:
         |Content-Type: 'application/json'
         |
-        |Тело ответа:
+        |Response body:
         |{
         |  "fact" : "There are approximately 100 breeds of cat.",
         |  "length" : 42.0
