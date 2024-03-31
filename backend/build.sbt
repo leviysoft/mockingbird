@@ -93,9 +93,9 @@ val mockingbird = (project in file("mockingbird"))
   )
 
 /*
-   Отдельный подпроект был создан ради того, чтобы не отключать coursier во всём проекте.
-   См. https://github.com/coursier/coursier/issues/2016
-   Так как netty-tranport-epoll больше не используется можно перенести код отсюда в mockingbird
+   A separate subproject was created to avoid disabling coursier throughout the entire project.
+   See https://github.com/coursier/coursier/issues/2016.
+   Since netty-transport-epoll is no longer used, the code from here can be moved to mockingbird.
  */
 lazy val `mockingbird-api` = (project in file("mockingbird-api"))
   .enablePlugins(BuildInfoPlugin)

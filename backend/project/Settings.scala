@@ -46,21 +46,21 @@ object Settings {
       java.lang.Runtime.getRuntime.availableProcessors().toString,
       "-Ycache-plugin-class-loader:last-modified",
       "-Ycache-macro-class-loader:last-modified",
-      prelude(), // стандартные импорты + zio
+      prelude(), // standart imports + zio
       "-Ymacro-annotations",
       "-Xsource:3",
       "-Vimplicits",
       "-Vtype-diffs",
-      // далее настройки предупреждений
-      "-Wconf:any:wv", // отображает категория warning'а для nowarn (https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html)
+      // warning settings
+      "-Wconf:any:wv", // shows warning categories for nowarn (https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html)
       "-Wunused:imports",
       "-Wunused:privates",
       "-Wunused:synthetics",
       "-Xlint:_",
-      "-Xlint:-byname-implicit",       // выкинут из-за бага в скале https://github.com/scala/bug/issues/12072
-      "-Xlint:-unused",                // частично включается через Wunused иначе ругается на макросы
-      "-Xlint:-missing-interpolator",  // ругается на строки для mongo запросов
-      "-Xlint:-type-parameter-shadow", // слишком много случаев
+      "-Xlint:-byname-implicit",       // disabled due to scala bug https://github.com/scala/bug/issues/12072
+      "-Xlint:-unused",                // partially enabled via Wunused otherwise is false-positive in macros
+      "-Xlint:-missing-interpolator",  // false-positive on mongo request
+      "-Xlint:-type-parameter-shadow", // too many occurrences
       "-Ywarn-unused:imports",
       "-Ywarn-value-discard",
       "-Ywarn-dead-code",
@@ -80,17 +80,17 @@ object Settings {
     ),
     missinglinkExcludedDependencies ++= Seq(
       moduleFilter(organization = "ch.qos.logback", name = "logback-core" | "logback-classic"),
-      // missinglink некорректно обрабатывает scope optional
+      // missinglink does not correctly handle optional scope
       moduleFilter(organization = "org.mongodb", name = "mongodb-driver-core" | "mongodb-driver-reactivestreams"),
       moduleFilter(organization = "io.netty"),
-      // там что-то ужасное, артефакт использует классы из зависимостей, которых нет в pom.xml
+      // something awful here, artifact uses classes from dependencies, which are absent in pom.xml
       moduleFilter(organization = "io.projectreactor", name = "reactor-core")
     ),
     missinglinkIgnoreDestinationPackages ++= Seq(
-      // optional зависимость в bson
+      // optional dependency in bson
       IgnoredPackage("org.slf4j"),
       IgnoredPackage("ch.qos.logback"),
-      // optional в vertx-core
+      // optional dependency in vertx-core
       IgnoredPackage("com.fasterxml.jackson.databind"),
       IgnoredPackage("io.vertx.core.json.jackson"),
       IgnoredPackage("io.netty.handler.codec.haproxy"),
