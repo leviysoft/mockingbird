@@ -17,7 +17,9 @@ trait CallbackChecker {
       case Some(value) =>
         value match {
           case MessageCallback(dest, _, mcallback, _) =>
-            (destinations(dest) !? Vector(s"The field ${nameOf[MessageCallback](_.destination)} must be filled")) ++ checkCallback(mcallback, destinations)
+            (destinations(dest) !? Vector(
+              s"The field ${nameOf[MessageCallback](_.destination)} must be filled"
+            )) ++ checkCallback(mcallback, destinations)
           case HttpCallback(_, rm, p, hcallback, _) =>
             (rm, p) match {
               case Some(_) <*> None =>

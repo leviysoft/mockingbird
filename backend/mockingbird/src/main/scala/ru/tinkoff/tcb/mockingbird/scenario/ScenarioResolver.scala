@@ -53,7 +53,8 @@ class ScenarioResolver(
       _ <- log.info("Candidates are: {}", scenarios0.map(_.id))
       scenarios1 = scenarios0.filter(_.input.checkMessage(message))
       _ <- ZIO.when(scenarios1.isEmpty)(
-        log.warn("After validating the message, there are no candidates left. Please verify the message: {}", message) *>
+        log
+          .warn("After validating the message, there are no candidates left. Please verify the message: {}", message) *>
           ZIO.fail(EarlyReturn)
       )
       _ <- log.info("After message validation: {}", scenarios1.map(_.id))
