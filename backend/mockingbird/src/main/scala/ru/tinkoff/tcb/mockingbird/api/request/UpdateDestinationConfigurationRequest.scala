@@ -15,14 +15,14 @@ import ru.tinkoff.tcb.protocol.schema.*
 
 @derive(decoder, encoder, schema)
 final case class UpdateDestinationConfigurationRequest(
-    @description("Описание конфигурации")
+    @description("Configuration description")
     description: String,
     service: String,
-    @description("Спецификация запроса")
+    @description("Request specification")
     request: EventDestinationRequest,
-    @description("Спецификация инициализатора")
+    @description("Initializer specification")
     init: Option[NonEmptyVector[ResourceRequest]],
-    @description("Спецификация деинициализатора")
+    @description("Finalizer specification")
     shutdown: Option[NonEmptyVector[ResourceRequest]],
 )
 
