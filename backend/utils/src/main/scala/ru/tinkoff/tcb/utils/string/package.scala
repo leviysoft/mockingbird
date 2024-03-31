@@ -6,7 +6,7 @@ package object string {
   implicit class ExtStringOps(private val text: String) extends AnyVal {
 
     /**
-     * Конвертирует camelCase в camel_case
+     * Converts camelCase into camel_case
      */
     def camel2Underscore: String =
       text.drop(1).foldLeft(text.headOption.map(ch => s"${ch.toLower}") getOrElse "") {
@@ -15,13 +15,13 @@ package object string {
       }
 
     /**
-     * Конвертирует snake_case в snakeCase
+     * Converts snake_case into snakeCase
      */
     def underscore2Camel: String =
       camelize(text)
 
     /**
-     * Конвертирует snake_case в SnakeCase
+     * Converts snake_case into SnakeCase
      */
     def underscore2UpperCamel: String =
       pascalize(text)

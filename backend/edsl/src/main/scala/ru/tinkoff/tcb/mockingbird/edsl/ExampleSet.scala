@@ -5,156 +5,13 @@ import org.scalactic.source
 
 import ru.tinkoff.tcb.mockingbird.edsl.model.*
 
-/**
- * ==Описание набора примеров==
- *
- * `ExampleSet` предоставляет DSL для описания примеров взаимодействия с Mockingbird со стороны внешнего
- * приложения/пользователя через его API. Описанные примеры потом можно в Markdown описание последовательности действий
- * с примерами HTTP запросов и ответов на них или сгенерировать тесты для scalatest. За это отвечают интерпретаторы DSL
- * [[ru.tinkoff.tcb.mockingbird.edsl.interpreter.MarkdownGenerator MarkdownGenerator]] и
- * [[ru.tinkoff.tcb.mockingbird.edsl.interpreter.AsyncScalaTestSuite AsyncScalaTestSuite]] соответственно.
- *
- * Описание набора примеров может выглядеть так:
- *
- * {{{
- * package ru.tinkoff.tcb.mockingbird.examples
- *
- * import ru.tinkoff.tcb.mockingbird.edsl.ExampleSet
- * import ru.tinkoff.tcb.mockingbird.edsl.model.*
- * import ru.tinkoff.tcb.mockingbird.edsl.model.Check.*
- * import ru.tinkoff.tcb.mockingbird.edsl.model.HttpMethod.*
- * import ru.tinkoff.tcb.mockingbird.edsl.model.ValueMatcher.syntax.*
- *
- * class CatsFacts[HttpResponseR] extends ExampleSet[HttpResponseR] {
- *
- *   override val name = "Примеры использования ExampleSet"
- *
- *   example("Получение случайного факта о котиках")(
- *     for {
- *       _ <- describe("Отправить GET запрос")
- *       resp <- sendHttp(
- *         method = Get,
- *         path = "/fact",
- *         headers = Seq("X-CSRF-TOKEN" -> "unEENxJqSLS02rji2GjcKzNLc0C0ySlWih9hSxwn")
- *       )
- *       _ <- describe("Ответ содержит случайный факт полученный с сервера")
- *       _ <- checkHttp(
- *         resp,
- *         HttpResponseExpected(
- *           code = Some(CheckInteger(200)),
- *           body = Some(
- *             CheckJsonObject(
- *               "fact"   -> CheckJsonString("There are approximately 100 breeds of cat.".sample),
- *               "length" -> CheckJsonNumber(42.sample)
- *             )
- *           ),
- *           headers = Seq("Content-Type" -> CheckString("application/json"))
- *         )
- *       )
- *     } yield ()
- *   )
- * }
- * }}}
- *
- * Дженерик параметр `HttpResponseR` нужен так результат выполнения HTTP запроса зависит от интерпретатора DSL.
- *
- * Переменная `name` - общий заголовок для примеров внутри набора, при генерации Markdown файла будет добавлен в самое
- * начало как заголовок первого уровня.
- *
- * Метод `example` позволяет добавить пример к набору. Вначале указывается название примера, как первый набор
- * аргументов. При генерации тестов это будет именем теста, а при генерации Markdown будет добавлено как заголовок
- * второго уровня, затем описывается сам пример. Последовательность действий описывается при помощи монады
- * [[ru.tinkoff.tcb.mockingbird.edsl.model.Example Example]].
- *
- * `ExampleSet` предоставляет следующие действия:
- *   - [[describe]] - добавить текстовое описание.
- *   - [[sendHttp]] - исполнить HTTP запрос с указанными параметрами, возвращает результат запроса.
- *   - [[checkHttp]] - проверить, что результат запроса отвечает указанным ожиданиям, возвращает извлеченные из ответа
- *     данные на основании проверок. ''Если предполагается использовать какие-то части ответа по ходу описания примера,
- *     то необходимо для них задать ожидания, иначе они будут отсутствовать в возвращаемом объекте.''
- *
- * Для описания ожиданий используются проверки [[model.Check$]]. Некоторые проверки принимают как параметр
- * [[model.ValueMatcher ValueMatcher]]. Данный трейт тип представлен двумя реализациями
- * [[model.ValueMatcher.AnyValue AnyValue]] и [[model.ValueMatcher.FixedValue FixedValue]]. Первая описывает
- * произвольное значение определенного типа, т.е. проверки значения не производится. Вторая задает конкретное ожидаемое
- * значение.
- *
- * Для упрощения создания значений типа [[model.ValueMatcher ValueMatcher]] добавлены имплиситы в объекте
- * [[model.ValueMatcher.syntax ValueMatcher.syntax]]. Они добавляют неявную конвертацию значений в тип
- * [[model.ValueMatcher.FixedValue FixedValue]], а так же методы `sample` и `fixed` для создания
- * [[model.ValueMatcher.AnyValue AnyValue]] и [[model.ValueMatcher.FixedValue FixedValue]] соответственно. Благодаря
- * этому можно писать:
- * {{{
- *   CheckString("some sample".sample) // вместо CheckString(AnyValue("some sample"))
- *   CheckString("some fixed string") // вместо CheckString(FixedValue("some fixed string"))
- * }}}
- *
- * ==Генерации markdown документа из набора примеров==
- *
- * {{{
- * package ru.tinkoff.tcb.mockingbird.examples
- *
- * import sttp.client3.*
- *
- * import ru.tinkoff.tcb.mockingbird.edsl.interpreter.MarkdownGenerator
- *
- * object CatsFactsMd {
- *   def main(args: Array[String]): Unit = {
- *     val mdg = MarkdownGenerator(baseUri = uri"https://catfact.ninja")
- *     val set = new CatsFacts[MarkdownGenerator.HttpResponseR]()
- *     println(mdg.generate(set))
- *   }
- * }
- * }}}
- *
- * Здесь создается интерпретатор [[ru.tinkoff.tcb.mockingbird.edsl.interpreter.MarkdownGenerator MarkdownGenerator]] для
- * генерации markdown документа из инстанса `ExampleSet`. Как параметр, конструктору передается хост со схемой который
- * будет подставлен в качестве примера в документ.
- *
- * Как упоминалось ранее, тип ответа от HTTP сервера зависит от интерпретатора DSL, поэтому при создании `CatsFacts`
- * параметром передается тип `MarkdownGenerator.HttpResponseR`.
- *
- * ==Генерация тестов из набора примеров==
- * {{{
- * package ru.tinkoff.tcb.mockingbird.examples
- *
- * import sttp.client3.*
- *
- * import ru.tinkoff.tcb.mockingbird.edsl.interpreter.AsyncScalaTestSuite
- *
- * class CatsFactsSuite extends AsyncScalaTestSuite {
- *   override val baseUri = uri"https://catfact.ninja"
- *   val set              = new CatsFacts[HttpResponseR]()
- *   generateTests(set)
- * }
- * }}}
- *
- * Для генерации тестов нужно создать класс и унаследовать его от
- * [[ru.tinkoff.tcb.mockingbird.edsl.interpreter.AsyncScalaTestSuite AsyncScalaTestSuite]]. После чего в переопределить
- * значение `baseUri` и в конструкторе вызвать метод `generateTests` передав в него набор примеров. В качестве дженерик
- * параметра для типа HTTP ответа, в создаваемый инстанс набора примеров надо передать тип
- * [[ru.tinkoff.tcb.mockingbird.edsl.interpreter.AsyncScalaTestSuite.HttpResponseR AsyncScalaTestSuite.HttpResponseR]]
- *
- * Пример запуска тестов:
- * {{{
- * [info] CatsFactsSuite:
- * [info] - Получение случайного факта о котиках
- * [info]   + Отправить GET запрос
- * [info]   + Ответ содержит случайный факт полученный с сервера
- * [info] Run completed in 563 milliseconds.
- * [info] Total number of tests run: 1
- * [info] Suites: completed 1, aborted 0
- * [info] Tests: succeeded 1, failed 0, canceled 0, ignored 0, pending 0
- * [info] All tests passed.
- * }}}
- */
 trait ExampleSet[HttpResponseR] {
   private var examples_ : Vector[ExampleDescription] = Vector.empty
 
   final private[edsl] def examples: Vector[ExampleDescription] = examples_
 
   /**
-   * Заглавие набора примеров.
+   * Title of the example set.
    */
   def name: String
 
@@ -162,30 +19,31 @@ trait ExampleSet[HttpResponseR] {
     examples_ = examples_ :+ ExampleDescription(name, body, pos)
 
   /**
-   * Выводит сообщение при помощи `info` при генерации тестов или добавляет текстовый блок при генерации Markdown.
+   * Prints a message using info during test generation or adds a text block during Markdown generation.
    * @param text
-   *   текст сообщения
+   *   The message text
    */
   final def describe(text: String)(implicit pos: source.Position): Example[Unit] =
     liftF[Step, Unit](Describe(text, pos))
 
   /**
-   * В тестах, выполняет HTTP запрос с указанными параметрами или добавляет в Markdown пример запроса, который можно
-   * исполнить командой `curl`.
+   * In tests, makes an HTTP request with the specified parameters or adds a sample request to the Markdown,
+   * which can be executed with the curl command.
    *
    * @param method
-   *   используемый HTTP метод.
+   *   HTTP method used.
    * @param path
-   *   путь до ресурса без схемы и хоста.
+   *   path to the resource without the scheme and host.
    * @param body
-   *   тело запроса как текст.
+   *   request body as text..
    * @param headers
-   *   заголовки, который будут переданы вместе с запросом.
+   *   request headers to send.
    * @param query
-   *   URL параметры запроса
+   *   URL query parameters.
    * @return
-   *   возвращает объект представляющий собой результат исполнения запроса, конкретный тип зависит от интерпретатора
-   *   DSL. Использовать возвращаемое значение можно только передав в метод [[checkHttp]].
+   *   Returns an object representing the result of the request execution;
+   *   the specific type depends on the DSL interpreter.
+   *   The return value can only be used by passing it to the [[checkHttp]] method.
    */
   final def sendHttp(
       method: HttpMethod,
@@ -199,18 +57,20 @@ trait ExampleSet[HttpResponseR] {
     liftF[Step, HttpResponseR](SendHttp[HttpResponseR](HttpRequest(method, path, body, headers, query), pos))
 
   /**
-   * В тестах, проверяет, что полученный HTTP ответ соответствует ожиданиям. При генерации Markdown вставляет ожидаемый
-   * ответ опираясь на указанные ожидания. Если никакие ожидания не указана, то ничего добавлено не будет.
+   * In tests, verifies that the received HTTP response matches the expectations.
+   * When generating Markdown, inserts the expected response based on the specified expectations.
+   * If no expectations are specified, nothing will be added.
    *
    * @param response
-   *   результат исполнения [[sendHttp]], тип зависит от интерпретатора DSL.
+   *   the result of executing [[sendHttp]], the type depends on the DSL interpreter.
    * @param expects
-   *   ожидания предъявляемые к результату HTTP запроса. Ожидания касаются кода ответа, тела запроса и заголовков
-   *   полеченных от сервера.
+   *   expectations placed on the result of the HTTP request.
+   *   Expectations concern the response code, request body, and headers received from the server.
    * @return
-   *   возвращает разобранный ответ от сервера. При генерации Markdown, так как реального ответа от сервера нет, то
-   *   формирует ответ на основании переданных ожиданий от ответа. В Markdown добавляется информация только от том, для
-   *   чего была указана проверка.
+   *   returns the parsed response from the server. When generating Markdown,
+   *   since there is no actual response from the server, it constructs a response based
+   *   on the provided response expectations.
+   *   Only information relevant to the specified checks is added to the Markdown.
    */
   final def checkHttp(response: HttpResponseR, expects: HttpResponseExpected)(implicit
       pos: source.Position

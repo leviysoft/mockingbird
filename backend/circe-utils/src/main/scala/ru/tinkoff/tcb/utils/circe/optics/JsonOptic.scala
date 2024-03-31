@@ -19,7 +19,7 @@ final case class JsonOptic private[optics] (private val jsonPath: Seq[PathPart])
   def set(v: Json): Json => Json = jsonPath.foldRight[Json => Json](_ => v)((part, f) => modifyPart(v)(part)(f))
 
   /**
-   * Если передан Some(..) - обновляет поддерево, если передан None - удаляет существующее
+   * Updates subtress if arg is Some(..), removes subtree otherwise
    */
   def setOpt(vo: Option[Json]): Json => Json = vo match {
     case Some(j) => set(j)

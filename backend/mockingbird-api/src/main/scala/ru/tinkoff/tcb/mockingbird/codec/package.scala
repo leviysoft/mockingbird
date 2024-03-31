@@ -38,7 +38,7 @@ package object codec {
         case BinaryResponse(_, _, body, _)  => body.asArray
         case EmptyResponse(_, _, _)         => Array.empty
         /**
-         * все *ProxyResponse преобразуются в RawResponse внутри [[PublicApiHandler]] (методы *proxyRequest)
+         * all *ProxyResponse are converted into RawResponse inside [[PublicApiHandler]] (see *proxyRequest methods)
          */
         case ProxyResponse(_, _, _)        => throw new UnsupportedOperationException()
         case JsonProxyResponse(_, _, _, _) => throw new UnsupportedOperationException()

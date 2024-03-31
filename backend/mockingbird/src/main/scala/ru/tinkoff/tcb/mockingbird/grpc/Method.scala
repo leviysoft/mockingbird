@@ -9,7 +9,7 @@ import io.grpc.MethodDescriptor.Marshaller
 object Method {
 
   /*
-  Универсальный маршаллер, который не меняет поток байтов
+    Universal marshaller that does not alter byte stream
    */
   final case class ByteMarshaller() extends Marshaller[Array[Byte]] {
     override def stream(value: Array[Byte]): InputStream = new ByteArrayInputStream(value)

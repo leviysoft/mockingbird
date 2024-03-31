@@ -33,7 +33,7 @@ package object bson {
   private type PartialEndo2[A, B] = PartialFunction[(A, B), (A, B)]
 
   /*
-    Экстракторы
+    Extractors
    */
 
   object BUndef {
@@ -108,7 +108,7 @@ package object bson {
   }
 
   /*
-    Расширения
+    Extensions
    */
 
   implicit final class BsonDocumentObjExt(private val doc: BsonDocument.type) extends AnyVal {
@@ -123,20 +123,20 @@ package object bson {
     @inline def decodeOpt[T: BsonDecoder]: Option[T] = decodeAs[T].toOption
 
     /**
-     * Производит слияние двух bson значений
+     * Merges two bson values
      *
      * bson1 :+ bson2
      *
-     * В случае совпадения значений по определённому ключу приоритетными являются значения из bson1
+     * In case of conflicts values from bson1 take precedence
      */
     @inline def :+(other: BsonValue): BsonValue = merge(other, bv, false)
 
     /**
-     * Производит слияние двух bson значений
+     * Merges two bson values
      *
      * bson1 :+ bson2
      *
-     * В случае совпадения значений по определённому ключу приоритетными являются значения из bson2
+     * In case of conflicts values from bson2 take precedence
      */
     @inline def +:(other: BsonValue): BsonValue = merge(other, bv, false)
   }

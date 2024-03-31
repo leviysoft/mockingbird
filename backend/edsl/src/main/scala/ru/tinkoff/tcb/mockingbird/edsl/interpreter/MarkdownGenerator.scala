@@ -68,10 +68,10 @@ object MarkdownGenerator {
 }
 
 /**
- * Интерпретатор DSL создающий markdown документ с описанием примера.
+ * DSL interpreter creating a markdown document with an example description.
  *
  * @param baseUri
- *   URI относительно которого будут разрешаться пути используемые в примерах
+ *   URI relative to which paths used in examples will be resolved.
  */
 final class MarkdownGenerator(baseUri: Uri) {
   import MarkdownGenerator.HttpResponseR
@@ -82,12 +82,12 @@ final class MarkdownGenerator(baseUri: Uri) {
   private[interpreter] type W[A] = Writer[Vector[Markdown], A]
 
   /**
-   * Сгенерировать markdown документ из переданного набора примеров.
+   * Generate a markdown document from the provided set of examples.
    *
    * @param set
-   *   набор примеров
+   *   examples set
    * @return
-   *   строка содержащая markdown документ.
+   *   A string containing a markdown document.
    */
   def generate(set: ExampleSet[HttpResponseR]): String = {
     val tags = for {

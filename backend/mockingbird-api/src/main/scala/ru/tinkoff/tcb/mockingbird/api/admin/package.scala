@@ -49,21 +49,21 @@ package object admin {
       .in("fetchStates")
       .in(jsonBody[SearchRequest])
       .out(jsonBody[Vector[PersistentState]])
-      .summary("Выборка состояний по предикату")
+      .summary("Fetch states by predicate")
 
   val testXPath: Endpoint[Unit, XPathTestRequest, Throwable, String, Any] =
     basicTest.post
       .in("testXpath")
       .in(jsonBody[XPathTestRequest])
       .out(stringBody)
-      .summary("Тестирование работоспособности XPath-выражения")
+      .summary("Test XPath expression")
 
   private val tryStub: PublicEndpoint[ExecInputB, Throwable, SID[
     HttpStub
   ], Any] =
     basicTest
       .in("tryStub")
-      .summary("Проверка резолвинга HTTP заглушки")
+      .summary("Test HTTP stub resolution")
       .in(execInput)
       .in(
         binaryBody(RawBodyType.ByteArrayBody)[Option[String]]
@@ -93,7 +93,7 @@ package object admin {
       .in("tryScenario")
       .in(jsonBody[ScenarioResolveRequest])
       .out(jsonBody[SID[Scenario]])
-      .summary("Проверка резолвинга сценария")
+      .summary("Test scenario resolution")
 
   private val basicV2 = basic.in("v2").tag("setup v2")
 
@@ -102,19 +102,19 @@ package object admin {
   val fetchServices: Endpoint[Unit, Unit, Throwable, Vector[Service], Any] =
     serviceBase.get
       .out(jsonBody[Vector[Service]])
-      .summary("Получение списка сервисов")
+      .summary("Get service list")
 
   val createService: Endpoint[Unit, CreateServiceRequest, Throwable, OperationResult[String], Any] =
     serviceBase.post
       .in(jsonBody[CreateServiceRequest])
       .out(jsonBody[OperationResult[String]])
-      .summary("Создание сервиса")
+      .summary("Create service")
 
   val getService: Endpoint[Unit, String, Throwable, Option[Service], Any] =
     serviceBase.get
       .in(path[String].name("suffix"))
       .out(jsonBody[Option[Service]])
-      .summary("Получение сервиса по суффиксу")
+      .summary("Get service by suffix")
 
   private val stubBase = basicV2.in("stub")
 
@@ -126,32 +126,32 @@ package object admin {
       .in(query[Option[String]]("service"))
       .in(query[List[String]]("labels"))
       .out(jsonBody[Vector[HttpStub]])
-      .summary("Получение списка заглушек")
+      .summary("Get stub list")
 
   val createHttpStub: Endpoint[Unit, CreateStubRequest, Throwable, OperationResult[SID[HttpStub]], Any] =
     stubBase.post
       .in(jsonBody[CreateStubRequest])
       .out(jsonBody[OperationResult[SID[HttpStub]]])
-      .summary("Создание HTTP мока")
+      .summary("Create HTTP mock")
 
   val getStub: Endpoint[Unit, SID[HttpStub], Throwable, Option[HttpStub], Any] =
     stubBase.get
       .in(path[SID[HttpStub]].name("id"))
       .out(jsonBody[Option[HttpStub]])
-      .summary("Получение заглушки по id")
+      .summary("Get stub by id")
 
   val updateStub: Endpoint[Unit, (SID[HttpStub], UpdateStubRequest), Throwable, OperationResult[SID[HttpStub]], Any] =
     stubBase.patch
       .in(path[SID[HttpStub]].name("id"))
       .in(jsonBody[UpdateStubRequest])
       .out(jsonBody[OperationResult[SID[HttpStub]]])
-      .summary("Обновление заглушки по id")
+      .summary("Update stub by id")
 
   val deleteStub: Endpoint[Unit, SID[HttpStub], Throwable, OperationResult[String], Any] =
     stubBase.delete
       .in(path[SID[HttpStub]].name("id"))
       .out(jsonBody[OperationResult[String]])
-      .summary("Удаление HTTP мока")
+      .summary("Delete HTTP mock")
 
   private val scenarioBase = basicV2.in("scenario")
 
@@ -163,19 +163,19 @@ package object admin {
       .in(query[Option[String]]("service"))
       .in(query[List[String]]("labels"))
       .out(jsonBody[Vector[Scenario]])
-      .summary("Получение списка сценариев")
+      .summary("Get scenario list")
 
   val createScenario: Endpoint[Unit, CreateScenarioRequest, Throwable, OperationResult[SID[Scenario]], Any] =
     scenarioBase.post
       .in(jsonBody[CreateScenarioRequest])
       .out(jsonBody[OperationResult[SID[Scenario]]])
-      .summary("Создание событийного мока")
+      .summary("Create scenario")
 
   val getScenario: Endpoint[Unit, SID[Scenario], Throwable, Option[Scenario], Any] =
     scenarioBase.get
       .in(path[SID[Scenario]].name("id"))
       .out(jsonBody[Option[Scenario]])
-      .summary("Получение сценария по id")
+      .summary("Get scenario by id")
 
   val updateScenario
       : Endpoint[Unit, (SID[Scenario], UpdateScenarioRequest), Throwable, OperationResult[SID[Scenario]], Any] =
@@ -183,13 +183,13 @@ package object admin {
       .in(path[SID[Scenario]].name("id"))
       .in(jsonBody[UpdateScenarioRequest])
       .out(jsonBody[OperationResult[SID[Scenario]]])
-      .summary("Обновление сценария по id")
+      .summary("Update scenario id")
 
   val deleteScenario: Endpoint[Unit, SID[Scenario], Throwable, OperationResult[String], Any] =
     scenarioBase.delete
       .in(path[SID[Scenario]].name("id"))
       .out(jsonBody[OperationResult[String]])
-      .summary("Удаление сценария")
+      .summary("Delete scenario")
 
   private val labelBase = basicV2.in("label")
 
@@ -232,20 +232,20 @@ package object admin {
     sourceConfBase.get
       .in(query[Option[String Refined NonEmpty]]("service"))
       .out(jsonBody[Vector[SourceDTO]])
-      .summary("Получение списка конфигураций источников")
+      .summary("Get source configurations")
 
   val getSourceConfiguration =
     sourceConfBase.get
       .in(path[SID[SourceConfiguration]].name("name"))
       .out(jsonBody[Option[SourceConfiguration]])
-      .summary("Получение конфигурации источника по имени")
+      .summary("Get source by name")
 
   val createSourceConf
       : Endpoint[Unit, CreateSourceConfigurationRequest, Throwable, OperationResult[SID[SourceConfiguration]], Any] =
     sourceConfBase.post
       .in(jsonBody[CreateSourceConfigurationRequest])
       .out(jsonBody[OperationResult[SID[SourceConfiguration]]])
-      .summary("Создание конфигурации источника")
+      .summary("Create source")
 
   val updateSourceConf
       : Endpoint[Unit, (SID[SourceConfiguration], UpdateSourceConfigurationRequest), Throwable, OperationResult[
@@ -255,13 +255,13 @@ package object admin {
       .in(path[SID[SourceConfiguration]].name("name"))
       .in(jsonBody[UpdateSourceConfigurationRequest])
       .out(jsonBody[OperationResult[SID[SourceConfiguration]]])
-      .summary("Обновление конфигурации по name")
+      .summary("Update source by name name")
 
   val deleteSourceConf: Endpoint[Unit, SID[SourceConfiguration], Throwable, OperationResult[String], Any] =
     sourceConfBase.delete
       .in(path[SID[SourceConfiguration]].name("name"))
       .out(jsonBody[OperationResult[String]])
-      .summary("Удаление конфигурации")
+      .summary("Delete source")
 
   private val destinationConfBase = basicV3.in("destination")
 
@@ -270,13 +270,13 @@ package object admin {
     destinationConfBase.get
       .in(query[Option[String Refined NonEmpty]]("service"))
       .out(jsonBody[Vector[DestinationDTO]])
-      .summary("Получение списка конфигураций назначений")
+      .summary("Get destinations list")
 
   val getDestinationConfiguration =
     destinationConfBase.get
       .in(path[SID[DestinationConfiguration]].name("name"))
       .out(jsonBody[Option[DestinationConfiguration]])
-      .summary("Получение конфигурации назначения по имени")
+      .summary("Get destination by name")
 
   val createDestinationConf: Endpoint[Unit, CreateDestinationConfigurationRequest, Throwable, OperationResult[
     SID[DestinationConfiguration]
@@ -284,7 +284,7 @@ package object admin {
     destinationConfBase.post
       .in(jsonBody[CreateDestinationConfigurationRequest])
       .out(jsonBody[OperationResult[SID[DestinationConfiguration]]])
-      .summary("Создание конфигурации источника")
+      .summary("Create destination")
 
   val updateDestinationConf: Endpoint[
     Unit,
@@ -299,5 +299,5 @@ package object admin {
       .in(path[SID[DestinationConfiguration]].name("name"))
       .in(jsonBody[UpdateDestinationConfigurationRequest])
       .out(jsonBody[OperationResult[SID[DestinationConfiguration]]])
-      .summary("Обновление конфигурации по name")
+      .summary("Update destination by name")
 }
