@@ -125,16 +125,16 @@ final class MarkdownGenerator(baseUri: Uri) {
         case CheckHttp(_, HttpResponseExpected(code, body, headers), _) =>
           val bodyStr = body.map(_.show)
           val cb = Vector(
-            code.map(c => s"Код ответа: ${c.matcher.show}\n"),
+            code.map(c => s"Response code: ${c.matcher.show}\n"),
             headers.nonEmpty.option {
-              headers.map { case (k, v) => s"$k: '${v.matcher.show}'" }.mkString("Заголовки ответа:\n", "\n", "\n")
+              headers.map { case (k, v) => s"$k: '${v.matcher.show}'" }.mkString("Response headers:\n", "\n", "\n")
             },
-            bodyStr.map("Тело ответа:\n" ++ _ ++ "\n"),
+            bodyStr.map("Response body:\n" ++ _ ++ "\n"),
           ).flatten.mkString("\n")
 
           Writer(
             Vector(
-              p("Ответ:"),
+              p("Response:"),
               codeBlock(cb)
             ),
             HttpResponse(
