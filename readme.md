@@ -264,19 +264,6 @@ Anything that needs to be extracted from the path should be done with a _named_ 
 ### Extractors
 In some cases, it's necessary to insert into the response data that cannot be extracted by simple means. For these purposes, extractors have been added.
 
-#### xcdata Extractor
-
-Extracts values from XML located within CDATA.
-
-Configuration:
-```javascript
-{
-  "type": "xcdata",
-  "prefix": "/root/inner/tag", // Path to the tag with CDATA
-  "path": "/path/to" // Path to the desired tag
-}
-```
-
 #### jcdata Extractor
 
 Extracts values from JSON located within CDATA.

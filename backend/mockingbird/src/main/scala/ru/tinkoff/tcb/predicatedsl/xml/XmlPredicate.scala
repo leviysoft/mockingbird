@@ -154,26 +154,6 @@ object XmlPredicate {
             } yield jpred)
             .leftMap(NonEmptyList.one)
             .map(jpred => (op: Option[Node]) => op.exists(_.evalXPath[Json](xp"self::node()").map(jpred).getOrElse(false)))
-        case (XCdata, spec) =>
-          Validated
-            .fromEither(for {
-              xspec <- spec
-                .as[Map[Xpath, Map[Keyword.Xml, Json]]]
-                .leftMap(_ => kwd.asInstanceOf[Keyword] -> spec)
-              xpred <- XmlPredicate(xspec).toEither.leftMap(errs =>
-                kwd.asInstanceOf[Keyword] -> Json.fromString(errs.toList.mkString(", "))
-              )
-            } yield xpred)
-            .leftMap(NonEmptyList.one)
-            .map(xpred =>
-              (op: Option[Node]) =>
-                op.exists(
-                  _.evalXPath[String](xp"self::node()")
-                    .flatMap(_.trim().asNode)
-                    .map(xpred)
-                    .getOrElse(false)
-                )
-            )
         case (kwd, j) => Validated.invalidNel(kwd -> j)
       }
 
