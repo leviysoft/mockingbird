@@ -17,18 +17,18 @@ import ru.tinkoff.tcb.utils.id.SID
 
 @derive(decoder, encoder, schema)
 final case class CreateSourceConfigurationRequest(
-    @description("Уникальное название конфигурации")
+    @description("Unique configuration name")
     name: SID[SourceConfiguration],
-    @description("Описание конфигурации")
+    @description("Configuration description")
     description: String,
     service: String,
-    @description("Спецификация запроса")
+    @description("Request specification")
     request: EventSourceRequest,
-    @description("Спецификация инициализатора")
+    @description("Initializer specification")
     init: Option[NonEmptyVector[ResourceRequest]],
-    @description("Спецификация деинициализатора")
+    @description("Finalizer specification")
     shutdown: Option[NonEmptyVector[ResourceRequest]],
-    @description("Спецификации триггеров реинициализации")
+    @description("Reinitialization triggers specification")
     reInitTriggers: Option[NonEmptyVector[ResponseSpec]]
 )
 

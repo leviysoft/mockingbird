@@ -33,29 +33,29 @@ import ru.tinkoff.tcb.utils.id.SID
 
 @derive(decoder, encoder, schema)
 final case class UpdateScenarioRequest(
-    @description("Тип конфигурации")
+    @description("Scope")
     scope: Scope,
-    @description("Количество возможных срабатываний. Имеет смысл только для scope=countdown")
+    @description("The number of possible triggers. Only relevant for scope=countdown")
     times: Option[Int Refined NonNegative] = Some(refineMV(1)),
     service: String Refined NonEmpty,
-    @description("Имя сценария, отображается в логах, полезно для отладки")
+    @description("Scenario name (shown in logs, handy for debugging)")
     name: String Refined NonEmpty,
-    @description("Имя источника событий")
+    @description("Event source name")
     source: SID[SourceConfiguration],
     seed: Option[Json],
-    @description("Спецификация события")
+    @description("Event specification")
     input: ScenarioInput,
-    @description("Предикат для поиска состояния")
+    @description("State search predicate")
     state: Option[Map[JsonOptic, Map[Keyword.Json, Json]]],
-    @description("Данные, записываемые в базу")
+    @description("Persisted data")
     persist: Option[Map[JsonOptic, Json]],
-    @description("Имя назначения ответа")
+    @description("Destination name")
     destination: Option[SID[DestinationConfiguration]],
-    @description("Спецификация ответа")
+    @description("Response specification")
     output: Option[ScenarioOutput],
-    @description("Спецификация колбека")
+    @description("Callback specification")
     callback: Option[Callback],
-    @description("Тэги")
+    @description("Tags")
     labels: Seq[String]
 )
 object UpdateScenarioRequest {

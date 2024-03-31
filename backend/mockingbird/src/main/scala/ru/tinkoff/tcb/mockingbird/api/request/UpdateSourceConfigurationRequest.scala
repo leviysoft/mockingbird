@@ -16,16 +16,16 @@ import ru.tinkoff.tcb.protocol.schema.*
 
 @derive(decoder, encoder, schema)
 final case class UpdateSourceConfigurationRequest(
-    @description("Описание конфигурации")
+    @description("Configuration description")
     description: String,
     service: String,
-    @description("Спецификация запроса")
+    @description("Request specification")
     request: EventSourceRequest,
-    @description("Спецификация инициализатора")
+    @description("Initializer specification")
     init: Option[NonEmptyVector[ResourceRequest]],
-    @description("Спецификация деинициализатора")
+    @description("Finalizer specification")
     shutdown: Option[NonEmptyVector[ResourceRequest]],
-    @description("Спецификации триггеров реинициализации")
+    @description("Reinitialization triggers specification")
     reInitTriggers: Option[NonEmptyVector[ResponseSpec]]
 )
 

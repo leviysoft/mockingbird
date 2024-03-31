@@ -16,16 +16,16 @@ import ru.tinkoff.tcb.utils.id.SID
 
 @derive(decoder, encoder, schema)
 final case class CreateDestinationConfigurationRequest(
-    @description("Уникальное название конфигурации")
+    @description("Unique configuration name")
     name: SID[DestinationConfiguration],
-    @description("Описание конфигурации")
+    @description("Configuration description")
     description: String,
     service: String,
-    @description("Спецификация запроса")
+    @description("Request specification")
     request: EventDestinationRequest,
-    @description("Спецификация инициализатора")
+    @description("Initializer specification")
     init: Option[NonEmptyVector[ResourceRequest]],
-    @description("Спецификация деинициализатора")
+    @description("Finalizer specification")
     shutdown: Option[NonEmptyVector[ResourceRequest]]
 )
 
