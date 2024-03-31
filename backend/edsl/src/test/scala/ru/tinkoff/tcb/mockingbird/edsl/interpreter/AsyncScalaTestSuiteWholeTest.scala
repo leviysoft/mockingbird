@@ -44,12 +44,12 @@ class AsyncScalaTestSuiteWholeTest
 
     (mockI
       .apply(_: String, _: Option[Any])(_: source.Position))
-      .expects("Send a GET request.", *, *)
+      .expects("Send a GET request", *, *)
       .once()
 
     (mockI
       .apply(_: String, _: Option[Any])(_: source.Position))
-      .expects("The response contains a random fact obtained from the server.", *, *)
+      .expects("The response contains a random fact obtained from the server", *, *)
       .twice()
 
     mockInformer = mockI.some

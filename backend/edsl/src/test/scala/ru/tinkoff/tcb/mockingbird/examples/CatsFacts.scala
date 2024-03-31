@@ -18,7 +18,7 @@ class CatsFacts[HttpResponseR] extends ExampleSet[HttpResponseR] {
         path = "/fact",
         headers = Seq("X-CSRF-TOKEN" -> "unEENxJqSLS02rji2GjcKzNLc0C0ySlWih9hSxwn")
       )
-      _ <- describe("The response contains a randomly obtained fact from the server")
+      _ <- describe("The response contains a random fact obtained from the server")
       _ <- checkHttp(
         resp,
         HttpResponseExpected(
