@@ -7,7 +7,7 @@ class LazySpec extends AnyFunSuite with Matchers {
   test("laziness test") {
     var wasTouched = false
 
-    val sut = Lazy({wasTouched = true; 42})
+    val sut = Lazy { wasTouched = true; 42 }
 
     wasTouched shouldBe false
     sut.isComputed shouldBe false

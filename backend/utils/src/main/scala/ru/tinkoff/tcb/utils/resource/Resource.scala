@@ -18,11 +18,10 @@ object Resource {
     new Resource[R] {
       override def use[U](f: R => U): U = {
         val resource = acquire
-        try {
+        try
           f(resource)
-        } finally {
+        finally
           close(resource)
-        }
       }
     }
 
@@ -30,12 +29,11 @@ object Resource {
     new Resource[Lazy[R]] {
       override def use[U](f: Lazy[R] => U): U = {
         val resource = Lazy(acquire)
-        try {
+        try
           f(resource)
-        } finally {
+        finally
           if (resource.isComputed)
             close(resource.value)
-        }
       }
     }
 

@@ -44,7 +44,7 @@ class GrpcRequestHandlerImpl(
         .filterOrElse(_.isDefined)(f(Scope.Ephemeral).filterOrElse(_.isDefined)(f(Scope.Persistent)))
         .someOrFail(StubSearchError(s"Can't find any stub for $grpcServiceName"))
       _ <- Tracing.update(_.addToPayload("name" -> stub.name))
-      seed = stub.seed.map(_.eval)
+      seed = stub.seed.map(_.eval.useAsIs)
       state <- ZIO.fromOption(stateOp).orElse(PersistentState.fresh)
       data = Json.obj(
         "req" := req,
