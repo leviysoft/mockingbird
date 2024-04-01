@@ -1,10 +1,8 @@
 package ru.tinkoff.tcb.utils.sandboxing
 
 import scala.util.Try
-import scala.util.Using
 import scala.util.chaining.*
 
-import io.circe.Json
 import org.graalvm.polyglot.*
 
 import ru.tinkoff.tcb.mockingbird.config.JsSandboxConfig
@@ -17,23 +15,6 @@ class GraalJsSandbox(
 ) {
   private val allowedClasses = GraalJsSandbox.DefaultAccess ++ jsSandboxConfig.allowedClasses
   private val preludeSource  = prelude.map(Source.create("js", _))
-
-  def eval(code: String, environment: Map[String, GValue] = Map.empty): Try[Json] =
-    Using(
-      Context
-        .newBuilder("js")
-        .allowHostAccess(HostAccess.ALL)
-        .allowHostClassLookup((t: String) => allowedClasses(t))
-        .option("engine.WarnInterpreterOnly", "false")
-        .build()
-    ) { context =>
-      context.getBindings("js").pipe { bindings =>
-        for ((key, value) <- environment.view.mapValues(_.unwrap))
-          bindings.putMember(key, value)
-      }
-      preludeSource.foreach(context.eval)
-      context.eval("js", code).toJson
-    }.flatten
 
   def makeRunner(environment: Map[String, GValue] = Map.empty): Resource[CodeRunner] =
     Resource
@@ -52,7 +33,7 @@ class GraalJsSandbox(
             preludeSource.foreach(context.eval)
           }
       )(_.close())
-      .map(ctx => (code: String) => ctx.value.eval("js", code).toJson)
+      .map(ctx => (code: String) => Try(ctx.value.eval("js", code)).flatMap(_.toJson))
 }
 
 object GraalJsSandbox {
