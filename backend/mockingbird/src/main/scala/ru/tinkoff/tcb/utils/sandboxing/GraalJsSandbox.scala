@@ -36,7 +36,7 @@ class GraalJsSandbox(
     }.flatten
 
   def makeRunner(environment: Map[String, GValue]): Resource[CodeRunner] =
-    Resource.make(
+    Resource.lean(
       Context
         .newBuilder("js")
         .allowHostAccess(HostAccess.ALL)
@@ -49,7 +49,7 @@ class GraalJsSandbox(
           }
           preludeSource.foreach(context.eval)
         }
-    )(_.close()).map(ctx => (code: String) => ctx.eval("js", code).toJson)
+    )(_.close()).map(ctx => (code: String) => ctx.value.eval("js", code).toJson)
 }
 
 object GraalJsSandbox {
