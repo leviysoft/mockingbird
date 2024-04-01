@@ -21,6 +21,7 @@ import kantan.xpath.implicits.*
 
 import ru.tinkoff.tcb.utils.json.json2StringFolder
 import ru.tinkoff.tcb.utils.regex.OneOrMore
+import ru.tinkoff.tcb.utils.resource.Resource
 import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 import ru.tinkoff.tcb.utils.transformation.json.jsonTemplater
 import ru.tinkoff.tcb.xpath.*
@@ -102,8 +103,8 @@ package object xml {
         }.result
       }
 
-    def substitute(values: Json)(implicit sandbox: GraalJsSandbox): Node =
-      jsonTemplater(values).pipe { templater =>
+    def substitute(values: Json)(implicit sandbox: GraalJsSandbox): Resource[Node] =
+      jsonTemplater(values).map { templater =>
         transform {
           case elem: Elem =>
             elem.attributes.foldLeft(elem)((e, attr) =>
@@ -135,27 +136,29 @@ package object xml {
 
     def patchFromValues(jValues: Json, xValues: Node, schema: Map[XmlZoom, String])(implicit
         sandbox: GraalJsSandbox
-    ): Node = {
-      val jt = jsonTemplater(jValues)
-      val nt = nodeTemplater(<wrapper>{xValues}</wrapper>)
-
-      schema
-        .foldLeft(<wrapper>{n}</wrapper>: Node) { case (acc, (zoom, defn)) =>
-          defn match {
-            case jp if jt.isDefinedAt(jp) =>
-              (zoom ==> Replace(_.map(_.transform { case Text(_) => Text(jt(jp).foldWith(json2StringFolder)) }.result)))
-                .transform[Try](acc)
-                .map(_.head)
-                .getOrElse(acc)
-            case xp if nt.isDefinedAt(xp) =>
-              (zoom ==> Replace(_.map(_.transform { case Text(_) => Text(nt(xp)) }.result)))
-                .transform[Try](acc)
-                .map(_.head)
-                .getOrElse(acc)
-            case _ => acc
+    ): Resource[Node] = {
+      for {
+        jt <- jsonTemplater(jValues)
+        nt = nodeTemplater(<wrapper>{xValues}</wrapper>)
+      } yield {
+        schema
+          .foldLeft(<wrapper>{n}</wrapper>: Node) { case (acc, (zoom, defn)) =>
+            defn match {
+              case jp if jt.isDefinedAt(jp) =>
+                (zoom ==> Replace(_.map(_.transform { case Text(_) => Text(jt(jp).foldWith(json2StringFolder)) }.result)))
+                  .transform[Try](acc)
+                  .map(_.head)
+                  .getOrElse(acc)
+              case xp if nt.isDefinedAt(xp) =>
+                (zoom ==> Replace(_.map(_.transform { case Text(_) => Text(nt(xp)) }.result)))
+                  .transform[Try](acc)
+                  .map(_.head)
+                  .getOrElse(acc)
+              case _ => acc
+            }
           }
-        }
-        .pipe(_.child.head)
+          .pipe(_.child.head)
+      }
     }
   }
 }

@@ -13,12 +13,12 @@ package object string {
 
     def substitute(jvalues: Json, xvalues: Node)(implicit sandbox: GraalJsSandbox): String =
       if (SubstRx.findFirstIn(s).isDefined || CodeRx.findFirstIn(s).isDefined)
-        Json.fromString(s).substitute(jvalues).substitute(xvalues).asString.getOrElse(s)
+        Json.fromString(s).substitute(jvalues).map(_.substitute(xvalues)).useAsIs.asString.getOrElse(s)
       else s
 
     def substitute(values: Json)(implicit sandbox: GraalJsSandbox): String =
       if (SubstRx.findFirstIn(s).isDefined || CodeRx.findFirstIn(s).isDefined)
-        Json.fromString(s).substitute(values).asString.getOrElse(s)
+        Json.fromString(s).substitute(values).useAsIs.asString.getOrElse(s)
       else s
   }
 }

@@ -56,7 +56,7 @@ class XmlTransformationSpec extends AnyFunSuite with Matchers {
       )
     )
 
-    val sut = template.substitute(data)
+    val sut = template.substitute(data).useAsIs
 
     sut shouldBe <root rt="kek"><tag1 t1="a1">test</tag1><tag2 t2="a2">42</tag2><composite cmp="kek_a2">test_42</composite></root>
   }
@@ -138,7 +138,7 @@ class XmlTransformationSpec extends AnyFunSuite with Matchers {
       XmlZoom.fromXPath("/root/second").toOption.get -> "${/data/value}"
     )
 
-    val sut = target.patchFromValues(source, xSource, schema)
+    val sut = target.patchFromValues(source, xSource, schema).useAsIs
 
     info(sut.toString())
 

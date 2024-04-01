@@ -132,8 +132,8 @@ final class PublicApiHandler(
             stub.response
               .applyIf(_.isTemplate)(
                 HttpStubResponse.jsonBody
-                  .updateF(_.substitute(data).substitute(xdata))
-                  .andThen(HttpStubResponse.xmlBody.updateF(_.substitute(data).substitute(xdata)))
+                  .updateF(_.substitute(data).map(_.substitute(xdata)).use(_.pure[Id]))
+                  .andThen(HttpStubResponse.xmlBody.updateF(_.substitute(data).map(_.substitute(xdata)).useAsIs))
               )
               .applyIf(HttpStubResponse.headers.getOption(_).exists(_.values.exists(_.isTemplate)))(
                 HttpStubResponse.headers.updateF(_.view.mapValues(_.substitute(data, xdata)).toMap)
@@ -250,7 +250,7 @@ final class PublicApiHandler(
             .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
             .map(h => h.name -> h.value)
             .toMap,
-          jsonResponse.patch(data, patch).noSpaces,
+          jsonResponse.patch(data, patch).use(_.noSpaces),
           delay
         )
       case Left(error) =>
