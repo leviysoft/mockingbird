@@ -1,7 +1,9 @@
 package ru.tinkoff.tcb.utils.resource
 
+import ru.tinkoff.tcb.utils.`lazy`.Lazy
+
 /*
- This implementation is taken from
+ Initial implementation was taken from
  https://bszwej.medium.com/composable-resource-management-in-scala-ce902bda48b2
  */
 
@@ -20,6 +22,19 @@ object Resource {
           f(resource)
         } finally {
           close(resource)
+        }
+      }
+    }
+
+  def lean[R](acquire: => R)(close: R => Unit): Resource[Lazy[R]] =
+    new Resource[Lazy[R]] {
+      override def use[U](f: Lazy[R] => U): U = {
+        val resource = Lazy(acquire)
+        try {
+          f(resource)
+        } finally {
+          if (resource.isComputed)
+            close(resource.value)
         }
       }
     }
