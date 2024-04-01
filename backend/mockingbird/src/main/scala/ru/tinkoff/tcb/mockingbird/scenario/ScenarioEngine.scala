@@ -141,9 +141,9 @@ final class ScenarioEngine(
               .method(Method(request.method.entryName), uri"$requestUrl")
               .pipe(r =>
                 request match {
-                  case JsonCallbackRequest(_, _, _, body) => r.body(body.substitute(data).substitute(xdata).noSpaces)
+                  case JsonCallbackRequest(_, _, _, body) => r.body(body.substitute(data).map(_.substitute(xdata)).use(_.noSpaces))
                   case XMLCallbackRequest(_, _, _, body) =>
-                    r.body(body.toNode.substitute(data).substitute(xdata).mkString)
+                    r.body(body.toNode.substitute(data).map(_.substitute(xdata)).use(_.mkString))
                   case _ => r
                 }
               )
@@ -178,18 +178,18 @@ final class ScenarioEngine(
             out match {
               case RawOutput(payload, _) => payload
               case JsonOutput(payload, _, isT) =>
-                if (isT) payload.substitute(data).substitute(xdata).noSpaces else payload.noSpaces
+                if (isT) payload.substitute(data).map(_.substitute(xdata)).use(_.noSpaces) else payload.noSpaces
               case XmlOutput(payload, _, isT) =>
-                if (isT) payload.toNode.substitute(data).substitute(xdata).mkString else payload.asString
+                if (isT) payload.toNode.substitute(data).map(_.substitute(xdata)).use(_.mkString) else payload.asString
             }
           )
         } { drb =>
           val bodyJson = out match {
             case RawOutput(payload, _)       => Json.fromString(payload)
-            case JsonOutput(payload, _, isT) => if (isT) payload.substitute(data).substitute(xdata) else payload
+            case JsonOutput(payload, _, isT) => if (isT) payload.substitute(data).map(_.substitute(xdata)).useAsIs else payload
             case XmlOutput(payload, _, isT) =>
               if (isT)
-                Json.fromString(payload.toNode.substitute(data).substitute(xdata).mkString)
+                Json.fromString(payload.toNode.substitute(data).map(_.substitute(xdata)).use(_.mkString))
               else Json.fromString(payload.asString)
           }
 
@@ -201,7 +201,7 @@ final class ScenarioEngine(
                   "_message" := bodyJson.asString.map(b64Enc).getOrElse(b64Enc(bodyJson.noSpaces))
                 )
               else Json.obj("_message" := bodyJson)
-            )
+            ).useAsIs
           )
         }
       )
