@@ -12,6 +12,10 @@ mockingbird - a service for emulating REST services and queue-interface services
 
 [Readme in Russian](readme_ru.md)
 
+## Important note
+
+Leviysoft mockingbird is an independently maintained fork of Tinkoff/mockingbird and is not related to Tinkoff in any kind.
+
 ## General Principles of Operation
 
 mockingbird supports the following scenarios:
