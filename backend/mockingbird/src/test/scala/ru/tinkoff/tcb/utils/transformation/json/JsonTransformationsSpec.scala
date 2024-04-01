@@ -199,7 +199,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
       "f" := s"%{today('$datePattern')}"
     )
 
-    val res = template.eval
+    val res = template.eval.useAsIs
 
     (res \\ "a").headOption.flatMap(_.asString).value should have length 10
 
@@ -242,7 +242,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
 
     template.isTemplate shouldBe true
 
-    val res = template.eval
+    val res = template.eval.useAsIs
 
     (res \\ "fmt").headOption.flatMap(_.asString).value should have length 19
   }

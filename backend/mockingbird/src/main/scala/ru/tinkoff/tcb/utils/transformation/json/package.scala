@@ -102,13 +102,15 @@ package object json {
         }.result
       }
 
-    def eval(implicit sandbox: GraalJsSandbox): Json =
-      transformValues { case JsonString(CodeRx(code)) =>
-        sandbox.eval(code) match {
-          case Success(value)     => value
-          case Failure(exception) => throw exception
-        }
-      }.result
+    def eval(implicit sandbox: GraalJsSandbox): Resource[Json] =
+      sandbox.makeRunner().map { runner =>
+        transformValues { case JsonString(CodeRx(code)) =>
+          runner.eval(code) match {
+            case Success(value)     => value
+            case Failure(exception) => throw exception
+          }
+        }.result
+      }
 
     def patch(values: Json, schema: Map[JsonOptic, String])(implicit sandbox: GraalJsSandbox): Resource[Json] =
       jsonTemplater(values).map { templater =>

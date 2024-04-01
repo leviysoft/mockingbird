@@ -35,21 +35,24 @@ class GraalJsSandbox(
       context.eval("js", code).toJson
     }.flatten
 
-  def makeRunner(environment: Map[String, GValue]): Resource[CodeRunner] =
-    Resource.lean(
-      Context
-        .newBuilder("js")
-        .allowHostAccess(HostAccess.ALL)
-        .allowHostClassLookup((t: String) => allowedClasses(t))
-        .option("engine.WarnInterpreterOnly", "false")
-        .build().tap { context =>
-          context.getBindings("js").pipe { bindings =>
-            for ((key, value) <- environment.view.mapValues(_.unwrap))
-              bindings.putMember(key, value)
+  def makeRunner(environment: Map[String, GValue] = Map.empty): Resource[CodeRunner] =
+    Resource
+      .lean(
+        Context
+          .newBuilder("js")
+          .allowHostAccess(HostAccess.ALL)
+          .allowHostClassLookup((t: String) => allowedClasses(t))
+          .option("engine.WarnInterpreterOnly", "false")
+          .build()
+          .tap { context =>
+            context.getBindings("js").pipe { bindings =>
+              for ((key, value) <- environment.view.mapValues(_.unwrap))
+                bindings.putMember(key, value)
+            }
+            preludeSource.foreach(context.eval)
           }
-          preludeSource.foreach(context.eval)
-        }
-    )(_.close()).map(ctx => (code: String) => ctx.value.eval("js", code).toJson)
+      )(_.close())
+      .map(ctx => (code: String) => ctx.value.eval("js", code).toJson)
 }
 
 object GraalJsSandbox {
