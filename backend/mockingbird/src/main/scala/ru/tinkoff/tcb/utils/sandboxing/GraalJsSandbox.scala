@@ -2,11 +2,13 @@ package ru.tinkoff.tcb.utils.sandboxing
 
 import scala.util.Try
 import scala.util.Using
+import scala.util.chaining.*
 
 import io.circe.Json
 import org.graalvm.polyglot.*
 
 import ru.tinkoff.tcb.mockingbird.config.JsSandboxConfig
+import ru.tinkoff.tcb.utils.resource.Resource
 import ru.tinkoff.tcb.utils.sandboxing.conversion.*
 
 class GraalJsSandbox(
@@ -32,6 +34,22 @@ class GraalJsSandbox(
       preludeSource.foreach(context.eval)
       context.eval("js", code).toJson
     }.flatten
+
+  def makeRunner(environment: Map[String, GValue]): Resource[CodeRunner] =
+    Resource.make(
+      Context
+        .newBuilder("js")
+        .allowHostAccess(HostAccess.ALL)
+        .allowHostClassLookup((t: String) => allowedClasses(t))
+        .option("engine.WarnInterpreterOnly", "false")
+        .build().tap { context =>
+          context.getBindings("js").pipe { bindings =>
+            for ((key, value) <- environment.view.mapValues(_.unwrap))
+              bindings.putMember(key, value)
+          }
+          preludeSource.foreach(context.eval)
+        }
+    )(_.close()).map(ctx => (code: String) => ctx.eval("js", code).toJson)
 }
 
 object GraalJsSandbox {

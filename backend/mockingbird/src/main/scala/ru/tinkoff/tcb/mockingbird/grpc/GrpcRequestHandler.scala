@@ -62,13 +62,13 @@ class GrpcRequestHandlerImpl(
       response <- stub.response match {
         case FillResponse(rdata, delay) =>
           ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get))) *>
-            ZIO.attemptBlocking(responseSchema.parseFromJson(rdata.substitute(data), stub.responseClass))
+            ZIO.attemptBlocking(responseSchema.parseFromJson(rdata.substitute(data).useAsIs, stub.responseClass))
         case GProxyResponse(endpoint, patch, delay) =>
           for {
             _          <- ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get)))
             binaryResp <- proxyCall(endpoint, bytes)
             jsonResp   <- responseSchema.convertMessageToJson(binaryResp, stub.responseClass)
-            patchedJsonResp   = jsonResp.patch(data, patch)
+            patchedJsonResp   = jsonResp.patch(data, patch).useAsIs
             patchedBinaryResp = responseSchema.parseFromJson(patchedJsonResp, stub.responseClass)
           } yield patchedBinaryResp
       }

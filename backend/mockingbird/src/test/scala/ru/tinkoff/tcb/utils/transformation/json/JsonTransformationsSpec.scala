@@ -66,11 +66,11 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
       "composite" := "Main topic: Some description"
     )
 
-    val sut = template.substitute(values)
+    val sut = template.substitute(values).useAsIs
 
     sut shouldBe expected
 
-    val sut2 = template2.substitute(values)
+    val sut2 = template2.substitute(values).useAsIs
 
     sut2 shouldBe expected
   }
@@ -82,7 +82,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
       "value" := "${description}"
     )
 
-    val sut = template.substitute(Json.obj())
+    val sut = template.substitute(Json.obj()).useAsIs
 
     sut shouldBe template
   }
@@ -92,7 +92,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
 
     val template = Json.obj("value" := "${message}")
 
-    val sut = template.substitute(Json.obj("message" := Json.obj("peka" := "name")))
+    val sut = template.substitute(Json.obj("message" := Json.obj("peka" := "name"))).useAsIs
 
     sut shouldBe Json.obj("value" := Json.obj("peka" := "name"))
   }
@@ -114,7 +114,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
       "n" := 45.99
     )
 
-    val sut = template.substitute(values)
+    val sut = template.substitute(values).useAsIs
 
     sut shouldBe Json.obj(
       "a" := "true",
@@ -140,7 +140,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
       "n" := "45.99"
     )
 
-    val sut = template.substitute(values)
+    val sut = template.substitute(values).useAsIs
 
     sut shouldBe Json.obj(
       "a" := true,
@@ -267,7 +267,7 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
       JsonOptic.fromPathString("o3.client") -> "${name} ${surname}"
     )
 
-    val sut = target.patch(source, schema)
+    val sut = target.patch(source, schema).useAsIs
 
     sut.get(JLens \ "a2" \ 4).asString.value shouldBe "nondesc"
     sut.get(JLens \ "o3" \ "client").asString.value shouldBe "Peka Kekovsky"
