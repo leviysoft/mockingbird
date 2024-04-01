@@ -121,13 +121,15 @@ package object xml {
         }.result
       }
 
-    def eval(implicit sandbox: GraalJsSandbox): Node =
-      transform { case tx @ Text(CodeRx(code)) =>
-        sandbox.eval(code) match {
-          case Success(value)     => Text(value.foldWith(json2StringFolder))
-          case Failure(exception) => throw exception
-        }
-      }.result
+    def eval(implicit sandbox: GraalJsSandbox): Resource[Node] =
+      sandbox.makeRunner().map { runner =>
+        transform { case tx @ Text(CodeRx(code)) =>
+          runner.eval(code) match {
+            case Success(value)     => Text(value.foldWith(json2StringFolder))
+            case Failure(exception) => throw exception
+          }
+        }.result
+      }
 
     def inlineXmlFromCData: Node =
       transform { case PCData(XCData(xml)) =>

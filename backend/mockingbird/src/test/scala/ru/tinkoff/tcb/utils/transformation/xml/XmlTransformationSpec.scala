@@ -78,7 +78,7 @@ class XmlTransformationSpec extends AnyFunSuite with Matchers {
 
     template.isTemplate shouldBe true
 
-    val res = template.eval
+    val res = template.eval.useAsIs
 
     (res \ "tag1").text should have length 10
 
