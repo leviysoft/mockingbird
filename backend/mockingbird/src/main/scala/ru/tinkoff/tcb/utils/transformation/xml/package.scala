@@ -136,29 +136,26 @@ package object xml {
 
     def patchFromValues(jValues: Json, xValues: Node, schema: Map[XmlZoom, String])(implicit
         sandbox: GraalJsSandbox
-    ): Resource[Node] = {
+    ): Resource[Node] =
       for {
         jt <- jsonTemplater(jValues)
         nt = nodeTemplater(<wrapper>{xValues}</wrapper>)
-      } yield {
-        schema
-          .foldLeft(<wrapper>{n}</wrapper>: Node) { case (acc, (zoom, defn)) =>
-            defn match {
-              case jp if jt.isDefinedAt(jp) =>
-                (zoom ==> Replace(_.map(_.transform { case Text(_) => Text(jt(jp).foldWith(json2StringFolder)) }.result)))
-                  .transform[Try](acc)
-                  .map(_.head)
-                  .getOrElse(acc)
-              case xp if nt.isDefinedAt(xp) =>
-                (zoom ==> Replace(_.map(_.transform { case Text(_) => Text(nt(xp)) }.result)))
-                  .transform[Try](acc)
-                  .map(_.head)
-                  .getOrElse(acc)
-              case _ => acc
-            }
+      } yield schema
+        .foldLeft(<wrapper>{n}</wrapper>: Node) { case (acc, (zoom, defn)) =>
+          defn match {
+            case jp if jt.isDefinedAt(jp) =>
+              (zoom ==> Replace(_.map(_.transform { case Text(_) => Text(jt(jp).foldWith(json2StringFolder)) }.result)))
+                .transform[Try](acc)
+                .map(_.head)
+                .getOrElse(acc)
+            case xp if nt.isDefinedAt(xp) =>
+              (zoom ==> Replace(_.map(_.transform { case Text(_) => Text(nt(xp)) }.result)))
+                .transform[Try](acc)
+                .map(_.head)
+                .getOrElse(acc)
+            case _ => acc
           }
-          .pipe(_.child.head)
-      }
-    }
+        }
+        .pipe(_.child.head)
   }
 }

@@ -82,7 +82,7 @@ final class PublicApiHandler(
         .filterOrElse(_.isDefined)(f(Scope.Ephemeral).filterOrElse(_.isDefined)(f(Scope.Persistent)))
         .someOrFail(StubSearchError(s"Can't find any stub for [$method] $path"))
       _ <- Tracing.update(_.addToPayload("name" -> stub.name))
-      seed     = stub.seed.map(_.eval)
+      seed     = stub.seed.map(_.eval.useAsIs)
       srb      = SimpleRequestBody.subset.getOption(body).map(_.value)
       bodyJson = stub.request.extractJson(body)
       bodyXml  = stub.request.extractXML(body)

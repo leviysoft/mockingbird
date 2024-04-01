@@ -79,7 +79,7 @@ final class ScenarioEngine(
         .filterOrElse(_.isDefined)(f(Scope.Ephemeral).filterOrElse(_.isDefined)(f(Scope.Persistent)))
         .someOrFail(ScenarioSearchError(s"Failed to match a scenario for the message from $source"))
       _ <- log.info("Executing scenario '{}'", scenario.name)
-      seed     = scenario.seed.map(_.eval)
+      seed     = scenario.seed.map(_.eval.useAsIs)
       bodyJson = scenario.input.extractJson(message)
       bodyXml  = scenario.input.extractXML(message)
       state <- ZIO.fromOption(stateOp).orElse(PersistentState.fresh)
@@ -141,7 +141,8 @@ final class ScenarioEngine(
               .method(Method(request.method.entryName), uri"$requestUrl")
               .pipe(r =>
                 request match {
-                  case JsonCallbackRequest(_, _, _, body) => r.body(body.substitute(data).map(_.substitute(xdata)).use(_.noSpaces))
+                  case JsonCallbackRequest(_, _, _, body) =>
+                    r.body(body.substitute(data).map(_.substitute(xdata)).use(_.noSpaces))
                   case XMLCallbackRequest(_, _, _, body) =>
                     r.body(body.toNode.substitute(data).map(_.substitute(xdata)).use(_.mkString))
                   case _ => r
@@ -185,8 +186,9 @@ final class ScenarioEngine(
           )
         } { drb =>
           val bodyJson = out match {
-            case RawOutput(payload, _)       => Json.fromString(payload)
-            case JsonOutput(payload, _, isT) => if (isT) payload.substitute(data).map(_.substitute(xdata)).useAsIs else payload
+            case RawOutput(payload, _) => Json.fromString(payload)
+            case JsonOutput(payload, _, isT) =>
+              if (isT) payload.substitute(data).map(_.substitute(xdata)).useAsIs else payload
             case XmlOutput(payload, _, isT) =>
               if (isT)
                 Json.fromString(payload.toNode.substitute(data).map(_.substitute(xdata)).use(_.mkString))
@@ -194,14 +196,16 @@ final class ScenarioEngine(
           }
 
           rt.body(
-            drb.substitute(
-              if (dest.request.stringifybody.contains(true)) Json.obj("_message" := bodyJson.noSpaces)
-              else if (dest.request.encodeBase64.contains(true))
-                Json.obj(
-                  "_message" := bodyJson.asString.map(b64Enc).getOrElse(b64Enc(bodyJson.noSpaces))
-                )
-              else Json.obj("_message" := bodyJson)
-            ).useAsIs
+            drb
+              .substitute(
+                if (dest.request.stringifybody.contains(true)) Json.obj("_message" := bodyJson.noSpaces)
+                else if (dest.request.encodeBase64.contains(true))
+                  Json.obj(
+                    "_message" := bodyJson.asString.map(b64Enc).getOrElse(b64Enc(bodyJson.noSpaces))
+                  )
+                else Json.obj("_message" := bodyJson)
+              )
+              .useAsIs
           )
         }
       )
