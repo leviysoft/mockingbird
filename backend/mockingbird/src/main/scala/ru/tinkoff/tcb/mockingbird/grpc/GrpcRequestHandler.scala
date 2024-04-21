@@ -25,6 +25,7 @@ import ru.tinkoff.tcb.mockingbird.model.GrpcConnectionType
 import ru.tinkoff.tcb.mockingbird.model.GrpcMethodDescription
 import ru.tinkoff.tcb.mockingbird.model.GrpcStub
 import ru.tinkoff.tcb.mockingbird.model.GrpcStubResponse
+import ru.tinkoff.tcb.mockingbird.model.NoBodyResponse
 import ru.tinkoff.tcb.mockingbird.model.PersistentState
 import ru.tinkoff.tcb.mockingbird.model.Scope
 import ru.tinkoff.tcb.protocol.log.*
@@ -133,6 +134,8 @@ class GrpcRequestHandlerImpl(
             )
           }
       }
+    case NoBodyResponse(delay) =>
+      ZStream.fromZIO(ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get)))).drain
     case _: GProxyResponse => ZStream.fail(ValidationError(Vector("Found proxy-stub during processing fill-stubs")))
   }
 
