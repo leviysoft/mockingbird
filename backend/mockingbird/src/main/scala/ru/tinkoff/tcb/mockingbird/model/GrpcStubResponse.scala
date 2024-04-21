@@ -39,7 +39,8 @@ object GrpcStubResponse {
   val modes: Map[String, String] = Map(
     nameOfType[FillResponse]       -> "fill",
     nameOfType[GProxyResponse]     -> "proxy",
-    nameOfType[FillStreamResponse] -> "fill_stream"
+    nameOfType[FillStreamResponse] -> "fill_stream",
+    nameOfType[NoBodyResponse]     -> "no_body"
   ).withDefault(identity)
 
   implicit val customConfiguration: TapirConfig =
@@ -70,3 +71,9 @@ object GProxyResponse {
 
   val endpoint: Contains[GProxyResponse, String] = GenContains[GProxyResponse](_.endpoint)
 }
+
+@derive(decoder, encoder)
+final case class NoBodyResponse(
+  delay: Option[FiniteDuration]
+) extends GrpcStubResponse
+
