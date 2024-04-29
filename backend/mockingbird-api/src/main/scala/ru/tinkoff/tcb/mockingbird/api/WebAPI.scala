@@ -2,6 +2,7 @@ package ru.tinkoff.tcb.mockingbird.api
 
 import scala.jdk.CollectionConverters.*
 
+import com.typesafe.config.ConfigRenderOptions
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
@@ -26,10 +27,13 @@ object WebAPI {
     ui           <- ZIO.service[UIHttp].toManaged
     metrics      <- ZIO.service[MetricsHttp].toManaged
     server <- ZManaged.acquireReleaseWith(ZIO.attempt {
-      val vertx         = Vertx.vertx()
-      val serverOptions = new HttpServerOptions().setMaxFormAttributeSize(256 * 1024)
-      val server        = vertx.createHttpServer(serverOptions)
-      val router        = Router.router(vertx)
+      val vertx = Vertx.vertx()
+      val serverOptions = {
+        val vertxCfg = serverConfig.vertx.root().render(ConfigRenderOptions.concise())
+        new HttpServerOptions(new io.vertx.core.json.JsonObject(vertxCfg))
+      }
+      val server = vertx.createHttpServer(serverOptions)
+      val router = Router.router(vertx)
       router
         .route()
         .path("/api/internal/mockingbird/v*")

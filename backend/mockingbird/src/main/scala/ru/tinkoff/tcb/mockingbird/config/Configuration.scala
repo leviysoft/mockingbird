@@ -3,10 +3,13 @@ package ru.tinkoff.tcb.mockingbird.config
 import scala.concurrent.duration.FiniteDuration
 
 import com.typesafe.config.Config
+import com.typesafe.config.ConfigException.Generic
 import com.typesafe.config.ConfigFactory
+import enumeratum.*
 import net.ceedubs.ficus.Ficus.*
 import net.ceedubs.ficus.readers.ArbitraryTypeReader.*
 import net.ceedubs.ficus.readers.EnumerationReader.*
+import net.ceedubs.ficus.readers.ValueReader
 
 final case class JsSandboxConfig(allowedClasses: Set[String] = Set())
 
@@ -15,7 +18,8 @@ final case class ServerConfig(
     port: Int,
     allowedOrigins: Seq[String],
     healthCheckRoute: Option[String],
-    sandbox: JsSandboxConfig
+    sandbox: JsSandboxConfig,
+    vertx: Config
 )
 
 final case class SecurityConfig(secret: String)
@@ -36,12 +40,28 @@ final case class ProxyServerConfig(
     auth: Option[ProxyServerAuth]
 )
 
+sealed trait HttpVersion extends EnumEntry
+object HttpVersion extends Enum[HttpVersion] {
+  val values = findValues
+  case object HTTP_1_1 extends HttpVersion
+  case object HTTP_2 extends HttpVersion
+
+  implicit val valueReader: ValueReader[HttpVersion] = ValueReader[String].map(s =>
+    namesToValuesMap.get(s) match {
+      case Some(v) => v
+      case None    => throw new Generic(s"Cannot get instance of enum HttpVersion from the value of $s")
+    }
+  )
+}
+
 final case class ProxyConfig(
     excludedRequestHeaders: Seq[String],
     excludedResponseHeaders: Set[String],
     proxyServer: Option[ProxyServerConfig],
     insecureHosts: Seq[String],
-    logOutgoingRequests: Boolean
+    logOutgoingRequests: Boolean,
+    disableAutoDecompressForRaw: Boolean,
+    httpVersion: HttpVersion
 )
 
 final case class EventConfig(fetchInterval: FiniteDuration, reloadInterval: FiniteDuration)

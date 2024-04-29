@@ -14,6 +14,7 @@ import sttp.client4.testing.WebSocketBackendStub
 import sttp.model.Header
 import sttp.model.MediaType
 import sttp.model.Method.*
+import sttp.model.RequestMetadata
 import sttp.model.StatusCode
 import sttp.model.Uri
 
@@ -61,14 +62,20 @@ class AsyncScalaTestSuiteWholeTest
         req.headers.exists(h => h.name == "X-CSRF-TOKEN" && h.value == "unEENxJqSLS02rji2GjcKzNLc0C0ySlWih9hSxwn")
       }
       .thenRespond(
-        Response(
+        new Response(
           body = """{
                    |  "fact" : "There are approximately 100 breeds of cat.",
                    |  "length" : 42.0
                    |}""".stripMargin,
           code = StatusCode.Ok,
           statusText = "",
-          headers = Seq(Header.contentType(MediaType.ApplicationJson))
+          headers = Seq(Header.contentType(MediaType.ApplicationJson)),
+          history = Nil,
+          request = RequestMetadata(
+            GET,
+            uri"https://localhost.example:9977/fact",
+            Seq(Header("X-CSRF-TOKEN", "unEENxJqSLS02rji2GjcKzNLc0C0ySlWih9hSxwn"))
+          ),
         )
       )
   }
