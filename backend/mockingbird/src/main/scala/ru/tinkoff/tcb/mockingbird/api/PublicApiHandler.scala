@@ -10,9 +10,11 @@ import io.circe.Json
 import io.circe.parser.parse
 import io.circe.syntax.*
 import io.estatico.newtype.ops.*
+import mouse.boolean.*
 import mouse.option.*
 import sttp.client4.{Backend as SttpBackend, *}
 import sttp.client4.circe.*
+import sttp.model.HeaderNames
 import sttp.model.Method
 import zio.interop.catz.core.*
 
@@ -155,6 +157,12 @@ final class PublicApiHandler(
     } yield response
   }
 
+  // The cases when Mockingbird implicitly changes answer:
+  // 1. If the answer is compressed, mockingbird decompressed it.
+  // 2. When proxy mock contains substitutions, they change the answer and the result have another length.
+  // In these cases, these headers they make the modified response is incorrect, so we need to remove them.
+  private def headersDependingOnContentLength = Seq(HeaderNames.ContentEncoding, HeaderNames.ContentLength)
+
   private def proxyRequest(
       method: HttpMethod,
       headers: Map[String, String],
@@ -164,6 +172,9 @@ final class PublicApiHandler(
     val requestUri = uri"$uri".pipe(query.foldLeft(_) { case (u, (key, value)) => u.addParam(key, value) })
     for {
       _ <- log.debug(s"Received headers: ${headers.keys.mkString(", ")}")
+      // Potentially, we want to pass the request and response as is. If the client wants this
+      // response to be encoded, it sets `Accept-Encoding` itself. Also, by default, we don't
+      // unpack the response here. It's the reason here we use emptyRequest.
       req = basicRequest
         .headers(headers -- proxyConfig.excludedRequestHeaders)
         .method(Method(method.entryName), requestUri)
@@ -184,6 +195,7 @@ final class PublicApiHandler(
               )
           }
         )
+        .pipe(r => proxyConfig.disableAutoDecompressForRaw.fold(r.disableAutoDecompression, r))
         .response(asByteArrayAlways)
       _ <- log.debug("Executing request: {}", req.toCurl).when(proxyConfig.logOutgoingRequests)
       response <- req
@@ -193,6 +205,9 @@ final class PublicApiHandler(
       Refined.unsafeApply[Int, HttpStatusCodeRange](response.code.code),
       response.headers
         .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
+        .pipe { hs =>
+          proxyConfig.disableAutoDecompressForRaw.fold(hs, hs.filterNot(h => headersDependingOnContentLength.exists(h.is)))
+        }
         .map(h => h.name -> h.value)
         .toMap,
       response.body.coerce[ByteArray],
@@ -218,7 +233,10 @@ final class PublicApiHandler(
     for {
       _ <- log.debug(s"Received headers: ${headers.keys.mkString(", ")}")
       req = basicRequest
-        .headers(headers -- proxyConfig.excludedRequestHeaders)
+        .headers(
+          // The basicRequest adds `Accept-Encoding`, so we should remove the same incoming header
+          headers.filterNot(_._1.equalsIgnoreCase(HeaderNames.AcceptEncoding)) -- proxyConfig.excludedRequestHeaders
+        )
         .method(Method(method.entryName), requestUri)
         .pipe(rt =>
           body match {
@@ -248,6 +266,7 @@ final class PublicApiHandler(
           Refined.unsafeApply[Int, HttpStatusCodeRange](response.code.code),
           response.headers
             .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
+            .filterNot(h => headersDependingOnContentLength.exists(h.is))
             .map(h => h.name -> h.value)
             .toMap,
           jsonResponse.patch(data, patch).use(_.noSpaces),
@@ -277,7 +296,10 @@ final class PublicApiHandler(
     for {
       _ <- log.debug(s"Received headers: ${headers.keys.mkString(", ")}")
       req = basicRequest
-        .headers(headers -- proxyConfig.excludedRequestHeaders)
+        .headers(
+          // The basicRequest adds `Accept-Encoding`, so we should remove the same incoming header
+          headers.filterNot(_._1.equalsIgnoreCase(HeaderNames.AcceptEncoding)) -- proxyConfig.excludedRequestHeaders
+        )
         .method(Method(method.entryName), requestUri)
         .pipe(rt =>
           body match {
@@ -307,6 +329,7 @@ final class PublicApiHandler(
           Refined.unsafeApply[Int, HttpStatusCodeRange](response.code.code),
           response.headers
             .filterNot(h => proxyConfig.excludedResponseHeaders(h.name))
+            .filterNot(h => headersDependingOnContentLength.exists(h.is))
             .map(h => h.name -> h.value)
             .toMap,
           xmlResponse.patchFromValues(jData, xData, patch.map { case (k, v) => k.toZoom -> v }).toString(),

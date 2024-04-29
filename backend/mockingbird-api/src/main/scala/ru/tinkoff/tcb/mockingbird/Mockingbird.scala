@@ -31,6 +31,7 @@ import ru.tinkoff.tcb.mockingbird.api.Tracing
 import ru.tinkoff.tcb.mockingbird.api.UIHttp
 import ru.tinkoff.tcb.mockingbird.api.WLD
 import ru.tinkoff.tcb.mockingbird.api.WebAPI
+import ru.tinkoff.tcb.mockingbird.config.HttpVersion
 import ru.tinkoff.tcb.mockingbird.config.MockingbirdConfiguration
 import ru.tinkoff.tcb.mockingbird.config.MongoCollections
 import ru.tinkoff.tcb.mockingbird.config.MongoConfig
@@ -133,6 +134,10 @@ object Mockingbird extends scala.App {
             }
             httpClient = HttpClient
               .newBuilder()
+              .version(pc.httpVersion match {
+                case HttpVersion.HTTP_1_1 => HttpClient.Version.HTTP_1_1
+                case HttpVersion.HTTP_2   => HttpClient.Version.HTTP_2
+              })
               .connectTimeout(sttpSettings.connectionTimeout.toJava)
               .pipe(b => sttpSettings.proxy.fold(b)(conf => b.proxy(conf.asJavaProxySelector)))
               .sslContext(sslContext)

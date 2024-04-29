@@ -11,7 +11,11 @@ Mockingbird конфигурируется посредством файла sec
         "http://localhost:3000",
         ...
       ],
-      "healthCheckRoute": "/ready"
+      "healthCheckRoute": "/ready",
+      "vertx": {
+        "maxFormAttributeSize": 262144,
+        "compressionSupported": true
+      }
     },
     "security": {
       "secret": ".."
@@ -24,6 +28,8 @@ Mockingbird конфигурируется посредством файла sec
       "excludedResponseHeaders": [..],
       "insecureHosts": [..],
       "logOutgoingRequests": false,
+      "disableAutoDecompressForRaw": "true",
+      "httpVersion": "HTTP_1_1",
       "proxyServer": {
         "type": "http" | "socks",
         "type": "..",
@@ -50,6 +56,8 @@ Mockingbird конфигурируется посредством файла sec
 Здесь указыватся ориджены для CORS. Эти настройки влияют на работоспособность UI Mockingbird, а также swagger-ui
 
 healthCheckRoute - необязательный параметр, позволяет настроить эндпоинт, всегда отдающий 200 OK, полезно для healthcheck
+
+Внутрии секции vertx можно задать [параметры для сервера Vert.x](https://vertx.io/docs/apidocs/io/vertx/core/http/HttpServerOptions.html).
 
 ### Секция security
 
@@ -94,7 +102,9 @@ healthCheckRoute - необязательный параметр, позволя
       "insecureHosts": [
         "some.host"
       ],
-      "logOutgoingRequests": false
+      "logOutgoingRequests": false,
+      "disableAutoDecompressForRaw": "true",
+      "httpVersion": "HTTP_1_1"
     }
   }
 }
@@ -104,6 +114,10 @@ healthCheckRoute - необязательный параметр, позволя
 для случаев развёртывания во внутренней инфраструктуре.
 
 Флаг logOutgoingRequests позволяет включить логирование запросов к удаленному серверу, когда http заглушка работет в режиме прокси. Запрос пишется в лог в виде команды curl с заголовками и телом запроса.
+
+Флаг disableAutoDecompressForRaw отключает автоматическую декомпрессию ответа для заглушек с режимом `proxy`.
+
+Параметр httpVersion отвечает за версию протокола исопльзуемого для исходящих HTTP запросов, может принимать значения `HTTP_1_1` или `HTTP_2`.
 
 Так-же в этой секции можно указать настройки прокси сервера. Эти настройки влияют на ВСЕ http запросы, которые делаем mockingbird, т.е.:
 - запросы к внешнему серверу с proxy моках

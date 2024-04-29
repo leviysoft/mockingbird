@@ -1,6 +1,7 @@
 package ru.tinkoff.tcb.mockingbird.edsl
 
 import sttp.client4.*
+import sttp.client4.DuplicateHeaderBehavior
 import sttp.model.Uri
 import sttp.model.Uri.QuerySegment
 
@@ -16,7 +17,7 @@ package object interpreter {
   def buildRequest(host: Uri, m: HttpRequest): Request[String] = {
     val initialRequest = emptyRequest.response(asStringAlways)
     var req            = m.body.fold(initialRequest)(initialRequest.body)
-    req = m.headers.foldLeft(req) { case (r, (k, v)) => r.header(k, v, replaceExisting = true) }
+    req = m.headers.foldLeft(req) { case (r, (k, v)) => r.header(k, v, DuplicateHeaderBehavior.Replace) }
     val url = makeUri(host, m)
     m.method match {
       case Delete => req.delete(url)

@@ -9,11 +9,13 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.Informer
 import org.scalatest.matchers.should.Matchers
 import sttp.client4.*
+import sttp.client4.Response
 import sttp.client4.httpclient.HttpClientFutureBackend
 import sttp.client4.testing.WebSocketBackendStub
 import sttp.model.Header
 import sttp.model.MediaType
 import sttp.model.Method.*
+import sttp.model.RequestMetadata
 import sttp.model.StatusCode
 import sttp.model.Uri
 
@@ -67,7 +69,14 @@ class AsyncScalaTestSuiteTest extends AsyncScalaTestSuite with Matchers with Asy
           if uri == uri"http://some.domain.com:8090/api/handler?service=world"
             && hs.exists(h => h.name == "x-token" && h.value == "asd5453qwe")
             && hs.exists(h => h.name == "Content-Type" && h.value == "application/json") =>
-        Response(body = "got request", code = StatusCode.Ok)
+        new Response[String](
+          body = "got request",
+          code = StatusCode.Ok,
+          statusText = "",
+          headers = Seq.empty,
+          history = Nil,
+          request = RequestMetadata(POST, uri, hs),
+        )
     }
 
     val example = eset.sendHttp(method, path, body.some, headers, query)
@@ -81,11 +90,13 @@ class AsyncScalaTestSuiteTest extends AsyncScalaTestSuite with Matchers with Asy
   test("checkHttp checks code of response") {
     sttpbackend_ = HttpClientFutureBackend.stub().whenRequestMatches(_ => true).thenRespondOk()
 
-    val sttpResp = Response(
+    val sttpResp = new Response(
       body = "got request",
       code = StatusCode.InternalServerError,
       statusText = "",
       headers = Seq.empty,
+      history = Nil,
+      request = RequestMetadata(GET, uri"https://host.domain", Seq.empty)
     )
 
     val example = eset.checkHttp(
@@ -105,11 +116,13 @@ class AsyncScalaTestSuiteTest extends AsyncScalaTestSuite with Matchers with Asy
   test("checkHttp checks body of response") {
     sttpbackend_ = HttpClientFutureBackend.stub().whenRequestMatches(_ => true).thenRespondOk()
 
-    val sttpResp = Response(
+    val sttpResp = new Response(
       body = "got request",
       code = StatusCode.Ok,
       statusText = "",
       headers = Seq.empty,
+      history = Nil,
+      request = RequestMetadata(GET, uri"https://host.domain", Seq.empty)
     )
 
     val example = eset.checkHttp(
@@ -129,11 +142,13 @@ class AsyncScalaTestSuiteTest extends AsyncScalaTestSuite with Matchers with Asy
   test("checkHttp checks headers of response") {
     sttpbackend_ = HttpClientFutureBackend.stub().whenRequestMatches(_ => true).thenRespondOk()
 
-    val sttpResp = Response(
+    val sttpResp = new Response(
       body = "{}",
       code = StatusCode.Ok,
       statusText = "",
       headers = Seq(Header.contentType(MediaType.TextPlain)),
+      history = Nil,
+      request = RequestMetadata(GET, uri"https://host.domain", Seq.empty)
     )
 
     val example = eset.checkHttp(

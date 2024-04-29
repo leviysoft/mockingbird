@@ -11,7 +11,11 @@ Mockingbird is configured via the secrets.conf file, which has the following str
         "http://localhost:3000",
         ...
       ],
-      "healthCheckRoute": "/ready"
+      "healthCheckRoute": "/ready",
+      "vertx": {
+        "maxFormAttributeSize": 262144,
+        "compressionSupported": true
+      }
     },
     "security": {
       "secret": ".."
@@ -24,6 +28,8 @@ Mockingbird is configured via the secrets.conf file, which has the following str
       "excludedResponseHeaders": [..],
       "insecureHosts": [..],
       "logOutgoingRequests": false,
+      "disableAutoDecompressForRaw": "true",
+      "httpVersion": "HTTP_1_1",
       "proxyServer": {
         "type": "http" | "socks",
         "type": "..",
@@ -50,6 +56,8 @@ Mockingbird is configured via the secrets.conf file, which has the following str
 This section specifies origins for CORS. These settings affect the functionality of UI Mockingbird as well as swagger-ui.
 
 healthCheckRoute - an optional parameter that allows configuring an endpoint always returning 200 OK, useful for health checks.
+
+Inside the vertx section, one can set up any [HTTP server options of Vert.x](https://vertx.io/docs/apidocs/io/vertx/core/http/HttpServerOptions.html)
 
 ### Security Section
 
@@ -94,7 +102,9 @@ Example of a typical configuration:
       "insecureHosts": [
         "some.host"
       ],
-      "logOutgoingRequests": false
+      "logOutgoingRequests": false,
+      "disableAutoDecompressForRaw": "true",
+      "httpVersion": "HTTP_1_1"
     }
   }
 }
@@ -103,6 +113,10 @@ Example of a typical configuration:
 In the insecureHosts field, you can specify a list of hosts for which certificate validation will not be performed. This can be useful for deployments within internal infrastructure.
 
 The logOutgoingRequests flag allows enabling logging of requests to the remote server when the HTTP mock is operating in proxy mode. The request is logged in the form of a curl command with headers and request body.
+
+The disableAutoDecompressForRaw flag allow disabling automatic decompression of response for proxy stub with mode `proxy`.
+
+The httpVersion allows to configure the desired HTTP protocol version for outgoing requests, possible values: HTTP_1_1 or HTTP_2.
 
 Also, in this section, you can specify proxy server settings. These settings affect ALL HTTP requests made by Mockingbird, including:
 
