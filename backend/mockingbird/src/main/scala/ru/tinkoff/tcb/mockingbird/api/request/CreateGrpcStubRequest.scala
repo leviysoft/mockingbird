@@ -3,10 +3,9 @@ package ru.tinkoff.tcb.mockingbird.api.request
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
-import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto.*
-import eu.timepit.refined.collection.NonEmpty
-import eu.timepit.refined.numeric.NonNegative
+import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Json
 import io.circe.refined.*
 import sttp.tapir.codec.refined.*
@@ -24,14 +23,14 @@ import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 @derive(decoder, encoder, schema)
 final case class CreateGrpcStubRequest(
     scope: Scope,
-    times: Option[Int Refined NonNegative] = Some(1),
-    service: String Refined NonEmpty,
+    times: Option[NonNegInt] = Some(1),
+    service: NonEmptyString,
     requestCodecs: ByteArray,
     responseCodecs: ByteArray,
     requestClass: String,
     responseClass: String,
     methodName: String,
-    name: String Refined NonEmpty,
+    name: NonEmptyString,
     response: GrpcStubResponse,
     requestPredicates: JsonPredicate,
     state: Option[Map[JsonOptic, Map[Keyword.Json, Json]]],

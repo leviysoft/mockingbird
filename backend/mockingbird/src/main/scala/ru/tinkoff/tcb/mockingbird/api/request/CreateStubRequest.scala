@@ -6,9 +6,8 @@ import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
 import eu.timepit.refined.*
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.*
-import eu.timepit.refined.numeric.NonNegative
+import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Json
 import io.circe.refined.*
 import sttp.tapir.Schema.annotations.description
@@ -32,13 +31,13 @@ final case class CreateStubRequest(
     @description("Scope")
     scope: Scope,
     @description("The number of possible triggers. Only relevant for scope=countdown")
-    times: Option[Int Refined NonNegative] = Some(refineMV(1)),
+    times: Option[NonNegInt] = Some(refineMV(1)),
     @description("Mock name")
-    name: String Refined NonEmpty,
+    name: NonEmptyString,
     @description("HTTP method")
     method: HttpMethod,
     @description("The path suffix where the mock triggers")
-    path: Option[String Refined NonEmpty],
+    path: Option[NonEmptyString],
     pathPattern: Option[Regex],
     seed: Option[Json],
     @description("State search predicate")

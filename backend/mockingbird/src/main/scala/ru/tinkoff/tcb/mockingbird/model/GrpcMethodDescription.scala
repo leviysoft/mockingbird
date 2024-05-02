@@ -3,9 +3,8 @@ package ru.tinkoff.tcb.mockingbird.model
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
-import eu.timepit.refined.api.Refined
+import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.refined.*
-import eu.timepit.refined.collection.NonEmpty
 import io.scalaland.chimney.dsl.TransformationOps
 import sttp.tapir.codec.refined.*
 import sttp.tapir.derevo.schema
@@ -21,7 +20,7 @@ import ru.tinkoff.tcb.utils.id.SID
 @derive(bsonDecoder, bsonEncoder, decoder, encoder, schema)
 final case class GrpcMethodDescription(
     @BsonKey("_id") id: SID[GrpcMethodDescription],
-    service: String Refined NonEmpty,
+    service: NonEmptyString,
     methodName: String,
     connectionType: GrpcConnectionType,
     scope: Scope,

@@ -1,7 +1,6 @@
 package ru.tinkoff.tcb.mockingbird.api
 
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.*
+import eu.timepit.refined.types.string.NonEmptyString
 import sttp.tapir.*
 import sttp.tapir.codec.refined.*
 import sttp.tapir.json.circe.*
@@ -228,9 +227,9 @@ package object admin {
 
   private val sourceConfBase = basicV3.in("source")
 
-  val fetchSourceConfigurations: Endpoint[Unit, Option[String Refined NonEmpty], Throwable, Vector[SourceDTO], Any] =
+  val fetchSourceConfigurations: Endpoint[Unit, Option[NonEmptyString], Throwable, Vector[SourceDTO], Any] =
     sourceConfBase.get
-      .in(query[Option[String Refined NonEmpty]]("service"))
+      .in(query[Option[NonEmptyString]]("service"))
       .out(jsonBody[Vector[SourceDTO]])
       .summary("Get source configurations")
 
@@ -266,9 +265,9 @@ package object admin {
   private val destinationConfBase = basicV3.in("destination")
 
   val fetchDestinationConfigurations
-      : Endpoint[Unit, Option[String Refined NonEmpty], Throwable, Vector[DestinationDTO], Any] =
+      : Endpoint[Unit, Option[NonEmptyString], Throwable, Vector[DestinationDTO], Any] =
     destinationConfBase.get
-      .in(query[Option[String Refined NonEmpty]]("service"))
+      .in(query[Option[NonEmptyString]]("service"))
       .out(jsonBody[Vector[DestinationDTO]])
       .summary("Get destinations list")
 

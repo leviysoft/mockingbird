@@ -5,9 +5,8 @@ import java.time.Instant
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.NonEmpty
-import eu.timepit.refined.numeric.NonNegative
+import eu.timepit.refined.types.string.NonEmptyString
+import eu.timepit.refined.types.numeric.NonNegInt
 import io.circe.Json
 import io.circe.refined.*
 import io.scalaland.chimney.dsl.TransformationOps
@@ -28,10 +27,10 @@ final case class GrpcStubView(
     methodDescriptionId: SID[GrpcMethodDescription],
     scope: Scope,
     created: Instant,
-    service: String Refined NonEmpty,
-    times: Option[Int Refined NonNegative],
+    service: NonEmptyString,
+    times: Option[NonNegInt],
     methodName: String,
-    name: String Refined NonEmpty,
+    name: NonEmptyString,
     connectionType: GrpcConnectionType,
     proxyUrl: Option[String],
     requestSchema: GrpcProtoDefinition,

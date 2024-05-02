@@ -6,8 +6,7 @@ import com.github.dwickern.macros.NameOf.nameOfType
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.NonEmpty
+import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Json
 import io.circe.refined.*
 import sttp.tapir.codec.refined.*
@@ -31,7 +30,7 @@ import ru.tinkoff.tcb.utils.xml.XMLString
 )
 @BsonDiscriminator("mode")
 sealed trait CallbackRequest {
-  def url: String Refined NonEmpty
+  def url: NonEmptyString
   def method: HttpMethod
   def headers: Map[String, String]
 }
@@ -50,14 +49,14 @@ object CallbackRequest {
 
 @derive(decoder, encoder)
 final case class CallbackRequestWithoutBody(
-    url: String Refined NonEmpty,
+    url: NonEmptyString,
     method: HttpMethod,
     headers: Map[String, String]
 ) extends CallbackRequest
 
 @derive(decoder, encoder)
 final case class RawCallbackRequest(
-    url: String Refined NonEmpty,
+    url: NonEmptyString,
     method: HttpMethod,
     headers: Map[String, String],
     body: String
@@ -65,7 +64,7 @@ final case class RawCallbackRequest(
 
 @derive(decoder, encoder)
 final case class JsonCallbackRequest(
-    url: String Refined NonEmpty,
+    url: NonEmptyString,
     method: HttpMethod,
     headers: Map[String, String],
     body: Json
@@ -73,7 +72,7 @@ final case class JsonCallbackRequest(
 
 @derive(decoder, encoder)
 final case class XMLCallbackRequest(
-    url: String Refined NonEmpty,
+    url: NonEmptyString,
     method: HttpMethod,
     headers: Map[String, String],
     body: XMLString
