@@ -3,9 +3,9 @@ package ru.tinkoff.tcb.mockingbird.api
 import scala.util.control.NonFatal
 
 import eu.timepit.refined.*
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.*
+import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.*
+import eu.timepit.refined.types.string.NonEmptyString
 import io.scalaland.chimney.dsl.*
 import kantan.xpath.*
 import kantan.xpath.implicits.*
@@ -517,7 +517,7 @@ final class AdminApiHandler(
     )
 
   def fetchSourceConfigurations(
-      service: Option[String Refined NonEmpty]
+      service: Option[NonEmptyString]
   ): RIO[WLD, Vector[SourceDTO]] = {
     var queryDoc = BsonDocument()
     if (service.isDefined) {
@@ -640,7 +640,7 @@ final class AdminApiHandler(
     } yield OperationResult("success", None)
 
   def fetchDestinationConfigurations(
-      service: Option[String Refined NonEmpty]
+      service: Option[NonEmptyString]
   ): RIO[WLD, Vector[DestinationDTO]] = {
     var queryDoc = BsonDocument()
     if (service.isDefined) {

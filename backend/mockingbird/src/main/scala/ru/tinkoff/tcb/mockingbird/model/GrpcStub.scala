@@ -5,9 +5,8 @@ import java.time.Instant
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.*
-import eu.timepit.refined.numeric.*
+import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Json
 import io.circe.refined.*
 import io.estatico.newtype.macros.newtype
@@ -37,8 +36,8 @@ final case class GrpcStub(
     @BsonKey("_id") id: SID[GrpcStub],
     methodDescriptionId: SID[GrpcMethodDescription],
     created: Instant,
-    times: Option[Int Refined NonNegative],
-    name: String Refined NonEmpty,
+    times: Option[NonNegInt],
+    name: NonEmptyString,
     response: GrpcStubResponse,
     seed: Option[Json],
     state: Option[Map[JsonOptic, Map[Keyword.Json, Json]]],

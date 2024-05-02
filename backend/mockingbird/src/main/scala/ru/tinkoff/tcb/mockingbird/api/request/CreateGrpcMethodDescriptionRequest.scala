@@ -3,8 +3,7 @@ package ru.tinkoff.tcb.mockingbird.api.request
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.NonEmpty
+import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.refined.*
 import sttp.tapir.codec.refined.*
 import sttp.tapir.derevo.schema
@@ -16,7 +15,7 @@ import ru.tinkoff.tcb.mockingbird.model.GrpcConnectionType
 @derive(decoder, encoder, schema)
 final case class CreateGrpcMethodDescriptionRequest(
     scope: Scope,
-    service: String Refined NonEmpty,
+    service: NonEmptyString,
     methodName: String,
     connectionType: GrpcConnectionType,
     requestClass: String,
