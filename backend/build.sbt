@@ -2,15 +2,14 @@ import ProjectKeys._
 import ch.epfl.scala.sbtmissinglink.MissingLinkPlugin.missinglinkConflictsTag
 import sbt.Keys.concurrentRestrictions
 
-ThisBuild / scalaVersion := "2.13.13"
-
-ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)
+ThisBuild / scalaVersion := "2.13.14"
 
 ThisBuild / concurrentRestrictions += Tags.limit(missinglinkConflictsTag, 1)
 
 ThisBuild / evictionErrorLevel := Level.Debug
 
 ThisBuild / semanticdbEnabled := true
+ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 val utils = (project in file("utils"))
   .settings(Settings.common)
