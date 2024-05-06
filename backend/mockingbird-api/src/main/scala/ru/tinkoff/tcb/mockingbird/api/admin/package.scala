@@ -66,10 +66,9 @@ package object admin {
       .summary("Test HTTP stub resolution")
       .in(execInput)
       .in(
-        binaryBody(RawBodyType.ByteArrayBody)[Option[String]]
-          .map[RequestBody]((_: Option[String]).fold[RequestBody](AbsentRequestBody)(SimpleRequestBody(_)))(
-            SimpleRequestBody.subset.getOption(_).map(_.value)
-          )
+        byteArrayBody.map[RequestBody]((b: Array[Byte]) => if (b.isEmpty) AbsentRequestBody else SimpleRequestBody(b))(
+          SimpleRequestBody.subset.getOption(_).map(_.binary).getOrElse(Array.empty)
+        )
       )
       .out(jsonBody[SID[HttpStub]])
 

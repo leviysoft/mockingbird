@@ -19,7 +19,9 @@ case object AbsentRequestBody extends RequestBody {
   implicit val absentRequestBodyLoggable: Loggable[AbsentRequestBody.type] = Loggable.empty[AbsentRequestBody.type]
 }
 
-final case class SimpleRequestBody(value: String) extends RequestBody
+final case class SimpleRequestBody(binary: Array[Byte]) extends RequestBody {
+  val value: String = new String(binary)
+}
 object SimpleRequestBody {
   final val subset: Subset[RequestBody, SimpleRequestBody] = GenSubset[RequestBody, SimpleRequestBody]
 
