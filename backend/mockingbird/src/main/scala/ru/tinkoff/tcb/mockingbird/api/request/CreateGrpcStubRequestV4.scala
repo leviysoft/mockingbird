@@ -12,6 +12,7 @@ import sttp.tapir.codec.refined.*
 import sttp.tapir.derevo.schema
 
 import ru.tinkoff.tcb.mockingbird.model.GrpcStubResponse
+import ru.tinkoff.tcb.mockingbird.model.Scope
 import ru.tinkoff.tcb.predicatedsl.Keyword
 import ru.tinkoff.tcb.predicatedsl.json.JsonPredicate
 import ru.tinkoff.tcb.protocol.json.*
@@ -21,6 +22,7 @@ import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 @derive(decoder, encoder, schema)
 final case class CreateGrpcStubRequestV4(
     methodName: String,
+    scope: Scope,
     times: Option[NonNegInt] = Some(1),
     name: NonEmptyString,
     response: GrpcStubResponse,

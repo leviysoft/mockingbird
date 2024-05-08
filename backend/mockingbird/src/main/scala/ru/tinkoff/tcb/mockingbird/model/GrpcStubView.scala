@@ -5,8 +5,8 @@ import java.time.Instant
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
-import eu.timepit.refined.types.string.NonEmptyString
 import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Json
 import io.circe.refined.*
 import io.scalaland.chimney.dsl.TransformationOps
