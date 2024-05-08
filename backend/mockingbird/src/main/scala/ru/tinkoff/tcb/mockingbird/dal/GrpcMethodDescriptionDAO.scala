@@ -22,11 +22,11 @@ class GrpcMethodDescriptionDAOImpl(collection: MongoCollection[BsonDocument])
     extends DAOBase[GrpcMethodDescription](collection)
     with GrpcMethodDescriptionDAO[Task] {
   def createIndexes: Task[Unit] = createIndex(
-    ascending(nameOf[GrpcMethodDescription](_.methodName))
-  ) *> createIndex(
     ascending(nameOf[GrpcMethodDescription](_.methodName), nameOf[GrpcMethodDescription](_.scope))
   ) *> createIndex(
     ascending(nameOf[GrpcMethodDescription](_.service))
+  ) *> createIndex(
+    descending(nameOf[GrpcMethodDescription](_.created))
   )
 }
 

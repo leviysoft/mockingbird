@@ -74,6 +74,5 @@ object GProxyResponse {
 
 @derive(decoder, encoder)
 final case class NoBodyResponse(
-  delay: Option[FiniteDuration]
+    delay: Option[FiniteDuration]
 ) extends GrpcStubResponse
-

@@ -51,7 +51,15 @@ final class AdminHttp(config: ServerConfig, handler: AdminApiHandler) {
     tryDelete,
     tryHead,
     tryOptions,
-    tryScenario
+    tryScenario,
+    fetchGrpcStubsV4,
+    createGrpcStubV4,
+    getGrpcStubV4,
+    deleteGrpcStubV4,
+    fetchGrpcMethodDescriptions,
+    createGrpcMethodDescription,
+    getGrpcMethodDescription,
+    deleteGrpcMethodDescription,
   )
 
   private val allLogic = List[ZServerEndpoint[WLD, Any]](
@@ -91,7 +99,15 @@ final class AdminHttp(config: ServerConfig, handler: AdminApiHandler) {
     tryDelete.zServerLogic((handler.tryResolveStub _).tupled),
     tryHead.zServerLogic((handler.tryResolveStub _).tupled),
     tryOptions.zServerLogic((handler.tryResolveStub _).tupled),
-    tryScenario.zServerLogic(handler.tryResolveScenario)
+    tryScenario.zServerLogic(handler.tryResolveScenario),
+    fetchGrpcStubsV4.zServerLogic((handler.fetchGrpcStubsV4 _).tupled),
+    createGrpcStubV4.zServerLogic(handler.createGrpcStubV4),
+    getGrpcStubV4.zServerLogic(handler.getGrpcStubV4),
+    deleteGrpcStubV4.zServerLogic(handler.deleteGrpcStubV4),
+    fetchGrpcMethodDescriptions.zServerLogic((handler.fetchGrpcMethodDescriptions _).tupled),
+    createGrpcMethodDescription.zServerLogic(handler.createGrpcMethodDescription),
+    getGrpcMethodDescription.zServerLogic(handler.getGrpcMethodDescription),
+    deleteGrpcMethodDescription.zServerLogic(handler.deleteGrpcMethodDescription)
   )
 
   private val swaggerEndpoints =

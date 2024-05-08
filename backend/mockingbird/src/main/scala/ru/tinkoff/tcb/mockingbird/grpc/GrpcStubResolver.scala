@@ -32,7 +32,7 @@ trait GrpcStubResolver {
       methodDescriptionPromise: Promise[StubSearchError, GrpcMethodDescription],
       service: String,
       request: Array[Byte]
-  )(scope: Scope):  RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]]
+  )(scope: Scope): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]]
 }
 
 class GrpcStubResolverImpl(
@@ -53,12 +53,9 @@ class GrpcStubResolverImpl(
   )(scope: Scope): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]] =
     (for {
       methodDescription <- getMethodDescription(methodDescriptionPromise, methodName, scope).some
-      _ <- log.info("1. got method description")
-      json <- parseJson(methodDescription, request).some
-      _ <- log.info("2. parsed json")
-      res <- findStubAndState(methodDescription.id, json).some
-      _ <- log.info("3. found stub")
-      _ <- methodDescriptionPromise.succeed(methodDescription)
+      json              <- parseJson(methodDescription, request).some
+      res               <- findStubAndState(methodDescription.id, json).some
+      _                 <- methodDescriptionPromise.succeed(methodDescription)
     } yield res).unsome
 
   private def getMethodDescription(
@@ -67,11 +64,12 @@ class GrpcStubResolverImpl(
       scope: Scope,
   ): Task[Option[GrpcMethodDescription]] = methodDescriptionPromise.poll.flatMap {
     case Some(io) => io.asSome
-    case _ => methodDescriptionDAO
-      .findOne(
-        prop[GrpcMethodDescription](_.methodName) === methodName &&
-          prop[GrpcMethodDescription](_.scope) === scope
-      )
+    case _ =>
+      methodDescriptionDAO
+        .findOne(
+          prop[GrpcMethodDescription](_.methodName) === methodName &&
+            prop[GrpcMethodDescription](_.scope) === scope
+        )
   }
 
   private def findStubAndState(
@@ -85,7 +83,8 @@ class GrpcStubResolverImpl(
         0,
         Integer.MAX_VALUE
       )
-    pairs = stubs.map(json -> _)
+    pairs = stubs
+      .map(json -> _)
       .filter { case (json, stub) =>
         stub.requestPredicates(json)
       }
@@ -122,7 +121,9 @@ class GrpcStubResolverImpl(
   private def parseJson(methodDescription: GrpcMethodDescription, bytes: Array[Byte]): URIO[WLD, Option[Json]] =
     ZIO
       .blocking(
-        methodDescription.requestSchema.convertMessageToJson(bytes, methodDescription.requestClass).map(json => json.some)
+        methodDescription.requestSchema
+          .convertMessageToJson(bytes, methodDescription.requestClass)
+          .map(json => json.some)
       )
       .catchSome { case e @ (_: InvalidProtocolBufferException | ParsingFailure(_, _)) =>
         log.infoCause(

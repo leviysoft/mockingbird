@@ -11,7 +11,7 @@ sealed trait GrpcConnectionType extends EnumEntry with UpperSnakecase {
 }
 
 object GrpcConnectionType
-  extends Enum[GrpcConnectionType]
+    extends Enum[GrpcConnectionType]
     with CirceEnum[GrpcConnectionType]
     with BsonEnum[GrpcConnectionType]
     with TapirCodecEnumeratum {

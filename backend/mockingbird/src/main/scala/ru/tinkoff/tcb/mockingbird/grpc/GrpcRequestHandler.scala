@@ -50,7 +50,7 @@ class GrpcRequestHandlerImpl(
         (for {
           context <- ZIO.service[RequestContext]
           grpcServiceName = context.methodDescriptor.getFullMethodName
-          _ <- Tracing.update(_.addToPayload("service" -> grpcServiceName))
+          _                        <- Tracing.update(_.addToPayload("service" -> grpcServiceName))
           methodDescriptionPromise <- Promise.make[StubSearchError, GrpcMethodDescription]
           (proxyStream, fillStream) <- stream
             .mapZIO(findStub(_, grpcServiceName, methodDescriptionPromise))
@@ -63,23 +63,23 @@ class GrpcRequestHandlerImpl(
             .partitionEither { case (stub, data, bytes) =>
               stub.response match {
                 case proxy: GProxyResponse => ZIO.left((proxy, data, bytes))
-                case response => ZIO.right((response, data))
+                case response              => ZIO.right((response, data))
               }
             }
           methodDescription <- methodDescriptionPromise.await
-          _ <- Tracing.update(_.addToPayload("methodDescription" -> methodDescription.id))
+          _                 <- Tracing.update(_.addToPayload("methodDescription" -> methodDescription.id))
           proxyRes = processProxyStream(methodDescription, proxyStream)
           fillRes = fillStream.flatMap { case (stubResponse, data) =>
             processFillStub(methodDescription, stubResponse, data)
           }
-        } yield fillRes.merge(proxyRes)
+        } yield fillRes
+          .merge(proxyRes)
           .zipWithIndex
           .mapZIO {
             case (bytes, ind) if methodDescription.connectionType.haveUnaryOutput && ind > 0 =>
               ZIO.fail(StubSearchError("Found stream response for unary output"))
             case (bytes, _) => ZIO.succeed(bytes)
-          }
-          )
+          })
       )
 
   private def findStub[Out](
@@ -122,7 +122,8 @@ class GrpcRequestHandlerImpl(
         ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get))) *>
           ZIO
             .attemptBlocking(
-              methodDescription.responseSchema.parseFromJson(rdata.substitute(data).useAsIs, methodDescription.responseClass)
+              methodDescription.responseSchema
+                .parseFromJson(rdata.substitute(data).useAsIs, methodDescription.responseClass)
             )
       }
     case FillStreamResponse(rdataArr, delay) =>
@@ -130,7 +131,8 @@ class GrpcRequestHandlerImpl(
         ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get))) *>
           ZIO.foreach(rdataArr) { rdata =>
             ZIO.attemptBlocking(
-              methodDescription.responseSchema.parseFromJson(rdata.substitute(data).useAsIs, methodDescription.responseClass)
+              methodDescription.responseSchema
+                .parseFromJson(rdata.substitute(data).useAsIs, methodDescription.responseClass)
             )
           }
       }
@@ -144,32 +146,36 @@ class GrpcRequestHandlerImpl(
       stream: Stream[Throwable, (GProxyResponse, Json, Array[Byte])],
   ): ZStream[RequestContext & WLD, Throwable, Array[Byte]] =
     ZStream.unwrap(
-      ZIO.foreach(methodDescription.proxyUrl) { proxyUrl =>
+      ZIO
+        .foreach(methodDescription.proxyUrl) { proxyUrl =>
           val bytesStream = stream.mapZIO { case (proxyStub, _, bytes) =>
             ZIO.when(proxyStub.delay.isDefined)(ZIO.sleep(Duration.fromScala(proxyStub.delay.get))).as(bytes)
           }
 
           val binaryResp = methodDescription.connectionType match {
-            case GrpcConnectionType.Unary => stream.mapZIO { case (proxyStub, data, bytes) =>
-              for {
-                _ <- ZIO.foreachDiscard(proxyStub.delay)(delay => ZIO.sleep(Duration.fromScala(delay)))
-                binaryResp <- ProxyCall.unary(proxyUrl, bytes)
-                jsonResp <- methodDescription.responseSchema.convertMessageToJson(binaryResp, methodDescription.responseClass)
-                patchedJsonResp = jsonResp.patch(data, proxyStub.patch).useAsIs
-                patchedBinaryResp = methodDescription.responseSchema.parseFromJson(patchedJsonResp, methodDescription.responseClass)
-              } yield patchedBinaryResp
-            }
-            case GrpcConnectionType.ServerStreaming => bytesStream.flatMap(bytes =>
-              ProxyCall.serverStreaming(proxyUrl, bytes)
-            )
+            case GrpcConnectionType.Unary =>
+              stream.mapZIO { case (proxyStub, data, bytes) =>
+                for {
+                  _          <- ZIO.foreachDiscard(proxyStub.delay)(delay => ZIO.sleep(Duration.fromScala(delay)))
+                  binaryResp <- ProxyCall.unary(proxyUrl, bytes)
+                  jsonResp <- methodDescription.responseSchema
+                    .convertMessageToJson(binaryResp, methodDescription.responseClass)
+                  patchedJsonResp = jsonResp.patch(data, proxyStub.patch).useAsIs
+                  patchedBinaryResp = methodDescription.responseSchema
+                    .parseFromJson(patchedJsonResp, methodDescription.responseClass)
+                } yield patchedBinaryResp
+              }
+            case GrpcConnectionType.ServerStreaming =>
+              bytesStream.flatMap(bytes => ProxyCall.serverStreaming(proxyUrl, bytes))
             case GrpcConnectionType.ClientStreaming => ProxyCall.clientStreaming(proxyUrl, bytesStream)
-            case GrpcConnectionType.BidiStreaming => ProxyCall.bidiStreaming(proxyUrl, bytesStream)
+            case GrpcConnectionType.BidiStreaming   => ProxyCall.bidiStreaming(proxyUrl, bytesStream)
           }
-        ZIO.succeed(binaryResp)
-      }.someOrElseZIO(
-        log.info(s"Proxy url is not defined for ${methodDescription.methodName}") as
-          (ZStream.empty: ZStream[RequestContext & WLD, Throwable, Array[Byte]])
-      )
+          ZIO.succeed(binaryResp)
+        }
+        .someOrElseZIO(
+          log.info(s"Proxy url is not defined for ${methodDescription.methodName}") as
+            (ZStream.empty: ZStream[RequestContext & WLD, Throwable, Array[Byte]])
+        )
     )
 
 }
