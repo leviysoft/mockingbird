@@ -49,7 +49,6 @@ object GrpcStubView {
   def makeFrom(stub: GrpcStub, description: GrpcMethodDescription): GrpcStubView =
     stub
       .into[GrpcStubView]
-      .withFieldConst(_.scope, description.scope)
       .withFieldConst(_.service, description.service)
       .withFieldConst(_.methodName, description.methodName)
       .withFieldConst(_.connectionType, description.connectionType)

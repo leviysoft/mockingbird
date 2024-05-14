@@ -10,11 +10,9 @@ import sttp.tapir.derevo.schema
 
 import ru.tinkoff.tcb.mockingbird.model.ByteArray
 import ru.tinkoff.tcb.mockingbird.model.GrpcConnectionType
-import ru.tinkoff.tcb.mockingbird.model.Scope
 
 @derive(decoder, encoder, schema)
 final case class CreateGrpcMethodDescriptionRequest(
-    scope: Scope,
     service: NonEmptyString,
     methodName: String,
     connectionType: GrpcConnectionType,
