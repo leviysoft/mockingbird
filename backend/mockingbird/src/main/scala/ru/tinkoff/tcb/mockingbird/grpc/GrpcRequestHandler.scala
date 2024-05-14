@@ -16,6 +16,7 @@ import ru.tinkoff.tcb.logging.MDCLogging
 import ru.tinkoff.tcb.mockingbird.api.Tracing
 import ru.tinkoff.tcb.mockingbird.api.WLD
 import ru.tinkoff.tcb.mockingbird.dal.GrpcMethodDescriptionDAO
+import ru.tinkoff.tcb.mockingbird.dal.GrpcStubDAO
 import ru.tinkoff.tcb.mockingbird.dal.PersistentStateDAO
 import ru.tinkoff.tcb.mockingbird.error.StubSearchError
 import ru.tinkoff.tcb.mockingbird.error.ValidationError
@@ -41,6 +42,7 @@ trait GrpcRequestHandler {
 
 class GrpcRequestHandlerImpl(
     stateDAO: PersistentStateDAO[Task],
+    stubDAO: GrpcStubDAO[Task],
     methodDescriptionDAO: GrpcMethodDescriptionDAO[Task],
     stubResolver: GrpcStubResolver,
     implicit val jsSandbox: GraalJsSandbox
@@ -111,6 +113,7 @@ class GrpcRequestHandlerImpl(
             .map(_.keys.map(_.path).filter(_.startsWith("_")).toVector)
             .filter(_.nonEmpty)
             .cata(_.traverse(stateDAO.createIndexForDataField), ZIO.unit)
+          _ <- ZIO.when(stub.scope == Scope.Countdown)(stubDAO.updateById(stub.id, prop[GrpcStub](_.times).inc(-1)))
         } yield (stub, data, bytes)
       }
     } yield response
@@ -185,10 +188,10 @@ class GrpcRequestHandlerImpl(
 
 object GrpcRequestHandlerImpl {
   val live: URLayer[
-    PersistentStateDAO[Task] & GrpcMethodDescriptionDAO[Task] & GrpcStubResolver & GraalJsSandbox,
+    PersistentStateDAO[Task] & GrpcStubDAO[Task] & GrpcMethodDescriptionDAO[Task] & GrpcStubResolver & GraalJsSandbox,
     GrpcRequestHandlerImpl
   ] =
-    ZLayer.fromFunction(new GrpcRequestHandlerImpl(_, _, _, _))
+    ZLayer.fromFunction(new GrpcRequestHandlerImpl(_, _, _, _, _))
 }
 
 object GrpcRequestHandler {
