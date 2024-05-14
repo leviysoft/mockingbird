@@ -10,9 +10,12 @@ import zio.interop.catz.core.*
 import zio.stream.Stream
 import zio.stream.ZStream
 
+import ru.tinkoff.tcb.criteria.*
+import ru.tinkoff.tcb.criteria.Typed.*
 import ru.tinkoff.tcb.logging.MDCLogging
 import ru.tinkoff.tcb.mockingbird.api.Tracing
 import ru.tinkoff.tcb.mockingbird.api.WLD
+import ru.tinkoff.tcb.mockingbird.dal.GrpcMethodDescriptionDAO
 import ru.tinkoff.tcb.mockingbird.dal.PersistentStateDAO
 import ru.tinkoff.tcb.mockingbird.error.StubSearchError
 import ru.tinkoff.tcb.mockingbird.error.ValidationError
@@ -38,6 +41,7 @@ trait GrpcRequestHandler {
 
 class GrpcRequestHandlerImpl(
     stateDAO: PersistentStateDAO[Task],
+    methodDescriptionDAO: GrpcMethodDescriptionDAO[Task],
     stubResolver: GrpcStubResolver,
     implicit val jsSandbox: GraalJsSandbox
 ) extends GrpcRequestHandler {
@@ -50,15 +54,16 @@ class GrpcRequestHandlerImpl(
         (for {
           context <- ZIO.service[RequestContext]
           grpcServiceName = context.methodDescriptor.getFullMethodName
-          _                        <- Tracing.update(_.addToPayload("service" -> grpcServiceName))
-          methodDescriptionPromise <- Promise.make[StubSearchError, GrpcMethodDescription]
+          _ <- Tracing.update(_.addToPayload("service" -> grpcServiceName))
+          methodDescription <- methodDescriptionDAO
+            .findOne(prop[GrpcMethodDescription](_.methodName) === grpcServiceName)
+            .someOrFail(StubSearchError(s"Can't find methodDescription for $grpcServiceName"))
           (proxyStream, fillStream) <- stream
-            .mapZIO(findStub(_, grpcServiceName, methodDescriptionPromise))
+            .mapZIO(findStub(_, methodDescription))
             .collectSome
             .orElseIfEmpty {
               val error = StubSearchError(s"Can't find any stub for $grpcServiceName")
-              ZStream.fromZIO(methodDescriptionPromise.fail(error)) *>
-                ZStream.fail(error)
+              ZStream.fail(error)
             }
             .partitionEither { case (stub, data, bytes) =>
               stub.response match {
@@ -66,8 +71,7 @@ class GrpcRequestHandlerImpl(
                 case response              => ZIO.right((response, data))
               }
             }
-          methodDescription <- methodDescriptionPromise.await
-          _                 <- Tracing.update(_.addToPayload("methodDescription" -> methodDescription.id))
+          _ <- Tracing.update(_.addToPayload("methodDescription" -> methodDescription.id))
           proxyRes = processProxyStream(methodDescription, proxyStream)
           fillRes = fillStream.flatMap { case (stubResponse, data) =>
             processFillStub(methodDescription, stubResponse, data)
@@ -84,11 +88,10 @@ class GrpcRequestHandlerImpl(
 
   private def findStub[Out](
       bytes: Array[Byte],
-      grpcServiceName: String,
-      methodDescriptionPromise: Promise[StubSearchError, GrpcMethodDescription]
+      methodDescription: GrpcMethodDescription
   ): RIO[WLD, Option[(GrpcStub, Json, Array[Byte])]] =
     for {
-      f <- ZIO.succeed(stubResolver.findStubAndState(methodDescriptionPromise, grpcServiceName, bytes) _)
+      f <- ZIO.succeed(stubResolver.findStubAndState(methodDescription, bytes) _)
       stubAndState <- f(Scope.Countdown)
         .filterOrElse(_.isDefined)(f(Scope.Ephemeral).filterOrElse(_.isDefined)(f(Scope.Persistent)))
       response <- ZIO.foreach(stubAndState) { case (stub, req, stateOp) =>
@@ -181,8 +184,11 @@ class GrpcRequestHandlerImpl(
 }
 
 object GrpcRequestHandlerImpl {
-  val live: URLayer[PersistentStateDAO[Task] & GrpcStubResolver & GraalJsSandbox, GrpcRequestHandlerImpl] =
-    ZLayer.fromFunction(new GrpcRequestHandlerImpl(_, _, _))
+  val live: URLayer[
+    PersistentStateDAO[Task] & GrpcMethodDescriptionDAO[Task] & GrpcStubResolver & GraalJsSandbox,
+    GrpcRequestHandlerImpl
+  ] =
+    ZLayer.fromFunction(new GrpcRequestHandlerImpl(_, _, _, _))
 }
 
 object GrpcRequestHandler {

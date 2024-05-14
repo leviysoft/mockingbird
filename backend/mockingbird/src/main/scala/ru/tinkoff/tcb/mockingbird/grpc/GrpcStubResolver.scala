@@ -29,8 +29,7 @@ import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 
 trait GrpcStubResolver {
   def findStubAndState(
-      methodDescriptionPromise: Promise[StubSearchError, GrpcMethodDescription],
-      service: String,
+      methodDescription: GrpcMethodDescription,
       request: Array[Byte]
   )(scope: Scope): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]]
 }
@@ -38,7 +37,6 @@ trait GrpcStubResolver {
 class GrpcStubResolverImpl(
     stubDAO: GrpcStubDAO[Task],
     stateDAO: PersistentStateDAO[Task],
-    methodDescriptionDAO: GrpcMethodDescriptionDAO[Task],
     implicit val jsSandbox: GraalJsSandbox
 ) extends GrpcStubResolver {
 
@@ -47,38 +45,23 @@ class GrpcStubResolverImpl(
   private val log = MDCLogging.`for`[WLD](this)
 
   override def findStubAndState(
-      methodDescriptionPromise: Promise[StubSearchError, GrpcMethodDescription],
-      methodName: String,
+      methodDescription: GrpcMethodDescription,
       request: Array[Byte]
   )(scope: Scope): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]] =
     (for {
-      methodDescription <- getMethodDescription(methodDescriptionPromise, methodName, scope).some
-      json              <- parseJson(methodDescription, request).some
-      res               <- findStubAndState(methodDescription.id, json).some
-      _                 <- methodDescriptionPromise.succeed(methodDescription)
+      json <- parseJson(methodDescription, request).some
+      res  <- findStubAndState(methodDescription.id, scope, json).some
     } yield res).unsome
-
-  private def getMethodDescription(
-      methodDescriptionPromise: Promise[StubSearchError, GrpcMethodDescription],
-      methodName: String,
-      scope: Scope,
-  ): Task[Option[GrpcMethodDescription]] = methodDescriptionPromise.poll.flatMap {
-    case Some(io) => io.asSome
-    case _ =>
-      methodDescriptionDAO
-        .findOne(
-          prop[GrpcMethodDescription](_.methodName) === methodName &&
-            prop[GrpcMethodDescription](_.scope) === scope
-        )
-  }
 
   private def findStubAndState(
       methodDescriptionId: SID[GrpcMethodDescription],
+      scope: Scope,
       json: Json
   ): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]] = for {
     stubs <- stubDAO
       .findChunk(
         prop[GrpcStub](_.methodDescriptionId) === methodDescriptionId &&
+          prop[GrpcStub](_.scope) === scope &&
           prop[GrpcStub](_.times) > Option(refineMV[NonNegative](0)),
         0,
         Integer.MAX_VALUE
@@ -155,16 +138,12 @@ class GrpcStubResolverImpl(
 }
 
 object GrpcStubResolverImpl {
-  val live: URLayer[
-    GrpcStubDAO[Task] & PersistentStateDAO[Task] & GrpcMethodDescriptionDAO[Task] & GraalJsSandbox,
-    GrpcStubResolver
-  ] =
+  val live: URLayer[GrpcStubDAO[Task] & PersistentStateDAO[Task] & GraalJsSandbox, GrpcStubResolver] =
     ZLayer {
       for {
         gsd       <- ZIO.service[GrpcStubDAO[Task]]
         psd       <- ZIO.service[PersistentStateDAO[Task]]
-        gmdd      <- ZIO.service[GrpcMethodDescriptionDAO[Task]]
         jsSandbox <- ZIO.service[GraalJsSandbox]
-      } yield new GrpcStubResolverImpl(gsd, psd, gmdd, jsSandbox)
+      } yield new GrpcStubResolverImpl(gsd, psd, jsSandbox)
     }
 }

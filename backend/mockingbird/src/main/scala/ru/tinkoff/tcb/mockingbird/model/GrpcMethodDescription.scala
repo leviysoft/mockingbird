@@ -26,7 +26,6 @@ final case class GrpcMethodDescription(
     service: NonEmptyString,
     methodName: String,
     connectionType: GrpcConnectionType,
-    scope: Scope,
     proxyUrl: Option[String],
     requestClass: String,
     requestSchema: GrpcProtoDefinition,

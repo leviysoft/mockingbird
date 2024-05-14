@@ -35,6 +35,7 @@ import ru.tinkoff.tcb.validation.Rule
 final case class GrpcStub(
     @BsonKey("_id") id: SID[GrpcStub],
     methodDescriptionId: SID[GrpcMethodDescription],
+    scope: Scope,
     created: Instant,
     times: Option[NonNegInt],
     name: NonEmptyString,

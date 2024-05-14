@@ -403,15 +403,9 @@ final class AdminApiHandler(
       labels: List[String]
   ): RIO[WLD, Vector[GrpcStubView]] =
     for {
-      methodQueryDoc <- ZIO
-        .foreach(service.flatMap(refineV[NonEmpty](_).toOption)) { service =>
-          ZIO.succeed(prop[GrpcMethodDescription](_.service) === service)
-        }
-        .someOrElse(Expression.empty: Expression[GrpcMethodDescription])
-      serviceDescriptions <- grpcMethodDescriptionDAO.findChunk(methodQueryDoc, 0, Integer.MAX_VALUE)
-      notCountdownScope = serviceDescriptions.filterNot(_.scope == Scope.Countdown).map(_.id)
-      scopeQuery = prop[GrpcStub](_.methodDescriptionId).in(notCountdownScope) || prop[GrpcStub](_.times) > Option(
-        refineMV[NonNegative](0)
+      scopeQuery <- ZIO.succeed(
+        prop[GrpcStub](_.scope) =/= Scope.Countdown.asInstanceOf[Scope] ||
+          prop[GrpcStub](_.times) > Option(refineMV[NonNegative](0))
       )
       nameDescriptions <- ZIO
         .foreach(query) { query =>
@@ -427,14 +421,23 @@ final class AdminApiHandler(
             prop[GrpcStub](_.methodDescriptionId).in(nameDescriptions.map(_.id))
           scopeQuery && q
         } else scopeQuery
+      refService = service.flatMap(refineV[NonEmpty](_).toOption)
+      serviceQuery <- if (refService.isDefined) {
+        grpcMethodDescriptionDAO
+          .findChunk(prop[GrpcMethodDescription](_.service) === refService.get, 0, Integer.MAX_VALUE)
+          .map(methodDescriptions =>
+            nameQuery && prop[GrpcStub](_.methodDescriptionId).in(methodDescriptions.map(_.id))
+          )
+      } else ZIO.succeed(nameQuery)
       queryDoc =
         if (labels.nonEmpty) {
-          nameQuery && (prop[GrpcStub](_.labels).containsAll(labels))
-        } else nameQuery
+          serviceQuery && (prop[GrpcStub](_.labels).containsAll(labels))
+        } else serviceQuery
       stubs <- grpcStubDAO.findChunk(queryDoc, page.getOrElse(0) * 20, 20, prop[GrpcStub](_.created).sort(Desc))
-      descriptions = (serviceDescriptions ++ nameDescriptions).toSet
+      methodDescriptions <- grpcMethodDescriptionDAO
+        .findChunk(prop[GrpcMethodDescription] (_.id).in(stubs.map(_.methodDescriptionId).toSet), 0, 20)
       res = stubs.flatMap(stub =>
-        descriptions
+        methodDescriptions
           .find(_.id == stub.methodDescriptionId)
           .map(description => GrpcStubView.makeFrom(stub, description))
           .toList
@@ -466,10 +469,7 @@ final class AdminApiHandler(
       _   <- GrpcMethodDescription.getRootFields(responsePkg.resolve(body.responseClass), responseTypes)
       now <- ZIO.clockWith(_.instant)
       methodDescription <- grpcMethodDescriptionDAO
-        .findOne(
-          prop[GrpcMethodDescription](_.methodName) === body.methodName &&
-            prop[GrpcMethodDescription](_.scope) === body.scope
-        )
+        .findOne(prop[GrpcMethodDescription](_.methodName) === body.methodName)
         .someOrElseZIO {
           val methodDescription = GrpcMethodDescription.fromCreateRequest(body, requestSchema, responseSchema, now)
           grpcMethodDescriptionDAO.insert(methodDescription).as(methodDescription)
@@ -743,7 +743,9 @@ final class AdminApiHandler(
       query: Option[String],
       labels: List[String]
   ): RIO[WLD, Vector[GrpcStub]] = {
-    var queryDoc = prop[GrpcStub](_.times).notExists || prop[GrpcStub](_.times) > Option(refineMV[NonNegative](0))
+    var queryDoc = prop[GrpcStub](_.scope) =/= Scope.Countdown.asInstanceOf[Scope] || prop[GrpcStub](_.times) > Option(
+      refineMV[NonNegative](0)
+    )
     if (query.isDefined) {
       val qs = query.get
       val q = prop[GrpcStub](_.id) === SID[GrpcStub](qs).asInstanceOf[SID[GrpcStub]] ||
@@ -760,13 +762,10 @@ final class AdminApiHandler(
   def createGrpcStubV4(body: CreateGrpcStubRequestV4): RIO[WLD, OperationResult[SID[GrpcStub]]] =
     for {
       methodDescription <- grpcMethodDescriptionDAO
-        .findOne(
-          prop[GrpcMethodDescription](_.methodName) === body.methodName &&
-            prop[GrpcMethodDescription](_.scope) === body.scope
-        )
+        .findOne(prop[GrpcMethodDescription](_.methodName) === body.methodName)
         .someOrFail {
           ValidationError(
-            Vector(s"Method description for ${body.methodName} and ${body.scope} does not exist")
+            Vector(s"Method description for ${body.methodName} does not exist")
           )
         }
       requestPkg   = GrpcMethodDescription.PackagePrefix(methodDescription.requestSchema)
@@ -862,15 +861,12 @@ final class AdminApiHandler(
       responseSchema <- protobufSchemaResolver.parseDefinitionFrom(responseSchemaBytes)
       responsePkg   = GrpcMethodDescription.PackagePrefix(responseSchema)
       responseTypes = GrpcMethodDescription.makeDictTypes(responsePkg, responseSchema.schemas).toMap
-      _ <- GrpcMethodDescription.getRootFields(responsePkg.resolve(body.responseClass), responseTypes)
-      candidate <- grpcMethodDescriptionDAO.findOne(
-        prop[GrpcMethodDescription](_.methodName) === body.methodName &&
-          prop[GrpcMethodDescription](_.scope) === body.scope
-      )
+      _         <- GrpcMethodDescription.getRootFields(responsePkg.resolve(body.responseClass), responseTypes)
+      candidate <- grpcMethodDescriptionDAO.findOne(prop[GrpcMethodDescription](_.methodName) === body.methodName)
       _ <- ZIO.foreachDiscard(candidate)(existed =>
         ZIO.fail(
           DuplicationError(
-            "There exists a method description with the same scope",
+            "There exists a method description that matches completely by name",
             Vector(existed.id)
           )
         )
