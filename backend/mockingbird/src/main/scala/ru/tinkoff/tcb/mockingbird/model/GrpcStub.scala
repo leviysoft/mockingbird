@@ -10,6 +10,8 @@ import eu.timepit.refined.collection.*
 import eu.timepit.refined.numeric.*
 import io.circe.Json
 import io.circe.refined.*
+import io.estatico.newtype.macros.newtype
+import io.estatico.newtype.ops.*
 import mouse.boolean.*
 import sttp.tapir.codec.refined.*
 import sttp.tapir.derevo.schema
@@ -54,24 +56,25 @@ final case class GrpcStub(
 object GrpcStub {
   private val indexRegex = "\\[([\\d]+)\\]".r
 
-  def getRootFields(className: String, definition: GrpcProtoDefinition): IO[ValidationError, List[GrpcField]] = {
-    val name = definition.`package`.map(p => className.stripPrefix(p ++ ".")).getOrElse(className)
+  def getRootFields(
+      name: NormalizedTypeName,
+      types: Map[NormalizedTypeName, GrpcRootMessage] = Map.empty
+  ): IO[ValidationError, List[GrpcField]] =
     for {
-      rootMessage <- ZIO.getOrFailWith(ValidationError(Vector(s"Root message '$className' not found")))(
-        definition.schemas.find(_.name == name)
+      rootMessage <- ZIO.getOrFailWith(ValidationError(Vector(s"Root message '${name}' not found")))(
+        types.get(name)
       )
       rootFields <- rootMessage match {
         case GrpcMessageSchema(_, fields, oneofs, _, _) =>
           ZIO.succeed(fields ++ oneofs.map(_.flatMap(_.options)).getOrElse(List.empty))
         case GrpcEnumSchema(_, _) =>
-          ZIO.fail(ValidationError(Vector(s"Enum cannot be a root message, but '$className' is")))
+          ZIO.fail(ValidationError(Vector(s"Enum cannot be a root message, but '${name}' is")))
       }
     } yield rootFields
-  }
 
   def validateOptics(
       optic: JsonOptic,
-      definition: GrpcProtoDefinition,
+      types: Map[NormalizedTypeName, GrpcRootMessage],
       rootFields: List[GrpcField]
   ): IO[ValidationError, Unit] = for {
     fields <- Ref.make(rootFields)
@@ -84,12 +87,11 @@ object GrpcStub {
       case Right(fieldName) =>
         for {
           fs <- fields.get
-          pkgPrefix = definition.`package`.map(p => s".$p.").getOrElse(".")
           field <- ZIO.getOrFailWith(ValidationError(Vector(s"Field $fieldName not found")))(fs.find(_.name == fieldName))
           _ <-
             if (primitiveTypes.values.exists(_ == field.typeName)) fields.set(List.empty)
             else
-              definition.schemas.find(_.name == field.typeName.stripPrefix(pkgPrefix)) match {
+              types.get(NormalizedTypeName(field.typeName)) match {
                 case Some(message) =>
                   message match {
                     case GrpcMessageSchema(_, fs, oneofs, _, _) =>
@@ -106,6 +108,35 @@ object GrpcStub {
         } yield ()
     }
   } yield ()
+
+  @newtype class PackagePrefix private (val asString: String) {
+    def :+(nested: String): PackagePrefix =
+      (asString ++ nested.dropWhile(_ == '.') ++ ".").coerce
+    def resolve(n: String): NormalizedTypeName =
+      if (n.startsWith(".")) NormalizedTypeName(n)
+      else if (n.startsWith(asString.drop(1))) NormalizedTypeName(s".$n")
+      else NormalizedTypeName(s"$asString$n")
+  }
+  object PackagePrefix {
+    def apply(definition: GrpcProtoDefinition): PackagePrefix =
+      definition.`package`.map(p => s".$p.").getOrElse(".").coerce
+  }
+
+  @newtype class NormalizedTypeName private (val asString: String)
+  object NormalizedTypeName {
+    def apply(name: String): NormalizedTypeName =
+      s".${name.dropWhile(_ == '.')}".coerce
+  }
+
+  def makeDictTypes(p: PackagePrefix, ms: Seq[GrpcRootMessage]): Vector[(NormalizedTypeName, GrpcRootMessage)] =
+    ms.foldLeft(Vector.empty[(NormalizedTypeName, GrpcRootMessage)]) {
+      case (b, m @ GrpcMessageSchema(name, _, _, nested, nestedEnums)) =>
+        (b :+ (p.resolve(name) -> m)) ++
+          makeDictTypes(p :+ name, nested.getOrElse(Nil)) ++
+          makeDictTypes(p :+ name, nestedEnums.getOrElse(Nil))
+      case (b, m @ GrpcEnumSchema(name, _)) =>
+        b :+ (p.resolve(name) -> m)
+    }
 
   private val stateNonEmpty: Rule[GrpcStub] =
     _.state.exists(_.isEmpty).valueOrZero(Vector("The state predicate cannot be empty"))

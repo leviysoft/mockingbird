@@ -433,9 +433,11 @@ final class AdminApiHandler(
         )
       )
       requestSchema <- protobufSchemaResolver.parseDefinitionFrom(requestSchemaBytes)
-      rootFields    <- GrpcStub.getRootFields(body.requestClass, requestSchema)
+      requestPkg   = GrpcStub.PackagePrefix(requestSchema)
+      requestTypes = GrpcStub.makeDictTypes(requestPkg, requestSchema.schemas).toMap
+      rootFields <- GrpcStub.getRootFields(requestPkg.resolve(body.requestClass), requestTypes)
       _ <- ZIO.foreachParDiscard(body.requestPredicates.definition.keys)(
-        GrpcStub.validateOptics(_, requestSchema, rootFields)
+        GrpcStub.validateOptics(_, requestTypes, rootFields)
       )
       candidates0 <- grpcStubDAO.findChunk(
         prop[GrpcStub](_.methodName) === body.methodName,
@@ -456,8 +458,10 @@ final class AdminApiHandler(
         )
       )
       responseSchema <- protobufSchemaResolver.parseDefinitionFrom(responseSchemaBytes)
-      _              <- GrpcStub.getRootFields(body.responseClass, responseSchema)
-      now            <- ZIO.clockWith(_.instant)
+      responsePkg   = GrpcStub.PackagePrefix(responseSchema)
+      responseTypes = GrpcStub.makeDictTypes(responsePkg, responseSchema.schemas).toMap
+      _   <- GrpcStub.getRootFields(responsePkg.resolve(body.responseClass), responseTypes)
+      now <- ZIO.clockWith(_.instant)
       stub = body
         .into[GrpcStub]
         .withFieldComputed(_.id, _ => SID.random[GrpcStub])
