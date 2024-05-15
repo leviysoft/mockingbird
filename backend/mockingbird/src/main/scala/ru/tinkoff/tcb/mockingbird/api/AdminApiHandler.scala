@@ -887,10 +887,20 @@ final class AdminApiHandler(
     grpcMethodDescriptionDAO.findById(id)
 
   def deleteGrpcMethodDescription(id: SID[GrpcMethodDescription]): RIO[WLD, OperationResult[String]] =
-    ZIO.ifZIO(grpcMethodDescriptionDAO.deleteById(id).map(_ > 0))(
-      ZIO.succeed(OperationResult("success")),
-      ZIO.succeed(OperationResult("nothing deleted"))
+  for {
+    stub <- grpcStubDAO.findOne(prop[GrpcStub](_.methodDescriptionId) === id)
+    _ <- ZIO.when(stub.isDefined)(
+      ZIO.fail(
+        ValidationError(
+          Vector("There exists a stub or stubs for method description. First, delete the stubs")
+        )
+      )
     )
+    res <- ZIO.ifZIO(grpcMethodDescriptionDAO.deleteById(id).map(_ > 0))(
+      ZIO.succeed(OperationResult[String]("success")),
+      ZIO.succeed(OperationResult[String]("nothing deleted"))
+    )
+  } yield res
 }
 
 object AdminApiHandler {
