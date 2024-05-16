@@ -422,20 +422,19 @@ final class AdminApiHandler(
           scopeQuery && q
         } else scopeQuery
       refService = service.flatMap(refineV[NonEmpty](_).toOption)
-      serviceQuery <- if (refService.isDefined) {
-        grpcMethodDescriptionDAO
-          .findChunk(prop[GrpcMethodDescription](_.service) === refService.get, 0, Integer.MAX_VALUE)
-          .map(methodDescriptions =>
-            nameQuery && prop[GrpcStub](_.methodDescriptionId).in(methodDescriptions.map(_.id))
-          )
-      } else ZIO.succeed(nameQuery)
+      serviceQuery <-
+        if (refService.isDefined) {
+          grpcMethodDescriptionDAO
+            .findChunk(prop[GrpcMethodDescription](_.service) === refService.get, 0, Integer.MAX_VALUE)
+            .map(methodDescriptions => nameQuery && prop[GrpcStub](_.methodDescriptionId).in(methodDescriptions.map(_.id)))
+        } else ZIO.succeed(nameQuery)
       queryDoc =
         if (labels.nonEmpty) {
           serviceQuery && (prop[GrpcStub](_.labels).containsAll(labels))
         } else serviceQuery
       stubs <- grpcStubDAO.findChunk(queryDoc, page.getOrElse(0) * 20, 20, prop[GrpcStub](_.created).sort(Desc))
       methodDescriptions <- grpcMethodDescriptionDAO
-        .findChunk(prop[GrpcMethodDescription] (_.id).in(stubs.map(_.methodDescriptionId).toSet), 0, 20)
+        .findChunk(prop[GrpcMethodDescription](_.id).in(stubs.map(_.methodDescriptionId).toSet), 0, 20)
       res = stubs.flatMap(stub =>
         methodDescriptions
           .find(_.id == stub.methodDescriptionId)
@@ -762,10 +761,10 @@ final class AdminApiHandler(
   def createGrpcStubV4(body: CreateGrpcStubRequestV4): RIO[WLD, OperationResult[SID[GrpcStub]]] =
     for {
       methodDescription <- grpcMethodDescriptionDAO
-        .findOne(prop[GrpcMethodDescription](_.methodName) === body.methodName)
+        .findById(body.methodDescriptionId)
         .someOrFail {
           ValidationError(
-            Vector(s"Method description for ${body.methodName} does not exist")
+            Vector(s"Method description for ${body.methodDescriptionId} does not exist")
           )
         }
       requestPkg   = GrpcMethodDescription.PackagePrefix(methodDescription.requestSchema)
@@ -805,6 +804,53 @@ final class AdminApiHandler(
       res <- grpcStubDAO.insert(stub)
       _   <- labelDAO.ensureLabels(methodDescription.service.value, stub.labels.to(Vector))
     } yield if (res > 0) OperationResult("success", stub.id) else OperationResult("nothing inserted")
+
+  def updateGrpcStubV4(
+      id: SID[GrpcStub],
+      body: UpdateGrpcStubRequestV4
+  ): RIO[WLD, OperationResult[SID[GrpcStub]]] =
+    for {
+      methodDescription <- grpcMethodDescriptionDAO.findById(body.methodDescriptionId).someOrFail(
+        ValidationError(
+          Vector(s"Can't find a method description ${body.methodDescriptionId}")
+        )
+      )
+      requestPkg   = GrpcMethodDescription.PackagePrefix(methodDescription.requestSchema)
+      requestTypes = GrpcMethodDescription.makeDictTypes(requestPkg, methodDescription.requestSchema.schemas).toMap
+      rootFields <- GrpcMethodDescription.getRootFields(requestPkg.resolve(methodDescription.requestClass), requestTypes)
+      _ <- ZIO.foreachParDiscard(body.requestPredicates.definition.keys)(
+        GrpcStub.validateOptics(_, requestTypes, rootFields)
+      )
+      candidates0 <- grpcStubDAO.findChunk(
+        where(_._id =/= id) && prop[GrpcStub](_.methodDescriptionId) === methodDescription.id,
+        0,
+        Integer.MAX_VALUE
+      )
+      candidates = candidates0
+        .filter(_.requestPredicates.definition == body.requestPredicates.definition)
+        .filter(_.state == body.state)
+      _ <- ZIO.when(candidates.nonEmpty)(
+        ZIO.fail(
+          DuplicationError(
+            "There exists a stub or stubs that match completely in terms of conditions and type",
+            candidates.map(_.id)
+          )
+        )
+      )
+      now <- ZIO.clockWith(_.instant)
+      stubPatch = body
+        .into[GrpcStubPatch]
+        .withFieldConst(_.id, id)
+        .transform
+      stub = stubPatch
+        .into[GrpcStub]
+        .withFieldConst(_.created, now)
+        .transform
+      vr = GrpcStub.validationRules(stub)
+      _ <- ZIO.when(vr.nonEmpty)(ZIO.fail(ValidationError(vr)))
+      res <- grpcStubDAO.patch(stubPatch)
+      _ <- labelDAO.ensureLabels(methodDescription.service.value, stub.labels.to(Vector))
+    } yield if (res.successful) OperationResult("success", stub.id) else OperationResult("nothing updated")
 
   def getGrpcStubV4(id: SID[GrpcStub]): RIO[WLD, Option[GrpcStub]] =
     grpcStubDAO.findById(id)
@@ -862,19 +908,23 @@ final class AdminApiHandler(
       responsePkg   = GrpcMethodDescription.PackagePrefix(responseSchema)
       responseTypes = GrpcMethodDescription.makeDictTypes(responsePkg, responseSchema.schemas).toMap
       _         <- GrpcMethodDescription.getRootFields(responsePkg.resolve(body.responseClass), responseTypes)
-      candidate <- grpcMethodDescriptionDAO.findOne(prop[GrpcMethodDescription](_.methodName) === body.methodName)
-      _ <- ZIO.foreachDiscard(candidate)(existed =>
+      candidates <- grpcMethodDescriptionDAO.findChunk(
+        where(_._id =/= body.id) &&
+          prop[GrpcMethodDescription](_.methodName) === body.methodName,
+        0,
+        Int.MaxValue
+      )
+      _ <- ZIO.when(candidates.nonEmpty)(
         ZIO.fail(
           DuplicationError(
-            "There exists a method description that matches completely by name",
-            Vector(existed.id)
+            "There exists a method description that matches completely by method name",
+            candidates.map(_.id)
           )
         )
       )
       now <- ZIO.clockWith(_.instant)
       methodDescription = body
         .into[GrpcMethodDescription]
-        .withFieldConst(_.id, SID.random[GrpcMethodDescription])
         .withFieldConst(_.requestSchema, requestSchema)
         .withFieldConst(_.responseSchema, responseSchema)
         .withFieldConst(_.created, now)
@@ -883,24 +933,68 @@ final class AdminApiHandler(
     } yield if (res > 0) OperationResult("success", methodDescription.id) else OperationResult("nothing inserted")
   }
 
+  def updateGrpcMethodDescription(
+      id: SID[GrpcMethodDescription],
+      body: UpdateGrpcMethodDescriptionRequest
+  ): RIO[WLD, OperationResult[SID[GrpcMethodDescription]]] =
+    for {
+      service <- serviceDAO.findById(body.service)
+      _ <- ZIO.when(service.isEmpty)(
+        ZIO.fail(
+          ValidationError(
+            Vector(s"Can't find a service for ${body.methodName}")
+          )
+        )
+      )
+      candidates <- grpcMethodDescriptionDAO.findChunk(
+        where(_._id =/= id) &&
+          prop[GrpcMethodDescription](_.methodName) === body.methodName,
+        0,
+        Int.MaxValue
+      )
+      _ <- ZIO.when(candidates.nonEmpty)(
+        ZIO.fail(
+          DuplicationError(
+            "There exists a method description that match completely in terms of method name",
+            candidates.map(_.id)
+          )
+        )
+      )
+      requestSchema <- protobufSchemaResolver.parseDefinitionFrom(body.requestCodecs.asArray)
+      requestPkg   = GrpcMethodDescription.PackagePrefix(requestSchema)
+      requestTypes = GrpcMethodDescription.makeDictTypes(requestPkg, requestSchema.schemas).toMap
+      rootFields     <- GrpcMethodDescription.getRootFields(requestPkg.resolve(body.requestClass), requestTypes)
+      responseSchema <- protobufSchemaResolver.parseDefinitionFrom(body.responseCodecs.asArray)
+      responsePkg   = GrpcMethodDescription.PackagePrefix(responseSchema)
+      responseTypes = GrpcMethodDescription.makeDictTypes(responsePkg, responseSchema.schemas).toMap
+      _ <- GrpcMethodDescription.getRootFields(responsePkg.resolve(body.responseClass), responseTypes)
+      methodDescriptionPatch = body
+        .into[GrpcMethodDescriptionPatch]
+        .withFieldConst(_.id, id)
+        .withFieldConst(_.requestSchema, requestSchema)
+        .withFieldConst(_.responseSchema, responseSchema)
+        .transform
+      res <- grpcMethodDescriptionDAO.patch(methodDescriptionPatch)
+    } yield if (res.successful) OperationResult("success", id) else OperationResult("nothing updated")
+
   def getGrpcMethodDescription(id: SID[GrpcMethodDescription]): RIO[WLD, Option[GrpcMethodDescription]] =
     grpcMethodDescriptionDAO.findById(id)
 
   def deleteGrpcMethodDescription(id: SID[GrpcMethodDescription]): RIO[WLD, OperationResult[String]] =
-  for {
-    stub <- grpcStubDAO.findOne(prop[GrpcStub](_.methodDescriptionId) === id)
-    _ <- ZIO.when(stub.isDefined)(
-      ZIO.fail(
-        ValidationError(
-          Vector("There exists a stub or stubs for method description. First, delete the stubs")
+    for {
+      stub <- grpcStubDAO.findOne(prop[GrpcStub](_.methodDescriptionId) === id)
+      _ <- ZIO.when(stub.isDefined)(
+        ZIO.fail(
+          ValidationError(
+            Vector("There exists a stub or stubs for method description. First, delete the stubs")
+          )
         )
       )
-    )
-    res <- ZIO.ifZIO(grpcMethodDescriptionDAO.deleteById(id).map(_ > 0))(
-      ZIO.succeed(OperationResult[String]("success")),
-      ZIO.succeed(OperationResult[String]("nothing deleted"))
-    )
-  } yield res
+      res <- ZIO.ifZIO(grpcMethodDescriptionDAO.deleteById(id).map(_ > 0))(
+        ZIO.succeed(OperationResult[String]("success")),
+        ZIO.succeed(OperationResult[String]("nothing deleted"))
+      )
+    } yield res
 }
 
 object AdminApiHandler {

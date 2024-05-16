@@ -12,7 +12,6 @@ import ru.tinkoff.tcb.criteria.*
 import ru.tinkoff.tcb.criteria.Typed.*
 import ru.tinkoff.tcb.logging.MDCLogging
 import ru.tinkoff.tcb.mockingbird.api.WLD
-import ru.tinkoff.tcb.mockingbird.dal.GrpcMethodDescriptionDAO
 import ru.tinkoff.tcb.mockingbird.dal.GrpcStubDAO
 import ru.tinkoff.tcb.mockingbird.dal.PersistentStateDAO
 import ru.tinkoff.tcb.mockingbird.error.StubSearchError

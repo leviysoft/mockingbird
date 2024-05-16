@@ -54,10 +54,12 @@ final class AdminHttp(config: ServerConfig, handler: AdminApiHandler) {
     tryScenario,
     fetchGrpcStubsV4,
     createGrpcStubV4,
+    updateGrpcStubV4,
     getGrpcStubV4,
     deleteGrpcStubV4,
     fetchGrpcMethodDescriptions,
     createGrpcMethodDescription,
+    updateGrpcMethodDescription,
     getGrpcMethodDescription,
     deleteGrpcMethodDescription,
   )
@@ -102,10 +104,12 @@ final class AdminHttp(config: ServerConfig, handler: AdminApiHandler) {
     tryScenario.zServerLogic(handler.tryResolveScenario),
     fetchGrpcStubsV4.zServerLogic((handler.fetchGrpcStubsV4 _).tupled),
     createGrpcStubV4.zServerLogic(handler.createGrpcStubV4),
+    updateGrpcStubV4.zServerLogic((handler.updateGrpcStubV4 _).tupled),
     getGrpcStubV4.zServerLogic(handler.getGrpcStubV4),
     deleteGrpcStubV4.zServerLogic(handler.deleteGrpcStubV4),
     fetchGrpcMethodDescriptions.zServerLogic((handler.fetchGrpcMethodDescriptions _).tupled),
     createGrpcMethodDescription.zServerLogic(handler.createGrpcMethodDescription),
+    updateGrpcMethodDescription.zServerLogic((handler.updateGrpcMethodDescription _).tupled),
     getGrpcMethodDescription.zServerLogic(handler.getGrpcMethodDescription),
     deleteGrpcMethodDescription.zServerLogic(handler.deleteGrpcMethodDescription)
   )
