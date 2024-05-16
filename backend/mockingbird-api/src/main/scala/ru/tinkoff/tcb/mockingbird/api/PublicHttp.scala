@@ -85,7 +85,7 @@ final class PublicHttp(handler: PublicApiHandler) {
       method: HttpMethod,
       path: String,
       headers: Map[String, String],
-      query: Map[String, String],
+      query: Seq[(String, Seq[String])],
       body: RequestBody
   ): ZIO[WLD, Throwable, (List[Header], StatusCode, HttpStubResponse)] =
     handler

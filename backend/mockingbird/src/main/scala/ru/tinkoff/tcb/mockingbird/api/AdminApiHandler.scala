@@ -6,8 +6,6 @@ import eu.timepit.refined.*
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.*
 import eu.timepit.refined.numeric.*
-import io.circe.Json
-import io.circe.parser.parse
 import io.scalaland.chimney.dsl.*
 import kantan.xpath.*
 import kantan.xpath.implicits.*
@@ -191,10 +189,10 @@ final class AdminApiHandler(
       method: HttpMethod,
       path: String,
       headers: Map[String, String],
-      query: Map[String, String],
+      query: Seq[(String, Seq[String])],
       body: RequestBody
   ): RIO[WLD, SID[HttpStub]] = {
-    val queryObject = Json.fromFields(query.view.mapValues(s => parse(s).getOrElse(Json.fromString(s))))
+    val queryObject = queryParamsToJsonObject(query)
     val f           = stubResolver.findStubAndState(method, path, headers, queryObject, body) _
 
     for {

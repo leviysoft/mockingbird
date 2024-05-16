@@ -7,7 +7,6 @@ import scala.xml.Node
 import eu.timepit.refined.*
 import eu.timepit.refined.api.Refined
 import io.circe.Json
-import io.circe.parser.parse
 import io.circe.syntax.*
 import io.estatico.newtype.ops.*
 import mouse.boolean.*
@@ -16,6 +15,7 @@ import sttp.client4.{Backend as SttpBackend, *}
 import sttp.client4.circe.*
 import sttp.model.HeaderNames
 import sttp.model.Method
+import sttp.model.QueryParams
 import zio.interop.catz.core.*
 
 import ru.tinkoff.tcb.criteria.*
@@ -72,10 +72,10 @@ final class PublicApiHandler(
       method: HttpMethod,
       path: String,
       headers: Map[String, String],
-      query: Map[String, String],
+      query: Seq[(String, Seq[String])],
       body: RequestBody
   ): RIO[WLD, HttpStubResponse] = {
-    val queryObject = Json.fromFields(query.view.mapValues(s => parse(s).getOrElse(Json.fromString(s))))
+    val queryObject = queryParamsToJsonObject(query)
     val f           = resolver.findStubAndState(method, path, headers, queryObject, body) _
 
     for {
@@ -166,10 +166,10 @@ final class PublicApiHandler(
   private def proxyRequest(
       method: HttpMethod,
       headers: Map[String, String],
-      query: Map[String, String],
+      query: Seq[(String, Seq[String])],
       body: RequestBody
   )(uri: String, delay: Option[FiniteDuration], timeout: Option[FiniteDuration]): RIO[WLD, HttpStubResponse] = {
-    val requestUri = uri"$uri".pipe(query.foldLeft(_) { case (u, (key, value)) => u.addParam(key, value) })
+    val requestUri = uri"$uri".addParams(QueryParams(query))
     for {
       _ <- log.debug(s"Received headers: ${headers.keys.mkString(", ")}")
       // Potentially, we want to pass the request and response as is. If the client wants this
@@ -218,7 +218,7 @@ final class PublicApiHandler(
   private def jsonProxyRequest(
       method: HttpMethod,
       headers: Map[String, String],
-      query: Map[String, String],
+      query: Seq[(String, Seq[String])],
       body: RequestBody,
       data: Json
   )(
@@ -227,9 +227,7 @@ final class PublicApiHandler(
       delay: Option[FiniteDuration],
       timeout: Option[FiniteDuration]
   ): RIO[WLD, HttpStubResponse] = {
-    val requestUri = uri"$uri".pipe(query.foldLeft(_) { case (u, (key, value)) =>
-      u.addParam(key, value)
-    })
+    val requestUri = uri"$uri".addParams(QueryParams(query))
     for {
       _ <- log.debug(s"Received headers: ${headers.keys.mkString(", ")}")
       req = basicRequest
@@ -280,7 +278,7 @@ final class PublicApiHandler(
   private def xmlProxyRequest(
       method: HttpMethod,
       headers: Map[String, String],
-      query: Map[String, String],
+      query: Seq[(String, Seq[String])],
       body: RequestBody,
       jData: Json,
       xData: Node
@@ -290,9 +288,7 @@ final class PublicApiHandler(
       delay: Option[FiniteDuration],
       timeout: Option[FiniteDuration]
   ): RIO[WLD, HttpStubResponse] = {
-    val requestUri = uri"$uri".pipe(query.foldLeft(_) { case (u, (key, value)) =>
-      u.addParam(key, value)
-    })
+    val requestUri = uri"$uri".addParams(QueryParams(query))
     for {
       _ <- log.debug(s"Received headers: ${headers.keys.mkString(", ")}")
       req = basicRequest
