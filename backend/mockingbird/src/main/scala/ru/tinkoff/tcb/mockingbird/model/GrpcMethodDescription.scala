@@ -22,6 +22,7 @@ import ru.tinkoff.tcb.utils.id.SID
 @derive(bsonDecoder, bsonEncoder, decoder, encoder, schema)
 final case class GrpcMethodDescription(
     @BsonKey("_id") id: SID[GrpcMethodDescription],
+    description: String,
     created: Instant,
     service: NonEmptyString,
     methodName: String,
@@ -60,6 +61,7 @@ object GrpcMethodDescription {
     request
       .into[GrpcMethodDescription]
       .withFieldConst(_.id, SID.random[GrpcMethodDescription])
+      .withFieldConst(_.description, "")
       .withFieldConst(_.connectionType, GrpcConnectionType.Unary)
       .withFieldConst(_.proxyUrl, proxyUrl)
       .withFieldConst(_.requestSchema, requestSchema)

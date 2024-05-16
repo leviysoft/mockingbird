@@ -298,21 +298,36 @@ package object admin {
       .in(query[Option[String]]("query"))
       .in(query[List[String]]("labels"))
       .out(jsonBody[Vector[GrpcStub]])
+      .summary("Get grpc stubs list")
 
   val createGrpcStubV4: Endpoint[Unit, CreateGrpcStubRequestV4, Throwable, OperationResult[SID[GrpcStub]], Any] =
     grpcStubBaseV4.post
       .in(jsonBody[CreateGrpcStubRequestV4])
       .out(jsonBody[OperationResult[SID[GrpcStub]]])
+      .summary("Create grpc stub")
+
+
+  val updateGrpcStubV4
+  : Endpoint[Unit, (SID[GrpcStub], UpdateGrpcStubRequestV4), Throwable, OperationResult[
+    SID[GrpcStub]
+  ], Any] =
+    grpcStubBaseV4.patch
+      .in(path[SID[GrpcStub]].name("id"))
+      .in(jsonBody[UpdateGrpcStubRequestV4])
+      .out(jsonBody[OperationResult[SID[GrpcStub]]])
+      .summary("Update grpc stub by id")
 
   val getGrpcStubV4: Endpoint[Unit, SID[GrpcStub], Throwable, Option[GrpcStub], Any] =
     grpcStubBaseV4.get
       .in(path[SID[GrpcStub]].name("id"))
       .out(jsonBody[Option[GrpcStub]])
+      .summary("Get grpc stub by id")
 
   val deleteGrpcStubV4: Endpoint[Unit, SID[GrpcStub], Throwable, OperationResult[String], Any] =
     grpcStubBaseV4.delete
       .in(path[SID[GrpcStub]].name("id"))
       .out(jsonBody[OperationResult[String]])
+      .summary("Delete grpc stub by id")
 
   private val grpcMethodDescriptionBase = basicV4.in("grpcMethodDescription")
 
@@ -323,6 +338,7 @@ package object admin {
       .in(query[Option[String]]("query"))
       .in(query[Option[String]]("service"))
       .out(jsonBody[Vector[GrpcMethodDescription]])
+      .summary("Get grpc method descriptions list")
 
   val createGrpcMethodDescription: Endpoint[Unit, CreateGrpcMethodDescriptionRequest, Throwable, OperationResult[
     SID[GrpcMethodDescription]
@@ -330,14 +346,27 @@ package object admin {
     grpcMethodDescriptionBase.post
       .in(jsonBody[CreateGrpcMethodDescriptionRequest])
       .out(jsonBody[OperationResult[SID[GrpcMethodDescription]]])
+      .summary("Create grpc method description")
+
+  val updateGrpcMethodDescription
+  : Endpoint[Unit, (SID[GrpcMethodDescription], UpdateGrpcMethodDescriptionRequest), Throwable, OperationResult[
+    SID[GrpcMethodDescription]
+  ], Any] =
+    grpcMethodDescriptionBase.patch
+      .in(path[SID[GrpcMethodDescription]].name("id"))
+      .in(jsonBody[UpdateGrpcMethodDescriptionRequest])
+      .out(jsonBody[OperationResult[SID[GrpcMethodDescription]]])
+      .summary("Update grpc method description by id")
 
   val getGrpcMethodDescription: Endpoint[Unit, SID[GrpcMethodDescription], Throwable, Option[GrpcMethodDescription], Any] =
     grpcMethodDescriptionBase.get
       .in(path[SID[GrpcMethodDescription]].name("id"))
       .out(jsonBody[Option[GrpcMethodDescription]])
+      .summary("Get grpc method description by id")
 
   val deleteGrpcMethodDescription: Endpoint[Unit, SID[GrpcMethodDescription], Throwable, OperationResult[String], Any] =
     grpcMethodDescriptionBase.delete
       .in(path[SID[GrpcMethodDescription]].name("id"))
       .out(jsonBody[OperationResult[String]])
+      .summary("Delete grpc method description by id")
 }
