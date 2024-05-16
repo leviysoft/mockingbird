@@ -9,8 +9,8 @@ import ru.tinkoff.tcb.mockingbird.model.HttpMethod
 import ru.tinkoff.tcb.mockingbird.model.RequestBody
 
 package object input {
-  private[api] type ExecInput  = (HttpMethod, String, Map[String, String], Map[String, String])
-  private[api] type ExecInputB = (HttpMethod, String, Map[String, String], Map[String, String], RequestBody)
+  private[api] type ExecInput  = (HttpMethod, String, Map[String, String], Seq[(String, Seq[String])])
+  private[api] type ExecInputB = (HttpMethod, String, Map[String, String], Seq[(String, Seq[String])], RequestBody)
 
   private[api] val execInput: EndpointInput[ExecInput] =
     extractFromRequest(_.method)
@@ -20,7 +20,5 @@ package object input {
         extractFromRequest(_.headers)
           .map(_.map(h => h.name -> h.value).to(Map))(_.map { case (name, value) => Header(name, value) }.to(Seq))
       )
-      .and(
-        queryParams.map(_.toMap)(QueryParams.fromMap)
-      )
+      .and(queryParams.map(_.ps)(QueryParams(_)))
 }
