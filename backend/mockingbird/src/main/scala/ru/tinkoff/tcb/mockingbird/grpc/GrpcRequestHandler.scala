@@ -89,7 +89,7 @@ class GrpcRequestHandlerImpl(
           result <- ClientCalls
             .unaryCall(
               channel,
-              Method.byteMethod(context.methodDescriptor.getServiceName, context.methodDescriptor.getFullMethodName),
+              Method.byteMethod(context.methodDescriptor.getServiceName, context.methodDescriptor.getBareMethodName),
               CallOptions.DEFAULT,
               context.metadata,
               bytes
