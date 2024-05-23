@@ -433,8 +433,7 @@ final class AdminApiHandler(
           serviceQuery && (prop[GrpcStub](_.labels).containsAll(labels))
         } else serviceQuery
       stubs <- grpcStubDAO.findChunk(queryDoc, page.getOrElse(0) * 20, 20, prop[GrpcStub](_.created).sort(Desc))
-      methodDescriptions <- grpcMethodDescriptionDAO
-        .findChunk(prop[GrpcMethodDescription](_.id).in(stubs.map(_.methodDescriptionId).toSet), 0, 20)
+      methodDescriptions <- grpcMethodDescriptionDAO.findByIds(stubs.map(_.methodDescriptionId)*)
       res = stubs.flatMap(stub =>
         methodDescriptions
           .find(_.id == stub.methodDescriptionId)

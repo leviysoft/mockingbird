@@ -13,7 +13,6 @@ import io.scalaland.chimney.dsl.TransformationOps
 import sttp.tapir.codec.refined.*
 import sttp.tapir.derevo.schema
 
-import ru.tinkoff.tcb.bson.annotation.BsonKey
 import ru.tinkoff.tcb.predicatedsl.Keyword
 import ru.tinkoff.tcb.predicatedsl.json.JsonPredicate
 import ru.tinkoff.tcb.protocol.json.*
@@ -23,16 +22,13 @@ import ru.tinkoff.tcb.utils.id.SID
 
 @derive(encoder, decoder, schema)
 final case class GrpcStubView(
-    @BsonKey("_id") id: SID[GrpcStub],
-    methodDescriptionId: SID[GrpcMethodDescription],
+    id: SID[GrpcStub],
     scope: Scope,
     created: Instant,
     service: NonEmptyString,
     times: Option[NonNegInt],
     methodName: String,
     name: NonEmptyString,
-    connectionType: GrpcConnectionType,
-    proxyUrl: Option[String],
     requestSchema: GrpcProtoDefinition,
     requestClass: String,
     responseSchema: GrpcProtoDefinition,
@@ -51,8 +47,6 @@ object GrpcStubView {
       .into[GrpcStubView]
       .withFieldConst(_.service, description.service)
       .withFieldConst(_.methodName, description.methodName)
-      .withFieldConst(_.connectionType, description.connectionType)
-      .withFieldConst(_.proxyUrl, description.proxyUrl)
       .withFieldConst(_.requestSchema, description.requestSchema)
       .withFieldConst(_.requestClass, description.requestClass)
       .withFieldConst(_.responseSchema, description.responseSchema)
