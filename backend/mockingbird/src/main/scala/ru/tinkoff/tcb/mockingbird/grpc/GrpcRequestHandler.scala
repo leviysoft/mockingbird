@@ -31,6 +31,7 @@ import ru.tinkoff.tcb.mockingbird.model.GrpcStub
 import ru.tinkoff.tcb.mockingbird.model.GrpcStubResponse
 import ru.tinkoff.tcb.mockingbird.model.NoBodyResponse
 import ru.tinkoff.tcb.mockingbird.model.PersistentState
+import ru.tinkoff.tcb.mockingbird.model.RepeatResponse
 import ru.tinkoff.tcb.mockingbird.model.Scope
 import ru.tinkoff.tcb.protocol.log.*
 import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
@@ -132,18 +133,32 @@ class GrpcRequestHandlerImpl(
                 .parseFromJson(rdata.substitute(data).useAsIs, methodDescription.responseClass)
             )
       }
-    case FillStreamResponse(rdataArr, delay) =>
-      ZStream.fromIterableZIO {
-        ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get))) *>
-          ZIO.foreach(rdataArr) { rdata =>
-            ZIO.attemptBlocking(
-              methodDescription.responseSchema
-                .parseFromJson(rdata.substitute(data).useAsIs, methodDescription.responseClass)
-            )
-          }
-      }
+    case FillStreamResponse(rdataArr, delay, streamDelay) =>
+      ZStream
+        .fromIterableZIO {
+          ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get))) *>
+            ZIO.foreach(rdataArr) { rdata =>
+              ZIO.attemptBlocking(
+                methodDescription.responseSchema
+                  .parseFromJson(rdata.substitute(data).useAsIs, methodDescription.responseClass)
+              )
+            }
+        }
+        .tap(_ => ZIO.when(streamDelay.isDefined)(ZIO.sleep(Duration.fromScala(streamDelay.get))))
     case NoBodyResponse(delay) =>
       ZStream.fromZIO(ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get)))).drain
+    case RepeatResponse(rdata, repeats, delay, streamDelay) =>
+      ZStream
+        .unwrap {
+          ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get))) *>
+            ZIO
+              .attemptBlocking(
+                methodDescription.responseSchema
+                  .parseFromJson(rdata.substitute(data).useAsIs, methodDescription.responseClass)
+              )
+              .map(bytes => ZStream.repeatWithSchedule(bytes, Schedule.recurs(repeats.value - 1)))
+        }
+        .tap(_ => ZIO.when(streamDelay.isDefined)(ZIO.sleep(Duration.fromScala(streamDelay.get))))
     case _: GProxyResponse => ZStream.fail(ValidationError(Vector("Found proxy-stub during processing fill-stubs")))
   }
 

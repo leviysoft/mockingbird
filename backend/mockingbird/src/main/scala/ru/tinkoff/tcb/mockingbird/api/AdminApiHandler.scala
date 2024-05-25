@@ -809,11 +809,13 @@ final class AdminApiHandler(
       body: UpdateGrpcStubRequestV4
   ): RIO[WLD, OperationResult[SID[GrpcStub]]] =
     for {
-      methodDescription <- grpcMethodDescriptionDAO.findById(body.methodDescriptionId).someOrFail(
-        ValidationError(
-          Vector(s"Can't find a method description ${body.methodDescriptionId}")
+      methodDescription <- grpcMethodDescriptionDAO
+        .findById(body.methodDescriptionId)
+        .someOrFail(
+          ValidationError(
+            Vector(s"Can't find a method description ${body.methodDescriptionId}")
+          )
         )
-      )
       requestPkg   = GrpcMethodDescription.PackagePrefix(methodDescription.requestSchema)
       requestTypes = GrpcMethodDescription.makeDictTypes(requestPkg, methodDescription.requestSchema.schemas).toMap
       rootFields <- GrpcMethodDescription.getRootFields(requestPkg.resolve(methodDescription.requestClass), requestTypes)
@@ -846,9 +848,9 @@ final class AdminApiHandler(
         .withFieldConst(_.created, now)
         .transform
       vr = GrpcStub.validationRules(stub)
-      _ <- ZIO.when(vr.nonEmpty)(ZIO.fail(ValidationError(vr)))
+      _   <- ZIO.when(vr.nonEmpty)(ZIO.fail(ValidationError(vr)))
       res <- grpcStubDAO.patch(stubPatch)
-      _ <- labelDAO.ensureLabels(methodDescription.service.value, stub.labels.to(Vector))
+      _   <- labelDAO.ensureLabels(methodDescription.service.value, stub.labels.to(Vector))
     } yield if (res.successful) OperationResult("success", stub.id) else OperationResult("nothing updated")
 
   def getGrpcStubV4(id: SID[GrpcStub]): RIO[WLD, Option[GrpcStub]] =

@@ -306,9 +306,7 @@ package object admin {
       .out(jsonBody[OperationResult[SID[GrpcStub]]])
       .summary("Create grpc stub")
 
-
-  val updateGrpcStubV4
-  : Endpoint[Unit, (SID[GrpcStub], UpdateGrpcStubRequestV4), Throwable, OperationResult[
+  val updateGrpcStubV4: Endpoint[Unit, (SID[GrpcStub], UpdateGrpcStubRequestV4), Throwable, OperationResult[
     SID[GrpcStub]
   ], Any] =
     grpcStubBaseV4.patch
@@ -349,9 +347,9 @@ package object admin {
       .summary("Create grpc method description")
 
   val updateGrpcMethodDescription
-  : Endpoint[Unit, (SID[GrpcMethodDescription], UpdateGrpcMethodDescriptionRequest), Throwable, OperationResult[
-    SID[GrpcMethodDescription]
-  ], Any] =
+      : Endpoint[Unit, (SID[GrpcMethodDescription], UpdateGrpcMethodDescriptionRequest), Throwable, OperationResult[
+        SID[GrpcMethodDescription]
+      ], Any] =
     grpcMethodDescriptionBase.patch
       .in(path[SID[GrpcMethodDescription]].name("id"))
       .in(jsonBody[UpdateGrpcMethodDescriptionRequest])
