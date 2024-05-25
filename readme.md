@@ -10,6 +10,8 @@ mockingbird - a service for emulating REST services and queue-interface services
 
 [Working with Message Brokers](message-brokers.md)
 
+[Working with gRPC](grpc-configuration.md)
+
 [Readme in Russian](readme_ru.md)
 
 ## Important note
@@ -598,41 +600,7 @@ Workflow:
 
 ### Configuration of GRPC Stubs
 
-```javascript
-{
-    "name": "Sample stub",
-    "scope": "..",
-    "service": "test",
-    "methodName": "/pos-loans/api/cl/get_partner_lead_info",
-    "seed": {
-        "integrationId": "%{randomString(20)}" //example
-    },
-    "state": {
-      // Predicates
-    },
-    "requestCodecs": "..", //request schema proto-file in base64
-    "requestClass": "..", //name of the request type from proto file
-    "responseCodecs": "..", //response schema proto-file in base64
-    "responseClass": "..", //name of the response type from proto file
-    "requestPredicates": {
-        "meta.id": {"==": 42}
-    },
-    "persist": {
-      // State modifications
-    },
-    "response": {
-        "mode": "fill",
-        "data": {
-            "code": 0,
-            "credit_amount": 802400,
-            "credit_term": 120,
-            "interest_rate": 13.9,
-            "partnum": "CL3.15"
-        },
-        "delay": "1 second"
-    }
-}
-```
+[Working with gRPC](grpc-configuration.md)
 
 ## Emulating Bus Services
 
