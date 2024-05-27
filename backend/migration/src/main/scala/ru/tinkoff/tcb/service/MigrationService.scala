@@ -67,7 +67,7 @@ final class MigrationServiceImpl(
           )
           proxyUrl = grpcStubsByMethodName.collectFirst {
             case stub if GProxyResponse.prism.getOption(stub.response).isDefined =>
-              (GProxyResponse.prism >> GProxyResponse.endpoint).getOption(stub.response)
+              (GProxyResponse.prism >> GProxyResponse.endpoint).getOption(stub.response).flatten
           }.flatten
           methodDescriptionOpt <- grpcMethodDescriptionDAO
             .findOne(

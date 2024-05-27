@@ -908,7 +908,7 @@ final class AdminApiHandler(
       responseSchema <- protobufSchemaResolver.parseDefinitionFrom(responseSchemaBytes)
       responsePkg   = GrpcMethodDescription.PackagePrefix(responseSchema)
       responseTypes = GrpcMethodDescription.makeDictTypes(responsePkg, responseSchema.schemas).toMap
-      _         <- GrpcMethodDescription.getRootFields(responsePkg.resolve(body.responseClass), responseTypes)
+      _ <- GrpcMethodDescription.getRootFields(responsePkg.resolve(body.responseClass), responseTypes)
       candidates <- grpcMethodDescriptionDAO.findChunk(
         where(_._id =/= body.id) &&
           prop[GrpcMethodDescription](_.methodName) === body.methodName,

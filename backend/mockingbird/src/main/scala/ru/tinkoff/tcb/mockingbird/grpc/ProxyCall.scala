@@ -27,7 +27,7 @@ object ProxyCall {
           result <- ClientCalls
             .unaryCall(
               channel,
-              Method.byteMethod(context.methodDescriptor.getServiceName, context.methodDescriptor.getFullMethodName),
+              Method.byteMethod(context.methodDescriptor.getServiceName, context.methodDescriptor.getBareMethodName),
               CallOptions.DEFAULT,
               context.metadata,
               bytes
@@ -52,7 +52,7 @@ object ProxyCall {
           result = ClientCalls
             .serverStreamingCall(
               channel,
-              Method.byteMethod(context.methodDescriptor.getServiceName, context.methodDescriptor.getFullMethodName),
+              Method.byteMethod(context.methodDescriptor.getServiceName, context.methodDescriptor.getBareMethodName),
               CallOptions.DEFAULT,
               context.metadata,
               bytes,
@@ -77,7 +77,7 @@ object ProxyCall {
           result <- ClientCalls
             .clientStreamingCall(
               channel,
-              Method.byteMethod(context.methodDescriptor.getServiceName, context.methodDescriptor.getFullMethodName),
+              Method.byteMethod(context.methodDescriptor.getServiceName, context.methodDescriptor.getBareMethodName),
               CallOptions.DEFAULT,
               context.metadata,
               stream.mapError(e => new StatusException(Status.fromThrowable(e)))
@@ -102,7 +102,7 @@ object ProxyCall {
           result = ClientCalls
             .bidiCall(
               channel,
-              Method.byteMethod(context.methodDescriptor.getServiceName, context.methodDescriptor.getFullMethodName),
+              Method.byteMethod(context.methodDescriptor.getServiceName, context.methodDescriptor.getBareMethodName),
               CallOptions.DEFAULT,
               context.metadata,
               stream.mapError(e => new StatusException(Status.fromThrowable(e)))
