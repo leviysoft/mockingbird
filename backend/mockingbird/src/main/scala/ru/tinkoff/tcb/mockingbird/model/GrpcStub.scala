@@ -9,8 +9,6 @@ import eu.timepit.refined.types.numeric.NonNegInt
 import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Json
 import io.circe.refined.*
-import io.estatico.newtype.macros.newtype
-import io.estatico.newtype.ops.*
 import mouse.boolean.*
 import sttp.tapir.codec.refined.*
 import sttp.tapir.derevo.schema
@@ -22,6 +20,7 @@ import ru.tinkoff.tcb.bson.derivation.bsonEncoder
 import ru.tinkoff.tcb.circe.bson.*
 import ru.tinkoff.tcb.mockingbird.error.ValidationError
 import ru.tinkoff.tcb.mockingbird.grpc.GrpcExractor.primitiveTypes
+import ru.tinkoff.tcb.mockingbird.model.GrpcMethodDescription.NormalizedTypeName
 import ru.tinkoff.tcb.predicatedsl.Keyword
 import ru.tinkoff.tcb.predicatedsl.json.JsonPredicate
 import ru.tinkoff.tcb.protocol.bson.*
@@ -49,22 +48,6 @@ final case class GrpcStub(
 
 object GrpcStub {
   private val indexRegex = "\\[([\\d]+)\\]".r
-
-  def getRootFields(
-      name: NormalizedTypeName,
-      types: Map[NormalizedTypeName, GrpcRootMessage] = Map.empty
-  ): IO[ValidationError, List[GrpcField]] =
-    for {
-      rootMessage <- ZIO.getOrFailWith(ValidationError(Vector(s"Root message '${name}' not found")))(
-        types.get(name)
-      )
-      rootFields <- rootMessage match {
-        case GrpcMessageSchema(_, fields, oneofs, _, _) =>
-          ZIO.succeed(fields ++ oneofs.map(_.flatMap(_.options)).getOrElse(List.empty))
-        case GrpcEnumSchema(_, _) =>
-          ZIO.fail(ValidationError(Vector(s"Enum cannot be a root message, but '${name}' is")))
-      }
-    } yield rootFields
 
   def validateOptics(
       optic: JsonOptic,
@@ -102,35 +85,6 @@ object GrpcStub {
         } yield ()
     }
   } yield ()
-
-  @newtype class PackagePrefix private (val asString: String) {
-    def :+(nested: String): PackagePrefix =
-      (asString ++ nested.dropWhile(_ == '.') ++ ".").coerce
-    def resolve(n: String): NormalizedTypeName =
-      if (n.startsWith(".")) NormalizedTypeName(n)
-      else if (n.startsWith(asString.drop(1))) NormalizedTypeName(s".$n")
-      else NormalizedTypeName(s"$asString$n")
-  }
-  object PackagePrefix {
-    def apply(definition: GrpcProtoDefinition): PackagePrefix =
-      definition.`package`.map(p => s".$p.").getOrElse(".").coerce
-  }
-
-  @newtype class NormalizedTypeName private (val asString: String)
-  object NormalizedTypeName {
-    def apply(name: String): NormalizedTypeName =
-      s".${name.dropWhile(_ == '.')}".coerce
-  }
-
-  def makeDictTypes(p: PackagePrefix, ms: Seq[GrpcRootMessage]): Vector[(NormalizedTypeName, GrpcRootMessage)] =
-    ms.foldLeft(Vector.empty[(NormalizedTypeName, GrpcRootMessage)]) {
-      case (b, m @ GrpcMessageSchema(name, _, _, nested, nestedEnums)) =>
-        (b :+ (p.resolve(name) -> m)) ++
-          makeDictTypes(p :+ name, nested.getOrElse(Nil)) ++
-          makeDictTypes(p :+ name, nestedEnums.getOrElse(Nil))
-      case (b, m @ GrpcEnumSchema(name, _)) =>
-        b :+ (p.resolve(name) -> m)
-    }
 
   private val stateNonEmpty: Rule[GrpcStub] =
     _.state.exists(_.isEmpty).valueOrZero(Vector("The state predicate cannot be empty"))

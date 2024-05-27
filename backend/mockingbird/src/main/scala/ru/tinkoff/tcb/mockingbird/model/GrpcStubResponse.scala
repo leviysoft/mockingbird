@@ -66,6 +66,7 @@ final case class FillStreamResponse(
 
 @derive(decoder, encoder)
 final case class GProxyResponse(
+    endpoint: Option[String],
     patch: Map[JsonOptic, String],
     delay: Option[FiniteDuration]
 ) extends GrpcStubResponse
@@ -73,7 +74,7 @@ final case class GProxyResponse(
 object GProxyResponse {
   val prism: Subset[GrpcStubResponse, GProxyResponse] = GenSubset[GrpcStubResponse, GProxyResponse]
 
-  val endpoint: Contains[GProxyResponse, String] = GenContains[GProxyResponse](_.endpoint)
+  val endpoint: Contains[GProxyResponse, Option[String]] = GenContains[GProxyResponse](_.endpoint)
 }
 
 @derive(decoder, encoder)
