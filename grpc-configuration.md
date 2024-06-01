@@ -187,6 +187,6 @@ But for stream output the connection to the proxy will be established for every 
 
 For newly created stubs v2 will be created unary method description. But existed stubs will fail requests.
 To migrate already existing stubs set mongo uri in `application.conf` and run the migration script `GrpcStubV4Migration.scala` in `migration` module.
-Method description information will be taken from the randomly stub with the highest priority of the scope (persistent, ephemeral, countdown).
+Method description information will be taken from the random stub with the highest priority of the scope (persistent, ephemeral, countdown).
 
 

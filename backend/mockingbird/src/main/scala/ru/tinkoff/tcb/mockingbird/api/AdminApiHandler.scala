@@ -479,7 +479,9 @@ final class AdminApiHandler(
         responseSchema
       )
       candidates0 <- grpcStubDAO.findChunk(
-        prop[GrpcStub](_.methodDescriptionId) === methodDescription.id,
+        prop[GrpcStub](_.methodDescriptionId) === methodDescription.id &&
+          prop[GrpcStub](_.scope) === body.scope &&
+          prop[GrpcStub](_.times) > Option(refineMV[NonNegative](0)),
         0,
         Integer.MAX_VALUE
       )
@@ -776,7 +778,9 @@ final class AdminApiHandler(
       responseTypes = GrpcMethodDescription.makeDictTypes(responsePkg, methodDescription.responseSchema.schemas).toMap
       _ <- GrpcMethodDescription.getRootFields(responsePkg.resolve(methodDescription.responseClass), responseTypes)
       candidates0 <- grpcStubDAO.findChunk(
-        prop[GrpcStub](_.methodDescriptionId) === methodDescription.id,
+        prop[GrpcStub](_.methodDescriptionId) === methodDescription.id &&
+          prop[GrpcStub](_.scope) === body.scope &&
+          prop[GrpcStub](_.times) > Option(refineMV[NonNegative](0)),
         0,
         Integer.MAX_VALUE
       )
@@ -964,7 +968,7 @@ final class AdminApiHandler(
       requestSchema <- protobufSchemaResolver.parseDefinitionFrom(body.requestCodecs.asArray)
       requestPkg   = GrpcMethodDescription.PackagePrefix(requestSchema)
       requestTypes = GrpcMethodDescription.makeDictTypes(requestPkg, requestSchema.schemas).toMap
-      rootFields     <- GrpcMethodDescription.getRootFields(requestPkg.resolve(body.requestClass), requestTypes)
+      _              <- GrpcMethodDescription.getRootFields(requestPkg.resolve(body.requestClass), requestTypes)
       responseSchema <- protobufSchemaResolver.parseDefinitionFrom(body.responseCodecs.asArray)
       responsePkg   = GrpcMethodDescription.PackagePrefix(responseSchema)
       responseTypes = GrpcMethodDescription.makeDictTypes(responsePkg, responseSchema.schemas).toMap
@@ -983,7 +987,10 @@ final class AdminApiHandler(
 
   def deleteGrpcMethodDescription(id: SID[GrpcMethodDescription]): RIO[WLD, OperationResult[String]] =
     for {
-      stub <- grpcStubDAO.findOne(prop[GrpcStub](_.methodDescriptionId) === id)
+      stub <- grpcStubDAO.findOne(
+        prop[GrpcStub](_.methodDescriptionId) === id &&
+          prop[GrpcStub](_.times) > Option(refineMV[NonNegative](0))
+      )
       _ <- ZIO.when(stub.isDefined)(
         ZIO.fail(
           ValidationError(
