@@ -4,9 +4,8 @@ import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
 import eu.timepit.refined.*
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.*
-import eu.timepit.refined.numeric.NonNegative
+import eu.timepit.refined.types.numeric.NonNegInt
+import eu.timepit.refined.types.string.NonEmptyString
 import io.circe.Json
 import io.circe.refined.*
 import sttp.tapir.Schema.annotations.description
@@ -32,10 +31,10 @@ final case class CreateScenarioRequest(
     @description("Scope")
     scope: Scope,
     @description("The number of possible triggers. Only relevant for scope=countdown")
-    times: Option[Int Refined NonNegative] = Some(refineMV(1)),
-    service: String Refined NonEmpty,
+    times: Option[NonNegInt] = Some(refineMV(1)),
+    service: NonEmptyString,
     @description("Scenario name (shown in logs, handy for debugging)")
-    name: String Refined NonEmpty,
+    name: NonEmptyString,
     @description("Event source name")
     source: SID[SourceConfiguration],
     seed: Option[Json],

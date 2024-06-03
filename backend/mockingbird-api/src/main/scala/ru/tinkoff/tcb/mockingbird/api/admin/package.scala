@@ -1,32 +1,21 @@
 package ru.tinkoff.tcb.mockingbird.api
 
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.*
+import eu.timepit.refined.types.string.NonEmptyString
 import sttp.tapir.*
 import sttp.tapir.codec.refined.*
 import sttp.tapir.json.circe.*
 
 import ru.tinkoff.tcb.mockingbird.api.input.*
-import ru.tinkoff.tcb.mockingbird.api.request.CreateDestinationConfigurationRequest
-import ru.tinkoff.tcb.mockingbird.api.request.CreateGrpcStubRequest
-import ru.tinkoff.tcb.mockingbird.api.request.CreateScenarioRequest
-import ru.tinkoff.tcb.mockingbird.api.request.CreateServiceRequest
-import ru.tinkoff.tcb.mockingbird.api.request.CreateSourceConfigurationRequest
-import ru.tinkoff.tcb.mockingbird.api.request.CreateStubRequest
-import ru.tinkoff.tcb.mockingbird.api.request.ScenarioResolveRequest
-import ru.tinkoff.tcb.mockingbird.api.request.SearchRequest
-import ru.tinkoff.tcb.mockingbird.api.request.UpdateDestinationConfigurationRequest
-import ru.tinkoff.tcb.mockingbird.api.request.UpdateScenarioRequest
-import ru.tinkoff.tcb.mockingbird.api.request.UpdateSourceConfigurationRequest
-import ru.tinkoff.tcb.mockingbird.api.request.UpdateStubRequest
-import ru.tinkoff.tcb.mockingbird.api.request.XPathTestRequest
+import ru.tinkoff.tcb.mockingbird.api.request.*
 import ru.tinkoff.tcb.mockingbird.api.response.DestinationDTO
 import ru.tinkoff.tcb.mockingbird.api.response.OperationResult
 import ru.tinkoff.tcb.mockingbird.api.response.SourceDTO
 import ru.tinkoff.tcb.mockingbird.codec.*
 import ru.tinkoff.tcb.mockingbird.model.AbsentRequestBody
 import ru.tinkoff.tcb.mockingbird.model.DestinationConfiguration
+import ru.tinkoff.tcb.mockingbird.model.GrpcMethodDescription
 import ru.tinkoff.tcb.mockingbird.model.GrpcStub
+import ru.tinkoff.tcb.mockingbird.model.GrpcStubView
 import ru.tinkoff.tcb.mockingbird.model.HttpStub
 import ru.tinkoff.tcb.mockingbird.model.PersistentState
 import ru.tinkoff.tcb.mockingbird.model.RequestBody
@@ -200,23 +189,23 @@ package object admin {
   private val grpcStubBase = basicV2.in("grpcStub")
 
   val fetchGrpcStubs
-      : Endpoint[Unit, (Option[Int], Option[String], Option[String], List[String]), Throwable, Vector[GrpcStub], Any] =
+      : Endpoint[Unit, (Option[Int], Option[String], Option[String], List[String]), Throwable, Vector[GrpcStubView], Any] =
     grpcStubBase.get
       .in(query[Option[Int]]("page"))
       .in(query[Option[String]]("query"))
       .in(query[Option[String]]("service"))
       .in(query[List[String]]("labels"))
-      .out(jsonBody[Vector[GrpcStub]])
+      .out(jsonBody[Vector[GrpcStubView]])
 
   val createGrpcStub: Endpoint[Unit, CreateGrpcStubRequest, Throwable, OperationResult[SID[GrpcStub]], Any] =
     grpcStubBase.post
       .in(jsonBody[CreateGrpcStubRequest])
       .out(jsonBody[OperationResult[SID[GrpcStub]]])
 
-  val getGrpcStub: Endpoint[Unit, SID[GrpcStub], Throwable, Option[GrpcStub], Any] =
+  val getGrpcStub: Endpoint[Unit, SID[GrpcStub], Throwable, Option[GrpcStubView], Any] =
     grpcStubBase.get
       .in(path[SID[GrpcStub]].name("id"))
-      .out(jsonBody[Option[GrpcStub]])
+      .out(jsonBody[Option[GrpcStubView]])
 
   val deleteGrpcStub: Endpoint[Unit, SID[GrpcStub], Throwable, OperationResult[String], Any] =
     grpcStubBase.delete
@@ -227,9 +216,9 @@ package object admin {
 
   private val sourceConfBase = basicV3.in("source")
 
-  val fetchSourceConfigurations: Endpoint[Unit, Option[String Refined NonEmpty], Throwable, Vector[SourceDTO], Any] =
+  val fetchSourceConfigurations: Endpoint[Unit, Option[NonEmptyString], Throwable, Vector[SourceDTO], Any] =
     sourceConfBase.get
-      .in(query[Option[String Refined NonEmpty]]("service"))
+      .in(query[Option[NonEmptyString]]("service"))
       .out(jsonBody[Vector[SourceDTO]])
       .summary("Get source configurations")
 
@@ -264,10 +253,9 @@ package object admin {
 
   private val destinationConfBase = basicV3.in("destination")
 
-  val fetchDestinationConfigurations
-      : Endpoint[Unit, Option[String Refined NonEmpty], Throwable, Vector[DestinationDTO], Any] =
+  val fetchDestinationConfigurations: Endpoint[Unit, Option[NonEmptyString], Throwable, Vector[DestinationDTO], Any] =
     destinationConfBase.get
-      .in(query[Option[String Refined NonEmpty]]("service"))
+      .in(query[Option[NonEmptyString]]("service"))
       .out(jsonBody[Vector[DestinationDTO]])
       .summary("Get destinations list")
 
@@ -299,4 +287,84 @@ package object admin {
       .in(jsonBody[UpdateDestinationConfigurationRequest])
       .out(jsonBody[OperationResult[SID[DestinationConfiguration]]])
       .summary("Update destination by name")
+
+  private val basicV4 = basic.in("v4").tag("setup v4")
+
+  private val grpcStubBaseV4 = basicV4.in("grpcStub")
+
+  val fetchGrpcStubsV4: Endpoint[Unit, (Option[Int], Option[String], List[String]), Throwable, Vector[GrpcStub], Any] =
+    grpcStubBaseV4.get
+      .in(query[Option[Int]]("page"))
+      .in(query[Option[String]]("query"))
+      .in(query[List[String]]("labels"))
+      .out(jsonBody[Vector[GrpcStub]])
+      .summary("Get grpc stubs list")
+
+  val createGrpcStubV4: Endpoint[Unit, CreateGrpcStubRequestV4, Throwable, OperationResult[SID[GrpcStub]], Any] =
+    grpcStubBaseV4.post
+      .in(jsonBody[CreateGrpcStubRequestV4])
+      .out(jsonBody[OperationResult[SID[GrpcStub]]])
+      .summary("Create grpc stub")
+
+  val updateGrpcStubV4: Endpoint[Unit, (SID[GrpcStub], UpdateGrpcStubRequestV4), Throwable, OperationResult[
+    SID[GrpcStub]
+  ], Any] =
+    grpcStubBaseV4.patch
+      .in(path[SID[GrpcStub]].name("id"))
+      .in(jsonBody[UpdateGrpcStubRequestV4])
+      .out(jsonBody[OperationResult[SID[GrpcStub]]])
+      .summary("Update grpc stub by id")
+
+  val getGrpcStubV4: Endpoint[Unit, SID[GrpcStub], Throwable, Option[GrpcStub], Any] =
+    grpcStubBaseV4.get
+      .in(path[SID[GrpcStub]].name("id"))
+      .out(jsonBody[Option[GrpcStub]])
+      .summary("Get grpc stub by id")
+
+  val deleteGrpcStubV4: Endpoint[Unit, SID[GrpcStub], Throwable, OperationResult[String], Any] =
+    grpcStubBaseV4.delete
+      .in(path[SID[GrpcStub]].name("id"))
+      .out(jsonBody[OperationResult[String]])
+      .summary("Delete grpc stub by id")
+
+  private val grpcMethodDescriptionBase = basicV4.in("grpcMethodDescription")
+
+  val fetchGrpcMethodDescriptions
+      : Endpoint[Unit, (Option[Int], Option[String], Option[String]), Throwable, Vector[GrpcMethodDescription], Any] =
+    grpcMethodDescriptionBase.get
+      .in(query[Option[Int]]("page"))
+      .in(query[Option[String]]("query"))
+      .in(query[Option[String]]("service"))
+      .out(jsonBody[Vector[GrpcMethodDescription]])
+      .summary("Get grpc method descriptions list")
+
+  val createGrpcMethodDescription: Endpoint[Unit, CreateGrpcMethodDescriptionRequest, Throwable, OperationResult[
+    SID[GrpcMethodDescription]
+  ], Any] =
+    grpcMethodDescriptionBase.post
+      .in(jsonBody[CreateGrpcMethodDescriptionRequest])
+      .out(jsonBody[OperationResult[SID[GrpcMethodDescription]]])
+      .summary("Create grpc method description")
+
+  val updateGrpcMethodDescription
+      : Endpoint[Unit, (SID[GrpcMethodDescription], UpdateGrpcMethodDescriptionRequest), Throwable, OperationResult[
+        SID[GrpcMethodDescription]
+      ], Any] =
+    grpcMethodDescriptionBase.patch
+      .in(path[SID[GrpcMethodDescription]].name("id"))
+      .in(jsonBody[UpdateGrpcMethodDescriptionRequest])
+      .out(jsonBody[OperationResult[SID[GrpcMethodDescription]]])
+      .summary("Update grpc method description by id")
+
+  val getGrpcMethodDescription: Endpoint[Unit, SID[GrpcMethodDescription], Throwable, Option[GrpcMethodDescription], Any] =
+    grpcMethodDescriptionBase.get
+      .in(path[SID[GrpcMethodDescription]].name("id"))
+      .out(jsonBody[Option[GrpcMethodDescription]])
+      .summary("Get grpc method description by id")
+
+  val deleteGrpcMethodDescription: Endpoint[Unit, SID[GrpcMethodDescription], Throwable, OperationResult[String], Any] =
+    grpcMethodDescriptionBase.delete
+      .in(path[SID[GrpcMethodDescription]].name("id"))
+      .out(jsonBody[OperationResult[String]])
+      .summary("Delete grpc method description by id")
 }
