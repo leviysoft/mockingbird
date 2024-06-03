@@ -1,0 +1,25 @@
+syntax = "proto3";
+package market_data;
+
+enum InstrumentIDKind {
+  ID_1 = 0;
+  ID_2 = 1;
+}
+
+message PricesRequest {
+  string instrument_id = 1;
+  optional InstrumentIDKind instrument_id_kind = 2;
+}
+
+message PricesResponse {
+
+  string instrument_id = 1;
+  string tracking_id = 2;
+  optional string error = 100;
+} 
+
+service OTCMarketDataService {
+  rpc Countdown  (PricesRequest) returns (PricesResponse) {}
+  rpc Ephemeral  (PricesRequest) returns (PricesResponse) {}
+  rpc Persistent (PricesRequest) returns (PricesResponse) {}
+}
