@@ -89,7 +89,7 @@ class GrpcRequestHandlerImpl(
           })
       )
 
-  private def findStub[Out](
+  private def findStub(
       bytes: Array[Byte],
       methodDescription: GrpcMethodDescription
   ): RIO[WLD, Option[(GrpcStub, Json, Array[Byte])]] =
