@@ -33,7 +33,7 @@ final class MigrationServiceImpl(
 ) extends MigrationService {
   override def migrateGrpcStubCollection: Task[Unit] =
     (for {
-      scope        <- ZIO.succeed(Scope.Persistent.asInstanceOf[Scope])
+      scope        <- ZIO.succeed(Scope.Persistent)
       stubAndScope <- getStubAndScope(scope)
       stubsMigrated <- ZIO.foreach(stubAndScope) { case (stub, scope) =>
         processMigration(stub, scope)
