@@ -214,9 +214,6 @@ val migration = (project in file("migration"))
   .settings(Settings.common)
   .aggregate(mockingbird)
   .dependsOn(mockingbird)
-  .settings(
-    run / javaOptions += "-Dconfig.resource=application.conf",
-  )
 
 val root = (project in file("."))
   .disablePlugins(ContribWarts)
