@@ -29,7 +29,7 @@ object Method {
   def byteMethod(serviceName: String, methodName: String): MethodDescriptor[Array[Byte], Array[Byte]] =
     MethodDescriptor
       .newBuilder()
-      .setType(MethodDescriptor.MethodType.UNARY)
+      .setType(MethodDescriptor.MethodType.BIDI_STREAMING)
       .setFullMethodName(MethodDescriptor.generateFullMethodName(serviceName, methodName))
       .setRequestMarshaller(ByteMarshaller())
       .setResponseMarshaller(ByteMarshaller())

@@ -1,0 +1,31 @@
+syntax = "proto3";
+package market_data;
+
+enum InstrumentIDKind {
+  ID_1 = 0;
+  ID_2 = 1;
+}
+
+message PricesRequest {
+  string instrument_id = 1;
+  optional InstrumentIDKind instrument_id_kind = 3;
+}
+
+message PricesResponse {
+  enum Code {
+    OK = 0;
+    ERROR = 1;
+  }
+
+  string instrument_id = 1;
+  string tracking_id = 3;
+  Code code = 4;
+  optional string error = 100;
+} 
+
+service OTCMarketDataService {
+  rpc PricesUnary  (PricesRequest)        returns (PricesResponse) {}
+  rpc PricesClient (stream PricesRequest) returns (PricesResponse) {}
+  rpc PricesServer (PricesRequest)        returns (stream PricesResponse) {}
+  rpc PricesBidi   (stream PricesRequest) returns (stream PricesResponse) {}
+}

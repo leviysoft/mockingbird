@@ -17,6 +17,7 @@ import ru.tinkoff.tcb.mockingbird.dal.PersistentStateDAO
 import ru.tinkoff.tcb.mockingbird.error.StubSearchError
 import ru.tinkoff.tcb.mockingbird.grpc.GrpcExractor.FromGrpcProtoDefinition
 import ru.tinkoff.tcb.mockingbird.misc.Renderable.ops.*
+import ru.tinkoff.tcb.mockingbird.model.GrpcMethodDescription
 import ru.tinkoff.tcb.mockingbird.model.GrpcStub
 import ru.tinkoff.tcb.mockingbird.model.PersistentState
 import ru.tinkoff.tcb.mockingbird.model.Scope
@@ -26,9 +27,10 @@ import ru.tinkoff.tcb.utils.id.SID
 import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 
 trait GrpcStubResolver {
-  def findStubAndState(service: String, request: Array[Byte])(
-      scope: Scope
-  ): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]]
+  def findStubAndState(
+      methodDescription: GrpcMethodDescription,
+      request: Array[Byte]
+  )(scope: Scope): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]]
 }
 
 class GrpcStubResolverImpl(
@@ -41,25 +43,30 @@ class GrpcStubResolverImpl(
 
   private val log = MDCLogging.`for`[WLD](this)
 
-  def findStubAndState(
-      methodName: String,
+  override def findStubAndState(
+      methodDescription: GrpcMethodDescription,
       request: Array[Byte]
-  )(scope: Scope): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]] = for {
+  )(scope: Scope): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]] =
+    (for {
+      json <- parseJson(methodDescription, request).some
+      res  <- findStubAndState(methodDescription.id, scope, json).some
+    } yield res).unsome
+
+  private def findStubAndState(
+      methodDescriptionId: SID[GrpcMethodDescription],
+      scope: Scope,
+      json: Json
+  ): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]] = for {
     stubs <- stubDAO
       .findChunk(
-        prop[GrpcStub](_.methodName) === methodName &&
+        prop[GrpcStub](_.methodDescriptionId) === methodDescriptionId &&
           prop[GrpcStub](_.scope) === scope &&
           prop[GrpcStub](_.times) > Option(refineMV[NonNegative](0)),
         0,
         Integer.MAX_VALUE
       )
-    parsed <- ZIO.foreachPar(stubs)(parseJson(_, request)).map(_.flatten)
-    pairs = parsed
-      .flatMap { case (json, id) =>
-        stubs
-          .find(_.id == id)
-          .map(json -> _)
-      }
+    pairs = stubs
+      .map(json -> _)
       .filter { case (json, stub) =>
         stub.requestPredicates(json)
       }
@@ -93,26 +100,28 @@ class GrpcStubResolverImpl(
     (stub, pairs.find(_._2.id == stub.id).map(_._1).get, states.headOption)
   }
 
-  private def parseJson(stub: GrpcStub, bytes: Array[Byte]): URIO[WLD, Option[(Json, SID[GrpcStub])]] =
+  private def parseJson(methodDescription: GrpcMethodDescription, bytes: Array[Byte]): URIO[WLD, Option[Json]] =
     ZIO
       .blocking(
-        stub.requestSchema.convertMessageToJson(bytes, stub.requestClass).map(json => (json, stub.id).some)
+        methodDescription.requestSchema
+          .convertMessageToJson(bytes, methodDescription.requestClass)
+          .map(json => json.some)
       )
       .catchSome { case e @ (_: InvalidProtocolBufferException | ParsingFailure(_, _)) =>
         log.infoCause(
-          "Failed to parse gRPC request {} for stub {}",
+          "Failed to parse gRPC request {} for method description {}",
           e,
-          stub.requestClass,
-          stub.id
+          methodDescription.requestClass,
+          methodDescription.id
         ) *>
           ZIO.none
       }
       .tapError(e =>
         log.errorCause(
-          "Failed to parse gRPC request {} for stub {}",
+          "Failed to parse gRPC request {} for method description {}",
           e,
-          stub.requestClass,
-          stub.id
+          methodDescription.requestClass,
+          methodDescription.id
         )
       )
       .orDie
