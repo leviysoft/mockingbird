@@ -210,15 +210,9 @@ val examples = (project in file("examples"))
     )
   )
 
-val migration = (project in file("migration"))
-  .settings(Settings.common)
-  .aggregate(mockingbird)
-  .dependsOn(mockingbird)
-
 val root = (project in file("."))
   .disablePlugins(ContribWarts)
   .aggregate(
-    migration,
     utils,
     circeUtils,
     dataAccess,

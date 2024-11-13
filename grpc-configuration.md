@@ -2,14 +2,16 @@
 
 ## Connection Types
 
-GRPC stubs API has versions: `/v2` and `/v4`. The main difference between them 
+GRPC stubs API has versions: `/v2` and `/v4`. The main difference between them
 is the ability to maintain streaming:
-- `/v2` supports only UNARY connection 
+
+- `/v2` supports only UNARY connection
 - `/v4` supports all connections, which are: UNARY, CLIENT_STREAMING, SERVER_STREAMING, BIDI_STREAMING
 
 ## Response Modes
 
 Response body generation in GRPC stubs can work in the following modes:
+
 * fill - the response is generated as one element from request body
 * proxy - the response is generated from proxy response
 * fill_stream - the response is generated as several elements from request body
@@ -21,22 +23,29 @@ The `fill_stream` and `repeat` modes in response can be used only for stream res
 The `no_body` mode in response may be used for state changing.
 
 In 'delay' and 'stream_delay' field you can pass a correct FiniteDuration no longer than 30 seconds.
-The first one is for delay before hole stub response and the second one is for delay before each element in stream response like `fill_stream` and `repeat`.
+The first one is for delay before hole stub response and the second one is for delay before each element in stream
+response like `fill_stream` and `repeat`.
 
-For a stream input for each element will be selected a stub. But it is not necessary to create stubs for each one, it is only important that the answer is not empty.
-It is also possible to select stubs with different response modes for a connection. For example input stream could be partially proxy and partially filled.
+For a stream input for each element will be selected a stub. But it is not necessary to create stubs for each one, it is
+only important that the answer is not empty.
+It is also possible to select stubs with different response modes for a connection. For example input stream could be
+partially proxy and partially filled.
 
 ## Method Description
 
-In API v4 a part related to a static information about GRPC method was isolated from the stub into a separate entity - method description. 
-It contains connection type, method name, request and response schemas. Method description is linked to a method 1:1 by method name. 
+In API v4 a part related to a static information about GRPC method was isolated from the stub into a separate entity -
+method description.
+It contains connection type, method name, request and response schemas. Method description is linked to a method 1:1 by
+method name.
 So only one method description could exist for a method.
 
 ## Proxy
 
 For proxy there is a `proxy` response mode. Proxy url is located in method description.
-If proxy url is defined for unary input type connections, the connection to the proxy will be established only if the proxy stub is selected.
-But for stream output the connection to the proxy will be established for every request regardless of whether a proxy stub has been selected.
+If proxy url is defined for unary input type connections, the connection to the proxy will be established only if the
+proxy stub is selected.
+But for stream output the connection to the proxy will be established for every request regardless of whether a proxy
+stub has been selected.
 
 ## Examples
 
@@ -186,7 +195,7 @@ But for stream output the connection to the proxy will be established for every 
 ### How to migrate from stub v2 to stub v4
 
 For newly created stubs v2 will be created unary method description. But existed stubs will fail requests.
-To migrate already existing stubs set mongo uri in `application.conf` and run the migration script `GrpcStubV4Migration.scala` in `migration` module.
-Method description information will be taken from the random stub with the highest priority of the scope (persistent, ephemeral, countdown).
+To migrate already existing stubs up docker-compose service `migration` or just run all the services.
+Method description information will be taken from the random stub with the highest priority by the scope (persistent, ephemeral, countdown).
 
 
