@@ -16,6 +16,14 @@ services:
       - "27017:27017"
     networks:
       - app-tier
+  migration:
+    image: mongo
+    networks:
+      - app-tier
+    volumes:
+      - ./backend/migrations/grpc-migration.js:/migrations/grpc-migration.js
+    command: mongosh mongo/mockingbird /migrations/grpc-migration.js
+
   mock:
     image: "ghcr.io/tinkoff/mockingbird:3.10.0-native"
     ports:
