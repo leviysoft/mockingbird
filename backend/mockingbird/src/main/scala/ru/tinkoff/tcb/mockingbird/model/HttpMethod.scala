@@ -5,7 +5,7 @@ import enumeratum.EnumEntry.Uppercase
 import sttp.tapir.codec.enumeratum.TapirCodecEnumeratum
 
 import ru.tinkoff.tcb.bson.enumeratum.BsonEnum
-import ru.tinkoff.tcb.mockingbird.config.FicusEnum
+import ru.tinkoff.tcb.mockingbird.config.PureconfigEnum
 
 sealed trait HttpMethod extends EnumEntry with Uppercase
 object HttpMethod
@@ -13,7 +13,7 @@ object HttpMethod
     with BsonEnum[HttpMethod]
     with TapirCodecEnumeratum
     with CirceEnum[HttpMethod]
-    with FicusEnum[HttpMethod] {
+    with PureconfigEnum[HttpMethod] {
   case object Get extends HttpMethod
   case object Post extends HttpMethod
   case object Head extends HttpMethod
