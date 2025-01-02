@@ -20,7 +20,8 @@ import ru.tinkoff.tcb.utils.transformation.xml.*
 object Substitute {
   implicit def jsonSJson(implicit sandbox: GraalJsSandbox): Substitute[Json, Json] = (a: Json, b: Json) =>
     a.substitute(b).useAsIs
-  implicit val jsonSNode: Substitute[Json, KNode] = (a: Json, b: KNode) => a.substitute(b)
+  implicit val jsonSNode: Substitute[Json, Node]   = (a: Json, b: Node) => a.substitute(b)
+  implicit val jsonSKNode: Substitute[Json, KNode] = (a: Json, b: KNode) => a.substitute(b)
   implicit def nodeSJson(implicit sandbox: GraalJsSandbox): Substitute[Node, Json] = (a: Node, b: Json) =>
     a.substitute(b).useAsIs
   implicit val nodeSNode: Substitute[Node, Node]   = (a: Node, b: Node) => a.substitute(b)
