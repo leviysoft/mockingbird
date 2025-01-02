@@ -149,9 +149,27 @@ class JsonTransformationsSpec extends AnyFunSuite with Matchers with OptionValue
     )
   }
 
+  test("Fill template from XML") {
+    val template = Json.obj(
+      "value1" := "${/root/tag1}",
+      "value2" := "${/root/tag2}"
+    )
+
+    template.isTemplate shouldBe true
+
+    val data = <wrapper><root><tag1>test</tag1><tag2>42</tag2></root></wrapper>
+
+    val sut = template.substitute(data)
+
+    sut shouldBe Json.obj(
+      "value1" := "test",
+      "value2" := "42"
+    )
+  }
+
   private def xml(str: String) = XmlSource[String].asUnsafeNode(str)
 
-  test("Fill template from XML") {
+  test("Fill template from (kantan) XML") {
     val template = Json.obj(
       "value1" := "${/root/tag1}",
       "value2" := "${/root/tag2}"
