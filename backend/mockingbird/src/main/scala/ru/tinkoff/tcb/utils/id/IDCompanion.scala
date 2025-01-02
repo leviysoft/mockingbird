@@ -2,7 +2,7 @@ package ru.tinkoff.tcb.utils.id
 
 import glass.Equivalent
 import io.circe.*
-import net.ceedubs.ficus.readers.ValueReader
+import pureconfig.ConfigReader
 import shapeless.tag
 import shapeless.tag.@@
 import sttp.tapir.Schema
@@ -40,5 +40,5 @@ trait IDCompanion[I] {
 
   implicit def idLoggable[T](implicit il: Loggable[I]): Loggable[I @@ T] = il.narrow
 
-  implicit def idValueReader[T](implicit vr: ValueReader[I]): ValueReader[I @@ T] = vr.map(apply)
+  implicit def idConfigReader[T](implicit cr: ConfigReader[I]): ConfigReader[I @@ T] = cr.map(apply)
 }

@@ -2,14 +2,13 @@ package ru.tinkoff.tcb.mockingbird.config
 
 import scala.concurrent.duration.FiniteDuration
 
+import com.github.dwickern.macros.NameOf.*
 import com.typesafe.config.Config
-import com.typesafe.config.ConfigException.Generic
-import com.typesafe.config.ConfigFactory
 import enumeratum.*
-import net.ceedubs.ficus.Ficus.*
-import net.ceedubs.ficus.readers.ArbitraryTypeReader.*
-import net.ceedubs.ficus.readers.EnumerationReader.*
-import net.ceedubs.ficus.readers.ValueReader
+import pureconfig.*
+import pureconfig.error.CannotConvert
+import pureconfig.generic.ProductHint
+import pureconfig.generic.auto.*
 
 final case class JsSandboxConfig(allowedClasses: Set[String] = Set())
 
@@ -18,7 +17,7 @@ final case class ServerConfig(
     port: Int,
     allowedOrigins: Seq[String],
     healthCheckRoute: Option[String],
-    sandbox: JsSandboxConfig,
+    sandbox: JsSandboxConfig = JsSandboxConfig(),
     vertx: Config
 )
 
@@ -26,13 +25,15 @@ final case class SecurityConfig(secret: String)
 
 final case class ProxyServerAuth(user: String, password: String)
 
-object ProxyServerType extends Enumeration {
-  val Http  = Value("http")
-  val Socks = Value("socks")
+sealed trait ProxyServerType extends EnumEntry
+object ProxyServerType extends Enum[ProxyServerType] with PureconfigEnum[ProxyServerType] {
+  case object Http extends ProxyServerType
+  case object Socks extends ProxyServerType
+  val values = findValues
 }
 
 final case class ProxyServerConfig(
-    `type`: ProxyServerType.Value,
+    `type`: ProxyServerType,
     host: String,
     port: Int,
     nonProxy: Seq[String] = Seq(),
@@ -46,12 +47,14 @@ object HttpVersion extends Enum[HttpVersion] {
   case object HTTP_1_1 extends HttpVersion
   case object HTTP_2 extends HttpVersion
 
-  implicit val valueReader: ValueReader[HttpVersion] = ValueReader[String].map(s =>
-    namesToValuesMap.get(s) match {
-      case Some(v) => v
-      case None    => throw new Generic(s"Cannot get instance of enum HttpVersion from the value of $s")
+  implicit val configReader: ConfigReader[HttpVersion] =
+    ConfigReader.fromString { s =>
+      namesToValuesMap.get(s) match {
+        case Some(v) => Right(v)
+        case None =>
+          Left(CannotConvert(s, nameOfType[HttpVersion], s"Cannot get instance of enum HttpVersion from the value of $s"))
+      }
     }
-  )
 }
 
 final case class ProxyConfig(
@@ -96,17 +99,20 @@ final case class MockingbirdConfiguration(
 )
 
 object MockingbirdConfiguration {
-  def load(): MockingbirdConfiguration =
-    load(ConfigFactory.load().getConfig("ru.tinkoff.tcb"))
+  implicit private def hint[T]: ProductHint[T] =
+    ProductHint[T](ConfigFieldMapping(CamelCase, CamelCase))
 
-  def load(config: Config): MockingbirdConfiguration =
+  def load(): MockingbirdConfiguration =
+    load(ConfigSource.default.at("ru.tinkoff.tcb"))
+
+  def load(config: ConfigSource): MockingbirdConfiguration =
     MockingbirdConfiguration(
-      config.as[ServerConfig]("server"),
-      config.as[SecurityConfig]("security"),
-      config.as[MongoConfig]("db.mongo"),
-      config.as[ProxyConfig]("proxy"),
-      config.as[EventConfig]("event"),
-      config.as[TracingConfig]("tracing"),
+      config.at("server").loadOrThrow[ServerConfig],
+      config.at("security").loadOrThrow[SecurityConfig],
+      config.at("db.mongo").loadOrThrow[MongoConfig],
+      config.at("proxy").loadOrThrow[ProxyConfig],
+      config.at("event").loadOrThrow[EventConfig],
+      config.at("tracing").loadOrThrow[TracingConfig],
     )
 
   private lazy val conf = load()

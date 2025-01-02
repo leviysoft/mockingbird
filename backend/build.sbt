@@ -60,7 +60,7 @@ val mockingbird = (project in file("mockingbird"))
       Dependencies.logback
     ).flatten,
     libraryDependencies ++= Seq(
-      "com.iheart"                    %% "ficus"               % "1.5.0",
+      "com.github.pureconfig"         %% "pureconfig"     % "0.17.8",
       "io.circe"                      %% "circe-config"        % "0.8.0",
       "com.nrinaudo"                  %% "kantan.xpath"        % "0.5.2",
       "com.lihaoyi"                   %% "scalatags"           % "0.9.1",
