@@ -15,7 +15,10 @@ import ru.tinkoff.tcb.bson.BsonEncoder
 import ru.tinkoff.tcb.bson.BsonKeyDecoder
 import ru.tinkoff.tcb.bson.BsonKeyEncoder
 
-final case class SXpath(raw: String, toZoom: XmlZoom) {
+/*
+ * toZoom inside extra braces is important. It excludes this value from hash and equals method.
+ */
+final case class SXpath(raw: String)(val toZoom: XmlZoom) {
   override def toString: String = raw
 }
 
@@ -26,7 +29,7 @@ object SXpath {
       .toEither
       .leftMap(errs => new Exception(errs.toList.mkString(",")))
       .toTry
-      .map(zoom => SXpath(pathStr, zoom))
+      .map(zoom => SXpath(pathStr)(zoom))
 
   def unapply(str: String): Option[SXpath] =
     fromString(str).toOption
