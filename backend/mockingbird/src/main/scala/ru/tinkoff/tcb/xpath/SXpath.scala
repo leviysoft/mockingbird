@@ -9,6 +9,7 @@ import io.circe.Encoder
 import io.circe.KeyDecoder
 import io.circe.KeyEncoder
 import org.mongodb.scala.bson.BsonString
+import sttp.tapir.Schema
 
 import ru.tinkoff.tcb.bson.BsonDecoder
 import ru.tinkoff.tcb.bson.BsonEncoder
@@ -54,4 +55,7 @@ object SXpath {
     (value: String) => sxpathBsonDecoder.fromBson(BsonString(value))
 
   implicit val sxpathBsonKeyEncoder: BsonKeyEncoder[SXpath] = _.raw
+
+  implicit val sxpathSchema: Schema[SXpath] =
+    Schema.schemaForString.as[SXpath]
 }

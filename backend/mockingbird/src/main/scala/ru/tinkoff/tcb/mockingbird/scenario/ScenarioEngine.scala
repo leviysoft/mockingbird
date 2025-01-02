@@ -2,11 +2,11 @@ package ru.tinkoff.tcb.mockingbird.scenario
 
 import java.nio.charset.Charset
 import java.util.Base64
+import scala.util.Try
+import scala.xml.Node
 
 import io.circe.Json
 import io.circe.syntax.*
-import kantan.xpath.Node as KNode
-import kantan.xpath.XmlSource
 import mouse.boolean.*
 import mouse.option.*
 import sttp.client4.{Backend as SttpBackend, *}
@@ -47,7 +47,8 @@ import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 import ru.tinkoff.tcb.utils.transformation.json.*
 import ru.tinkoff.tcb.utils.transformation.string.*
 import ru.tinkoff.tcb.utils.transformation.xml.*
-import ru.tinkoff.tcb.utils.xml.emptyKNode
+import ru.tinkoff.tcb.utils.xml.SafeXML
+import ru.tinkoff.tcb.utils.xml.emptyNode
 import ru.tinkoff.tcb.utils.xttp.*
 
 trait CallbackEngine {
@@ -55,7 +56,7 @@ trait CallbackEngine {
       state: PersistentState,
       callback: Callback,
       data: Json,
-      xdata: KNode
+      xdata: Node
   ): RIO[WLD, Unit]
 }
 
@@ -84,7 +85,7 @@ final class ScenarioEngine(
       bodyXml  = scenario.input.extractXML(message)
       state <- ZIO.fromOption(stateOp).orElse(PersistentState.fresh)
       data  = Json.obj("message" := bodyJson, "state" := state.data, "seed" := seed)
-      xdata = bodyXml.getOrElse(emptyKNode)
+      xdata = bodyXml.getOrElse(emptyNode)
       _ <-
         scenario.persist
           .cata(
@@ -115,7 +116,7 @@ final class ScenarioEngine(
       state: PersistentState,
       callback: Callback,
       data: Json,
-      xdata: KNode
+      xdata: Node
   ): RIO[WLD, Unit] =
     callback match {
       case MessageCallback(destinationId, output, callback, delay) =>
@@ -160,7 +161,7 @@ final class ScenarioEngine(
           xmlBody =
             responseMode
               .contains(CallbackResponseMode.Xml)
-              .option(XmlSource[String].asNode(bodyStr).toOption)
+              .option(Try(SafeXML.loadString(bodyStr)).toOption)
               .flatten
           data1  = jsonBody.cata(j => data.mapObject(("req" -> j) +: _), data)
           xdata1 = xmlBody.getOrElse(xdata)
@@ -171,7 +172,7 @@ final class ScenarioEngine(
         } yield ()
     }
 
-  private def sendTo(dest: DestinationConfiguration, out: ScenarioOutput, data: Json, xdata: KNode): RIO[WLD, Unit] =
+  private def sendTo(dest: DestinationConfiguration, out: ScenarioOutput, data: Json, xdata: Node): RIO[WLD, Unit] =
     ZIO.when(out.delay.isDefined)(ZIO.sleep(Duration.fromScala(out.delay.get))) *> basicRequest
       .pipe(rt =>
         dest.request.body.fold {

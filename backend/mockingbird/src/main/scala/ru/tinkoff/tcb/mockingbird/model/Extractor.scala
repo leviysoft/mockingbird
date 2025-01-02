@@ -1,12 +1,13 @@
 package ru.tinkoff.tcb.mockingbird.model
 
+import scala.xml.NodeSeq
+
 import com.github.dwickern.macros.NameOf.*
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
 import io.circe.Json
-import kantan.xpath.*
-import kantan.xpath.implicits.*
+import io.circe.parser.parse
 import sttp.tapir.derevo.schema
 import sttp.tapir.generic.Configuration as TapirConfig
 
@@ -18,7 +19,7 @@ import ru.tinkoff.tcb.protocol.json.*
 import ru.tinkoff.tcb.protocol.schema.*
 import ru.tinkoff.tcb.protocol.xml.*
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
-import ru.tinkoff.tcb.xpath.Xpath
+import ru.tinkoff.tcb.xpath.SXpath
 
 @derive(
   bsonDecoder,
@@ -29,7 +30,7 @@ import ru.tinkoff.tcb.xpath.Xpath
 )
 @BsonDiscriminator("type")
 sealed trait XmlExtractor {
-  def apply(node: Node): Either[XPathError, Json]
+  def apply(node: NodeSeq): Option[Json]
 }
 object XmlExtractor {
   val types: Map[String, String] = Map(
@@ -47,7 +48,12 @@ object XmlExtractor {
  *   Path inside CDATA
  */
 @derive(decoder, encoder)
-final case class JsonCDataExtractor(prefix: Xpath, path: JsonOptic) extends XmlExtractor {
-  def apply(node: Node): Either[XPathError, Json] =
-    node.evalXPath[Json](prefix.toXPathExpr).map(path.get)
+final case class JsonCDataExtractor(prefix: SXpath, path: JsonOptic) extends XmlExtractor {
+  def apply(node: NodeSeq): Option[Json] =
+    prefix.toZoom
+      .bind(node)
+      .run[Option]
+      .map(_.text.trim)
+      .flatMap(parse(_).toOption)
+      .map(path.get)
 }
