@@ -2,7 +2,7 @@ import ProjectKeys._
 import ch.epfl.scala.sbtmissinglink.MissingLinkPlugin.missinglinkConflictsTag
 import sbt.Keys.concurrentRestrictions
 
-ThisBuild / scalaVersion := "2.13.15"
+ThisBuild / scalaVersion := "3.3.4"
 
 ThisBuild / concurrentRestrictions += Tags.limit(missinglinkConflictsTag, 1)
 
@@ -28,15 +28,11 @@ val dataAccess = (project in file("dataAccess"))
   .settings(
     scalacOptions += "-language:experimental.macros",
     libraryDependencies ++= Dependencies.alleycats ++ Dependencies.cats ++ Dependencies.zio ++ Dependencies.catsTagless ++ Dependencies.mouse ++ Seq(
-      "com.beachape"                 %% "enumeratum"                      % "1.7.0",
-      "org.mongodb.scala"            %% "mongo-scala-driver"              % Versions.mongoScalaDriver,
-      "com.chuusai"                  %% "shapeless"                       % "2.3.3",
-      "org.julienrf"                 %% "enum-labels"                     % "3.1",
-      "tf.tofu"                      %% "derevo-core"                     % Versions.derevo,
-      "com.softwaremill.magnolia1_2" %% "magnolia"                        % "1.1.8",
+      "com.beachape"                 %% "enumeratum"                      % "1.7.5",
+      "org.mongodb.scala"            %% "mongo-scala-driver"              % Versions.mongoScalaDriver cross CrossVersion.for3Use2_13,
+      "com.softwaremill.magnolia1_3" %% "magnolia"                        % "1.3.8",
       "com.google.code.findbugs"      % "jsr305"                          % "3.0.2" % Optional
     ) ++ Dependencies.scalatest ++ Dependencies.scalacheck ++ Dependencies.json ++ Dependencies.refined,
-    libraryDependencies ++= Dependencies.reflect(scalaVersion.value),
     publish := {}
   )
 
@@ -60,22 +56,20 @@ val mockingbird = (project in file("mockingbird"))
       Dependencies.logback
     ).flatten,
     libraryDependencies ++= Seq(
-      "com.github.pureconfig"         %% "pureconfig"          % "0.17.8",
-      "com.lihaoyi"                   %% "scalatags"           % "0.9.1",
-      "tf.tofu"                       %% "derevo-circe"        % Versions.derevo,
+      "com.github.pureconfig"         %% "pureconfig-core"     % "0.17.8",
+      "com.lihaoyi"                   %% "scalatags"           % "0.13.1",
       "org.webjars.npm"                % "swagger-ui-dist"     % "3.32.5",
       "eu.timepit"                    %% "fs2-cron-cron4s"     % "0.9.0",
       "com.softwaremill.sttp.client4" %% "zio"                 % Versions.sttp,
       "com.softwaremill.sttp.client4" %% "circe"               % Versions.sttp,
       "org.apache.tika"                % "tika-core"           % "2.1.0",
       "io.scalaland"                  %% "chimney"             % "0.8.5",
-      "com.ironcorelabs"              %% "cats-scalatest"      % "3.0.8" % Test,
+      "com.ironcorelabs"              %% "cats-scalatest"      % "4.0.0" % Test,
       "com.google.code.findbugs"       % "jsr305"              % "3.0.2" % Optional,
       "com.github.dwickern"           %% "scala-nameof"        % "4.0.0" % Provided,
       "com.github.os72"                % "protobuf-dynamic"    % "1.0.1",
       "com.github.geirolz"            %% "advxml-core"         % "2.5.1",
       "com.github.geirolz"            %% "advxml-xpath"        % "2.5.1",
-      "io.estatico"                   %% "newtype"             % "0.4.4",
       "org.mozilla"                    % "rhino"               % "1.7.14",
       "org.graalvm.polyglot"           % "js"                  % "23.1.+",
       "org.slf4j"                      % "slf4j-api"           % "1.7.30" % Provided
@@ -173,7 +167,7 @@ val edsl = (project in file("edsl"))
     ).flatten,
     libraryDependencies ++= Seq(
       "com.softwaremill.sttp.client4" %% "circe"               % Versions.sttp,
-      "pl.muninn"                     %% "scala-md-tag"        % "0.2.3",
+      //"pl.muninn"                     %% "scala-md-tag"        % "0.2.3",
     ),
   )
   .settings(

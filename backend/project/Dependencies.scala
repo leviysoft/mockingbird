@@ -1,7 +1,7 @@
 import sbt._
 
 object Dependencies {
-  val tapirBase = Seq("tapir-core", "tapir-enumeratum", "tapir-derevo", "tapir-refined")
+  val tapirBase = Seq("tapir-core", "tapir-enumeratum", "tapir-refined")
     .map("com.softwaremill.sttp.tapir" %% _ % Versions.tapir)
 
   val tapir = Seq(
@@ -14,7 +14,7 @@ object Dependencies {
     "tofu-logging",
     "tofu-logging-structured",
     "tofu-logging-derivation"
-  ).map("tf.tofu" %% _ % "0.11.1")
+  ).map("tf.tofu" %% _ % "0.13.6")
 
   val alleycats = Seq(
     "alleycats-core"
@@ -25,13 +25,13 @@ object Dependencies {
     "cats-kernel"
   ).map("org.typelevel" %% _ % Versions.cats)
 
-  val catsTagless = Seq("org.typelevel" %% "cats-tagless-macros" % "0.15.0")
+  val catsTagless = Seq("org.typelevel" %% "cats-tagless-core" % "0.16.2")
 
   val zio = Seq(
     "dev.zio" %% "zio"                 % Versions.zio,
     "dev.zio" %% "zio-managed"         % Versions.zio,
     "dev.zio" %% "zio-interop-cats"    % "23.1.0.1",
-    "dev.zio" %% "zio-interop-twitter" % "21.2.0.2.2",
+    //"dev.zio" %% "zio-interop-twitter" % "21.2.0.2.2",
     "dev.zio" %% "zio-test"            % Versions.zio % Test,
     "dev.zio" %% "zio-test-sbt"        % Versions.zio % Test
   )
@@ -42,34 +42,32 @@ object Dependencies {
     "io.circe" %% "circe-parser"                 % "0.14.6",
     "io.circe" %% "circe-literal"                % "0.14.6",
     "io.circe" %% "circe-jawn"                   % "0.14.6",
-    "io.circe" %% "circe-derivation"             % "0.13.0-M5",
-    "io.circe" %% "circe-derivation-annotations" % "0.13.0-M5",
+    //"io.circe" %% "circe-derivation"             % "0.13.0-M5",
+    //"io.circe" %% "circe-derivation-annotations" % "0.13.0-M5",
     "io.circe" %% "circe-refined"                % "0.14.6"
   )
-
-  def reflect(scalaVersion: String) = Seq("org.scala-lang" % "scala-reflect" % scalaVersion)
 
   val mouse = Seq("org.typelevel" %% "mouse" % "1.0.11")
 
   val enumeratum = Seq(
-    "com.beachape" %% "enumeratum"       % "1.7.0",
-    "com.beachape" %% "enumeratum-circe" % "1.7.0"
+    "com.beachape" %% "enumeratum"       % "1.7.5",
+    "com.beachape" %% "enumeratum-circe" % "1.7.5"
   )
 
   val scalatestMain = Seq(
-    "org.scalatest"    %% "scalatest"      % "3.2.2",
-    "com.ironcorelabs" %% "cats-scalatest" % "3.1.1",
+    "org.scalatest"    %% "scalatest"      % "3.2.19",
+    "com.ironcorelabs" %% "cats-scalatest" % "4.0.0",
   )
 
   val scalatest = scalatestMain.map(_ % Test)
 
   val scalacheck = Seq(
-    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.2.0" % Test,
-    "org.scalacheck"    %% "scalacheck"      % "1.15.2"  % Test
+    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.11.0" % Test,
+    "org.scalacheck"    %% "scalacheck"      % "1.15.4"  % Test
   )
 
   val scalamock = Seq(
-    "org.scalamock" %% "scalamock" % "5.1.0" % Test
+    "org.scalamock" %% "scalamock" % "6.1.1" % Test
   )
 
   lazy val testContainers = Seq(
