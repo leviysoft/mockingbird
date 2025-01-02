@@ -1,7 +1,8 @@
 package ru.tinkoff.tcb.utils.transformation
 
+import scala.xml.Node
+
 import io.circe.Json
-import kantan.xpath.Node
 
 import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 import ru.tinkoff.tcb.utils.transformation.json.*

@@ -1,9 +1,10 @@
 package ru.tinkoff.tcb.mockingbird.scenario
 
+import scala.xml.Node
+
 import eu.timepit.refined.*
 import eu.timepit.refined.numeric.*
 import io.circe.Json
-import kantan.xpath.Node as KNode
 import mouse.boolean.*
 import mouse.option.*
 import zio.interop.catz.core.*
@@ -93,7 +94,7 @@ class ScenarioResolver(
   private def computeStateSpec(
       spec: Option[StateSpec],
       bodyJson: Option[Json],
-      bodyXml: Option[KNode]
+      bodyXml: Option[Node]
   ): Option[StateSpec] =
     (spec, bodyJson).mapN(_.fill(_)).orElse((spec, bodyXml).mapN(_.fill(_))).orElse(spec)
 

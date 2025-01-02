@@ -54,7 +54,4 @@ object Xpath {
 
   implicit val xpathSchema: Schema[Xpath] =
     Schema.schemaForString.as[Xpath]
-
-  implicit val sxpathSchema: Schema[SXpath] =
-    Schema.schemaForString.as[SXpath]
 }

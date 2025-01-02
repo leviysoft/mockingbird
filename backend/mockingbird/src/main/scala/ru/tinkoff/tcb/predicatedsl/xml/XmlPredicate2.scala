@@ -130,7 +130,9 @@ object XmlPredicate2 {
               )
             } yield jpred)
             .leftMap(NonEmptyList.one)
-            .map(jpred => (op: Option[NodeSeq]) => op.map(_.text).flatMap(parse(_).toOption).map(jpred).getOrElse(false))
+            .map(jpred =>
+              (op: Option[NodeSeq]) => op.map(_.text.trim).flatMap(parse(_).toOption).map(jpred).getOrElse(false)
+            )
         case (kwd, j) => Validated.invalidNel(kwd -> j)
       }
 }

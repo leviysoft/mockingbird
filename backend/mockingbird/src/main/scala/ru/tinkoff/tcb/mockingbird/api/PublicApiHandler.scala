@@ -53,7 +53,7 @@ import ru.tinkoff.tcb.utils.transformation.json.*
 import ru.tinkoff.tcb.utils.transformation.string.*
 import ru.tinkoff.tcb.utils.transformation.xml.*
 import ru.tinkoff.tcb.utils.xml.SafeXML
-import ru.tinkoff.tcb.utils.xml.emptyKNode
+import ru.tinkoff.tcb.utils.xml.emptyNode
 import ru.tinkoff.tcb.utils.xttp.xml.asXML
 import ru.tinkoff.tcb.xpath.SXpath
 
@@ -102,7 +102,7 @@ final class PublicApiHandler(
         "extracted" := bodyXml.map(stub.request.runXmlExtractors),
         "headers" := headers
       )
-      xdata   = bodyXml.getOrElse(emptyKNode)
+      xdata   = bodyXml.getOrElse(emptyNode)
       persist = stub.persist
       _ <- persist
         .cata(spec => stateDAO.upsertBySpec(state.id, spec.fill(data).fill(xdata)).map(_.successful), ZIO.succeed(true))

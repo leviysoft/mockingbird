@@ -1,6 +1,8 @@
 package ru.tinkoff.tcb.mockingbird.model
 
 import scala.util.Try
+import scala.xml.Node
+import scala.xml.NodeSeq
 
 import com.github.dwickern.macros.NameOf.*
 import derevo.circe.decoder
@@ -9,8 +11,6 @@ import derevo.derive
 import io.circe.Json
 import io.circe.JsonObject
 import io.circe.parser.parse
-import kantan.xpath.Node
-import kantan.xpath.XmlSource
 import sttp.model.Part
 import sttp.tapir.derevo.schema
 import sttp.tapir.generic.Configuration as TapirConfig
@@ -23,6 +23,7 @@ import ru.tinkoff.tcb.predicatedsl.Keyword
 import ru.tinkoff.tcb.predicatedsl.form.FormPredicate
 import ru.tinkoff.tcb.predicatedsl.json.JsonPredicate
 import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate
+import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate2
 import ru.tinkoff.tcb.protocol.bson.*
 import ru.tinkoff.tcb.protocol.json.*
 import ru.tinkoff.tcb.protocol.schema.*
@@ -116,14 +117,13 @@ final case class XmlRequest(
     SimpleRequestBody.subset.getOption(rBody).map(_.value).flatMap { bodyStr =>
       if (inlineCData) {
         Try(SafeXML.loadString(bodyStr)).toOption
-          .map(_.inlineXmlFromCData.toString)
-          .flatMap(XmlSource[String].asNode(_).toOption)
+          .map(_.inlineXmlFromCData)
       } else
-        XmlSource[String].asNode(bodyStr).toOption
+        Try(SafeXML.loadString(bodyStr)).toOption
     }
 
   override def runXmlExtractors(body: Node): Json =
-    extractors.view.mapValues(_(body)).collect { case (key, Right(jv)) => key -> jv } pipe Json.fromFields
+    extractors.view.mapValues(_(body)).collect { case (key, Some(jv)) => key -> jv } pipe Json.fromFields
 }
 
 @derive(decoder, encoder)
@@ -163,7 +163,7 @@ final case class JLensRequest(
 final case class XPathRequest(
     headers: Map[String, String],
     query: Map[JsonOptic, Map[Keyword.Json, Json]] = Map.empty,
-    body: XmlPredicate,
+    body: XmlPredicate2,
     extractors: Map[String, XmlExtractor] = Map.empty,
     inlineCData: Boolean = false
 ) extends HttpStubRequest {
@@ -176,14 +176,13 @@ final case class XPathRequest(
     SimpleRequestBody.subset.getOption(rBody).map(_.value).flatMap { bodyStr =>
       if (inlineCData) {
         Try(SafeXML.loadString(bodyStr)).toOption
-          .map(_.inlineXmlFromCData.toString)
-          .flatMap(XmlSource[String].asNode(_).toOption)
+          .map(_.inlineXmlFromCData)
       } else
-        XmlSource[String].asNode(bodyStr).toOption
+        Try(SafeXML.loadString(bodyStr)).toOption
     }
 
   override def runXmlExtractors(body: Node): Json =
-    extractors.view.mapValues(_(body)).collect { case (key, Right(jv)) => key -> jv } pipe Json.fromFields
+    extractors.view.mapValues(_(body)).collect { case (key, Some(jv)) => key -> jv } pipe Json.fromFields
 }
 
 @derive(decoder, encoder)
@@ -318,11 +317,11 @@ final case class JsonPart(headers: Map[String, String], body: Json) extends Requ
 
 @derive(decoder, encoder)
 final case class XMLPart(headers: Map[String, String], body: XMLString) extends RequestPart {
-  override def checkBody(value: String): Boolean = XmlSource[String].asNode(value).contains(body.toKNode)
+  override def checkBody(value: String): Boolean = Try(SafeXML.loadString(value)).exists(_ == body.toNode)
 
   override def extractJson(body: String): Option[Json] = None
 
-  override def extractXML(body: String): Option[Node] = XmlSource[String].asNode(body).toOption
+  override def extractXML(body: String): Option[Node] = Try(SafeXML.loadString(body)).toOption
 }
 
 @derive(decoder, encoder)
@@ -335,12 +334,12 @@ final case class JLensPart(headers: Map[String, String], body: JsonPredicate) ex
 }
 
 @derive(decoder, encoder)
-final case class XPathPart(headers: Map[String, String], body: XmlPredicate) extends RequestPart {
-  override def checkBody(value: String): Boolean = XmlSource[String].asNode(value).map(body).getOrElse(false)
+final case class XPathPart(headers: Map[String, String], body: XmlPredicate2) extends RequestPart {
+  override def checkBody(value: String): Boolean = Try(SafeXML.loadString(value)).map(body).getOrElse(false)
 
   override def extractJson(body: String): Option[Json] = None
 
-  override def extractXML(body: String): Option[Node] = XmlSource[String].asNode(body).toOption
+  override def extractXML(body: String): Option[Node] = Try(SafeXML.loadString(body)).toOption
 }
 
 @derive(decoder, encoder)

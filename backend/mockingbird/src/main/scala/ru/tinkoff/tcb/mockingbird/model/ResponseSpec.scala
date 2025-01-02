@@ -1,5 +1,7 @@
 package ru.tinkoff.tcb.mockingbird.model
 
+import scala.util.Try
+
 import com.github.dwickern.macros.NameOf.*
 import derevo.circe.decoder
 import derevo.circe.encoder
@@ -15,7 +17,9 @@ import ru.tinkoff.tcb.bson.derivation.bsonEncoder
 import ru.tinkoff.tcb.circe.bson.*
 import ru.tinkoff.tcb.predicatedsl.json.JsonPredicate
 import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate
+import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate2
 import ru.tinkoff.tcb.protocol.schema.*
+import ru.tinkoff.tcb.utils.xml.SafeXML
 import ru.tinkoff.tcb.utils.xml.XMLString
 
 @derive(
@@ -56,7 +60,7 @@ final case class JsonResponseSpec(code: Option[Int], body: Option[Json]) extends
 @derive(decoder, encoder)
 final case class XmlResponseSpec(code: Option[Int], body: Option[XMLString]) extends ResponseSpec {
   override def checkBody(data: String): Boolean =
-    XmlSource[String].asNode(data).map(nx => body.forall(_.toKNode == nx)).getOrElse(false)
+    Try(SafeXML.loadString(data)).toOption.exists(nx => body.forall(_.toNode == nx))
 }
 
 @derive(decoder, encoder)
@@ -65,7 +69,7 @@ final case class JLensResponseSpec(code: Option[Int], body: Option[JsonPredicate
 }
 
 @derive(decoder, encoder)
-final case class XPathResponseSpec(code: Option[Int], body: Option[XmlPredicate]) extends ResponseSpec {
+final case class XPathResponseSpec(code: Option[Int], body: Option[XmlPredicate2]) extends ResponseSpec {
   override def checkBody(data: String): Boolean =
-    XmlSource[String].asNode(data).map(nx => body.forall(_(nx))).getOrElse(false)
+    Try(SafeXML.loadString(data)).exists(nx => body.forall(_(nx)))
 }

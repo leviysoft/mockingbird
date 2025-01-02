@@ -6,7 +6,9 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 import scala.util.Try
+import scala.xml.Elem
 import scala.xml.Node
+import scala.xml.NodeSeq
 
 import io.circe.Decoder
 import io.circe.Encoder
@@ -22,7 +24,7 @@ import ru.tinkoff.tcb.bson.BsonEncoder
 import ru.tinkoff.tcb.generic.RootOptionFields
 
 package object xml {
-  val emptyKNode: KNode = XmlSource[String].asUnsafeNode("<empty />")
+  val emptyNode: Elem = <empty/>
 
   @newtype class XMLString private (val asString: String)
 

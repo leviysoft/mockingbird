@@ -1,13 +1,14 @@
 package ru.tinkoff.tcb.mockingbird.model
 
+import scala.util.Try
+import scala.xml.Node
+
 import com.github.dwickern.macros.NameOf.*
 import derevo.circe.decoder
 import derevo.circe.encoder
 import derevo.derive
 import io.circe.Json
 import io.circe.parser.parse
-import kantan.xpath.Node
-import kantan.xpath.XmlSource
 import sttp.tapir.derevo.schema
 import sttp.tapir.generic.Configuration as TapirConfig
 
@@ -17,7 +18,9 @@ import ru.tinkoff.tcb.bson.derivation.bsonEncoder
 import ru.tinkoff.tcb.circe.bson.*
 import ru.tinkoff.tcb.predicatedsl.json.JsonPredicate
 import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate
+import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate2
 import ru.tinkoff.tcb.protocol.schema.*
+import ru.tinkoff.tcb.utils.xml.SafeXML
 import ru.tinkoff.tcb.utils.xml.XMLString
 
 @derive(
@@ -72,12 +75,12 @@ final case class JsonInput(payload: Json) extends ScenarioInput {
 @derive(decoder, encoder)
 final case class XmlInput(payload: XMLString) extends ScenarioInput {
   override def checkMessage(message: String): Boolean =
-    XmlSource[String].asNode(message).contains(payload.toKNode)
+    extractXML(message).contains(payload.toNode)
 
   override def extractJson(message: String): Option[Json] = None
 
   override def extractXML(message: String): Option[Node] =
-    XmlSource[String].asNode(message).toOption
+    Try(SafeXML.loadString(message)).toOption
 }
 
 @derive(decoder, encoder)
@@ -92,12 +95,12 @@ final case class JLensInput(payload: JsonPredicate) extends ScenarioInput {
 }
 
 @derive(decoder, encoder)
-final case class XPathInput(payload: XmlPredicate) extends ScenarioInput {
+final case class XPathInput(payload: XmlPredicate2) extends ScenarioInput {
   override def checkMessage(message: String): Boolean =
-    extractXML(message).map(payload).getOrElse(false)
+    extractXML(message).exists(payload(_))
 
   override def extractJson(message: String): Option[Json] = None
 
   override def extractXML(message: String): Option[Node] =
-    XmlSource[String].asNode(message).toOption
+    Try(SafeXML.loadString(message)).toOption
 }

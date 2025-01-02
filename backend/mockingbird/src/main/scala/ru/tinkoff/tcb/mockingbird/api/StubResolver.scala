@@ -1,12 +1,13 @@
 package ru.tinkoff.tcb.mockingbird.api
 
+import scala.xml.Node
+
 import com.github.dwickern.macros.NameOf.*
 import eu.timepit.refined.*
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.*
 import io.circe.Json
-import kantan.xpath.Node
 import mouse.boolean.*
 import mouse.option.*
 import org.mongodb.scala.bson.*

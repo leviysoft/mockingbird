@@ -22,7 +22,7 @@ class StringTransformationsSpec extends AnyFunSuite with Matchers with TryValues
   test("Substitute XML") {
     implicit val sandbox: GraalJsSandbox = new GraalJsSandbox(JsSandboxConfig())
 
-    "${/a}".substitute(Json.Null, xml("<a>test</a>")) shouldBe "test"
+    "${/a}".substitute(Json.Null, <wrapper><a>test</a></wrapper>) shouldBe "test"
   }
 
   test("isTemplate test") {
