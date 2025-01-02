@@ -61,7 +61,6 @@ val mockingbird = (project in file("mockingbird"))
     ).flatten,
     libraryDependencies ++= Seq(
       "com.github.pureconfig"         %% "pureconfig"     % "0.17.8",
-      "io.circe"                      %% "circe-config"        % "0.8.0",
       "com.nrinaudo"                  %% "kantan.xpath"        % "0.5.2",
       "com.lihaoyi"                   %% "scalatags"           % "0.9.1",
       "tf.tofu"                       %% "derevo-circe"        % Versions.derevo,
