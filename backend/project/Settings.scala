@@ -28,7 +28,7 @@ object Settings {
 
   val common = Seq(
     organization := "ru.tinkoff",
-    scalaVersion := "2.13.15",
+    scalaVersion := "3.3.4",
     Compile / packageDoc / publishArtifact := false,
     Compile / packageSrc / publishArtifact := false,
     Compile / doc / sources := Seq.empty,
@@ -66,8 +66,6 @@ object Settings {
       "-Ywarn-dead-code",
       "-Ywarn-macros:after"
     ),
-    addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
-    addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.13.3" cross CrossVersion.full),
     wartremoverDependencies ~= (_.filterNot(_.name == "wartremover-contrib")),
     wartremoverDependencies += "org.wartremover" % "wartremover-contrib_2.13" % ContribWart.ContribVersion,
     wartremoverErrors ++= Seq(
