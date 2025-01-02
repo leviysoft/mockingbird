@@ -4,10 +4,11 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.control.TailCalls
 import scala.util.control.TailCalls.TailRec
+import scala.xml.Node
 
 import io.circe.Json
 import io.circe.JsonNumber as JNumber
-import kantan.xpath.*
+import kantan.xpath.Node as KNode
 
 import ru.tinkoff.tcb.utils.circe.*
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
@@ -96,6 +97,13 @@ package object json {
       }
 
     def substitute(values: Node): Json =
+      nodeTemplater(values).pipe { templater =>
+        transformValues { case js @ JsonString(str) =>
+          templater.andThen(Json.fromString _).applyOrElse(str, (_: String) => js)
+        }.result
+      }
+
+    def substitute(values: KNode): Json =
       nodeTemplater(values).pipe { templater =>
         transformValues { case js @ JsonString(str) =>
           templater.andThen(Json.fromString _).applyOrElse(str, (_: String) => js)
