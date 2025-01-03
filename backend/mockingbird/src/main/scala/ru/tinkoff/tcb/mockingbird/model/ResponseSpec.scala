@@ -8,7 +8,6 @@ import derevo.circe.encoder
 import derevo.derive
 import io.circe.Json
 import io.circe.parser.parse
-import kantan.xpath.XmlSource
 import sttp.tapir.derevo.schema
 import sttp.tapir.generic.Configuration as TapirConfig
 
@@ -16,7 +15,6 @@ import ru.tinkoff.tcb.bson.derivation.bsonDecoder
 import ru.tinkoff.tcb.bson.derivation.bsonEncoder
 import ru.tinkoff.tcb.circe.bson.*
 import ru.tinkoff.tcb.predicatedsl.json.JsonPredicate
-import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate
 import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate2
 import ru.tinkoff.tcb.protocol.schema.*
 import ru.tinkoff.tcb.utils.xml.SafeXML

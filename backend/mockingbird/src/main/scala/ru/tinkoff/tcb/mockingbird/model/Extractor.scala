@@ -17,7 +17,6 @@ import ru.tinkoff.tcb.bson.derivation.bsonEncoder
 import ru.tinkoff.tcb.protocol.bson.*
 import ru.tinkoff.tcb.protocol.json.*
 import ru.tinkoff.tcb.protocol.schema.*
-import ru.tinkoff.tcb.protocol.xml.*
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.xpath.SXpath
 

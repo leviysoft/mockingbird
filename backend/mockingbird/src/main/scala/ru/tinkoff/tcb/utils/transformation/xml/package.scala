@@ -16,8 +16,6 @@ import advxml.implicits.*
 import advxml.transform.XmlModifier.*
 import advxml.transform.XmlZoom
 import io.circe.Json
-import kantan.xpath.Node as KNode
-import kantan.xpath.implicits.*
 
 import ru.tinkoff.tcb.utils.json.json2StringFolder
 import ru.tinkoff.tcb.utils.regex.OneOrMore
@@ -29,16 +27,9 @@ import ru.tinkoff.tcb.xpath.*
 package object xml {
   private object SubstRxs extends OneOrMore(SubstRx)
 
-  private def nt(values: KNode): PartialFunction[String, Option[String]] = { case SubstRx(Xexpr(xe)) =>
-    values.evalXPath[String](xe).toOption
-  }
-
   private def nt(values: Node): PartialFunction[String, Option[String]] = { case SubstRx(XZoom(zoom)) =>
     zoom.bind(values).run[Option].map(_.text)
   }
-
-  def nodeTemplater(values: KNode): PartialFunction[String, String] =
-    nt(values).andThen { case Some(s) => s }
 
   def nodeTemplater(values: Node): PartialFunction[String, String] =
     nt(values).andThen { case Some(s) => s }
@@ -49,13 +40,13 @@ package object xml {
         case elem: Elem =>
           elem.attributes.exists(attr =>
             attr.value match {
-              case Seq(Text(SubstRx(Xexpr(_)))) => true
+              case Seq(Text(SubstRx(XZoom(_)))) => true
               case Seq(Text(CodeRx(_)))         => true
               case Seq(Text(SubstRxs()))        => true
               case _                            => false
             }
           ) || elem.child.exists(_.isTemplate)
-        case Text(SubstRx(Xexpr(_))) => true
+        case Text(SubstRx(XZoom(_))) => true
         case Text(CodeRx(_))         => true
         case Text(SubstRxs())        => true
         case _                       => false
@@ -65,24 +56,6 @@ package object xml {
       pf.applyOrElse(n, identity[Node]) match {
         case elem: Elem => elem.child.toVector.traverse(_.transform(pf)).map(children => elem.copy(child = children))
         case otherwise  => TailCalls.done(otherwise)
-      }
-
-    def substitute(values: KNode): Node =
-      nodeTemplater(values).pipe { templater =>
-        transform {
-          case elem: Elem =>
-            elem.attributes.foldLeft(elem)((e, attr) =>
-              attr.value match {
-                case Seq(Text(text)) =>
-                  templater
-                    .andThen(s => e % Attribute(None, attr.key, Text(s), Null))
-                    .applyOrElse(text, (_: String) => e)
-                case _ => e
-              }
-            )
-          case Text(str) =>
-            templater.andThen(Text(_)).applyOrElse(str, Text(_))
-        }.result
       }
 
     def substitute(values: Node): Node =
