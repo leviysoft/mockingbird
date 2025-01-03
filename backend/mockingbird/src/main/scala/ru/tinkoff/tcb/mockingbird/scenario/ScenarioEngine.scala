@@ -84,8 +84,8 @@ final class ScenarioEngine(
       bodyJson = scenario.input.extractJson(message)
       bodyXml  = scenario.input.extractXML(message)
       state <- ZIO.fromOption(stateOp).orElse(PersistentState.fresh)
-      data  = Json.obj("message" := bodyJson, "state" := state.data, "seed" := seed)
-      xdata = bodyXml.getOrElse(emptyNode)
+      data        = Json.obj("message" := bodyJson, "state" := state.data, "seed" := seed)
+      xdata: Node = <wrapper>{bodyXml.getOrElse(emptyNode)}</wrapper>
       _ <-
         scenario.persist
           .cata(

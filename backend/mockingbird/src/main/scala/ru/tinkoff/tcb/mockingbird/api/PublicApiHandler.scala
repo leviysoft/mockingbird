@@ -102,8 +102,8 @@ final class PublicApiHandler(
         "extracted" := bodyXml.map(stub.request.runXmlExtractors),
         "headers" := headers
       )
-      xdata   = bodyXml.getOrElse(emptyNode)
-      persist = stub.persist
+      xdata: Node = <wrapper>{bodyXml.getOrElse(emptyNode)}</wrapper>
+      persist     = stub.persist
       _ <- persist
         .cata(spec => stateDAO.upsertBySpec(state.id, spec.fill(data).fill(xdata)).map(_.successful), ZIO.succeed(true))
       _ <- persist
