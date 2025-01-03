@@ -2,7 +2,7 @@ import ProjectKeys._
 import ch.epfl.scala.sbtmissinglink.MissingLinkPlugin.missinglinkConflictsTag
 import sbt.Keys.concurrentRestrictions
 
-ThisBuild / scalaVersion := "3.3.4"
+ThisBuild / scalaVersion := "3.4.3"
 
 ThisBuild / concurrentRestrictions += Tags.limit(missinglinkConflictsTag, 1)
 
@@ -27,7 +27,7 @@ val dataAccess = (project in file("dataAccess"))
   .settings(Settings.common)
   .settings(
     scalacOptions += "-language:experimental.macros",
-    libraryDependencies ++= Dependencies.alleycats ++ Dependencies.cats ++ Dependencies.zio ++ Dependencies.catsTagless ++ Dependencies.mouse ++ Seq(
+    libraryDependencies ++= Dependencies.alleycats ++ Dependencies.cats ++ Dependencies.zio ++ Dependencies.catsTagless ++ Dependencies.mouse ++ Dependencies.oolong ++ Seq(
       "com.beachape"                 %% "enumeratum"                      % "1.7.5",
       "org.mongodb.scala"            %% "mongo-scala-driver"              % Versions.mongoScalaDriver cross CrossVersion.for3Use2_13,
       "com.softwaremill.magnolia1_3" %% "magnolia"                        % "1.3.8",
@@ -152,6 +152,7 @@ lazy val `mockingbird-native` = (project in file("mockingbird-native"))
     )
   )
 
+/*
 val edsl = (project in file("edsl"))
   .dependsOn(utils, circeUtils)
   .settings(Settings.common)
@@ -167,7 +168,7 @@ val edsl = (project in file("edsl"))
     ).flatten,
     libraryDependencies ++= Seq(
       "com.softwaremill.sttp.client4" %% "circe"               % Versions.sttp,
-      //"pl.muninn"                     %% "scala-md-tag"        % "0.2.3",
+      "pl.muninn"                     %% "scala-md-tag"        % "0.2.3",
     ),
   )
   .settings(
@@ -200,7 +201,7 @@ val examples = (project in file("examples"))
       "lintAll",
       "scalafixAll; scalafmtAll"
     )
-  )
+  )*/
 
 val root = (project in file("."))
   .disablePlugins(ContribWarts)
@@ -211,7 +212,7 @@ val root = (project in file("."))
     mockingbird,
     `mockingbird-api`,
     `mockingbird-native`,
-    `edsl`
+//    `edsl`
   )
   .settings(
     run / aggregate := false,

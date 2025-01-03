@@ -5,10 +5,6 @@ import derevo.circe.encoder
 import derevo.derive
 import sttp.tapir.derevo.schema
 
-import ru.tinkoff.tcb.bson.BsonDecoder
-import ru.tinkoff.tcb.bson.BsonEncoder
-import ru.tinkoff.tcb.bson.derivation.DerivedDecoder
-import ru.tinkoff.tcb.bson.derivation.DerivedEncoder
 import ru.tinkoff.tcb.utils.crypto.AES
 
 @derive(decoder, encoder, schema)

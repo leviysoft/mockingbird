@@ -97,6 +97,13 @@ object Dependencies {
     "glass-macro",
   ).map("tf.tofu" %% _ % Versions.glass)
 
+  lazy val oolong = Seq(
+    "oolong-core",
+    "oolong-bson",
+    "oolong-bson-refined",
+    "oolong-mongo",
+  ).map("io.github.leviysoft" %% _ % "0.4.0")
+
   lazy val logback = Seq(
     "logback-core",
     "logback-classic"

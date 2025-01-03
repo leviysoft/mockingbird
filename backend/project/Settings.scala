@@ -28,7 +28,7 @@ object Settings {
 
   val common = Seq(
     organization := "ru.tinkoff",
-    scalaVersion := "3.3.4",
+    scalaVersion := "3.4.3",
     Compile / packageDoc / publishArtifact := false,
     Compile / packageSrc / publishArtifact := false,
     Compile / doc / sources := Seq.empty,
@@ -36,6 +36,7 @@ object Settings {
       "-encoding",
       "utf8",
       "-deprecation",
+      "-experimental",
       "-explaintypes",
       "-feature",
       "-language:higherKinds",
@@ -44,6 +45,7 @@ object Settings {
       "-unchecked",
       "-Ybackend-parallelism",
       java.lang.Runtime.getRuntime.availableProcessors().toString,
+      "-Yretain-trees", //for accessing default values by magnolia
       prelude(), // standart imports + zio
       // warning settings
       //"-Wconf:any:wv", // shows warning categories for nowarn (https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html)
