@@ -11,13 +11,13 @@ import ru.tinkoff.tcb.predicatedsl.Keyword
 import ru.tinkoff.tcb.predicatedsl.SpecificationError
 import ru.tinkoff.tcb.xpath.*
 
-class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
+class XmlPredicateSpec extends AnyFunSuite with Matchers with EitherValues {
   test("XmlPredicate should produce validator from correct specification") {
     val spec = Json.obj(
       "/tag1" := Json.obj("==" := "test")
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toEither
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toEither
 
     sut shouldBe Symbol("right")
   }
@@ -27,7 +27,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       "/tag1" := Json.obj(">=" := "test")
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toEither
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toEither
 
     sut shouldBe Left(
       NonEmptyList.one(
@@ -42,7 +42,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       // "/root/tag2" := Json.obj("==" := 42)
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><root><tag1>test</tag1><tag2>42</tag2></root></wrapper>)) shouldBe Some(true)
     sut.map(_(<wrapper><root><tag1>peka</tag1><tag2>42</tag2></root></wrapper>)) shouldBe Some(false)
@@ -54,7 +54,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       "/root/tag2" := Json.obj("!=" := 42)
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><root><tag1>test</tag1><tag2>42</tag2></root></wrapper>)) shouldBe Some(false)
     sut.map(_(<wrapper><root><tag1>peka</tag1><tag2>99</tag2></root></wrapper>)) shouldBe Some(true)
@@ -65,7 +65,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       "/f" := Json.obj(">" := 42)
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><f>43</f></wrapper>)) shouldBe Some(true)
     sut.map(_(<wrapper><f>42</f></wrapper>)) shouldBe Some(false)
@@ -76,7 +76,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       "/f" := Json.obj(">=" := 42)
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><f>43</f></wrapper>)) shouldBe Some(true)
     sut.map(_(<wrapper><f>42</f></wrapper>)) shouldBe Some(true)
@@ -88,7 +88,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       "/f" := Json.obj("<" := 42)
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><f>42</f></wrapper>)) shouldBe Some(false)
     sut.map(_(<wrapper><f>41</f></wrapper>)) shouldBe Some(true)
@@ -99,7 +99,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       "/f" := Json.obj("<=" := 42)
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><f>43</f></wrapper>)) shouldBe Some(false)
     sut.map(_(<wrapper><f>42</f></wrapper>)) shouldBe Some(true)
@@ -111,7 +111,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       "/f" := Json.obj(">" := 40, "<=" := 45, "!=" := 43)
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><f>39</f></wrapper>)) shouldBe Some(false)
     sut.map(_(<wrapper><f>40</f></wrapper>)) shouldBe Some(false)
@@ -128,7 +128,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       "f" := Json.obj("~=" := "\\d{4,}")
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><f>123</f></wrapper>)) shouldBe Some(false)
     sut.map(_(<wrapper><f>1234</f></wrapper>)) shouldBe Some(true)
@@ -141,7 +141,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       "/f" := Json.obj("size" := 4)
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><f>123</f></wrapper>)) shouldBe Some(false)
     sut.map(_(<wrapper><f>1234</f></wrapper>)) shouldBe Some(true)
@@ -153,7 +153,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       "/f" := Json.obj("exists" := true)
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><f>123</f></wrapper>)) shouldBe Some(true)
     sut.map(_(<wrapper><f/></wrapper>)) shouldBe Some(true)
@@ -165,7 +165,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       "/f" := Json.obj("exists" := false)
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><f>123</f></wrapper>)) shouldBe Some(false)
     sut.map(_(<wrapper><f/></wrapper>)) shouldBe Some(false)
@@ -181,7 +181,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       )
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><data><![CDATA[test]]></data></wrapper>)) shouldBe Some(true)
     sut.map(_(<wrapper><data><![CDATA[test]]> </data></wrapper>)) shouldBe Some(false)
@@ -197,7 +197,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       )
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper><data><![CDATA[1234]]></data></wrapper>)) shouldBe Some(true)
     sut.map(_(<wrapper><data><![CDATA[123f]]></data></wrapper>)) shouldBe Some(false)
@@ -215,7 +215,7 @@ class XmlPredicateSpec2 extends AnyFunSuite with Matchers with EitherValues {
       )
     )
 
-    val sut = XmlPredicate2(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
+    val sut = XmlPredicate(spec.as[Map[SXpath, Map[Keyword.Xml, Json]]].value).toOption
 
     sut.map(_(<wrapper>
       <json>
