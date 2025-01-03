@@ -8,9 +8,9 @@ import cats.data.NonEmptyVector
 import eu.timepit.refined.api.RefType
 import eu.timepit.refined.api.Validate
 import org.bson.BsonInvalidOperationException
-import org.mongodb.scala.bson.*
+import oolong.bson.*
+import oolong.bson.given
 
-import ru.tinkoff.tcb.bson.*
 import ru.tinkoff.tcb.utils.circe.optics.JLens
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.string.*

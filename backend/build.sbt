@@ -70,6 +70,8 @@ val mockingbird = (project in file("mockingbird"))
       "com.github.os72"                % "protobuf-dynamic"    % "1.0.1",
       "com.github.geirolz"            %% "advxml-core"         % "2.5.1",
       "com.github.geirolz"            %% "advxml-xpath"        % "2.5.1",
+      "io.github.kitlangton"          %% "neotype"             % "0.3.8",
+      "com.softwaremill.common"       %% "tagging"             % "2.3.5",
       "org.mozilla"                    % "rhino"               % "1.7.14",
       "org.graalvm.polyglot"           % "js"                  % "23.1.+",
       "org.slf4j"                      % "slf4j-api"           % "1.7.30" % Provided

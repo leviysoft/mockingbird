@@ -4,17 +4,14 @@ import scala.util.Try
 import scala.xml.Node
 
 import com.github.dwickern.macros.NameOf.*
-import derevo.circe.decoder
-import derevo.circe.encoder
-import derevo.derive
 import io.circe.Json
 import io.circe.parser.parse
-import sttp.tapir.derevo.schema
+import io.circe.derivation.Configuration as CirceConfig
 import sttp.tapir.generic.Configuration as TapirConfig
 
-import ru.tinkoff.tcb.bson.annotation.BsonDiscriminator
-import ru.tinkoff.tcb.bson.derivation.bsonDecoder
-import ru.tinkoff.tcb.bson.derivation.bsonEncoder
+import oolong.bson.*
+import oolong.bson.given
+import oolong.bson.annotation.BsonDiscriminator
 import ru.tinkoff.tcb.circe.bson.*
 import ru.tinkoff.tcb.predicatedsl.json.JsonPredicate
 import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate
@@ -22,15 +19,8 @@ import ru.tinkoff.tcb.protocol.schema.*
 import ru.tinkoff.tcb.utils.xml.SafeXML
 import ru.tinkoff.tcb.utils.xml.XMLString
 
-@derive(
-  bsonDecoder,
-  bsonEncoder,
-  decoder(ScenarioInput.modes, true, Some("mode")),
-  encoder(ScenarioInput.modes, Some("mode")),
-  schema
-)
 @BsonDiscriminator("mode")
-sealed trait ScenarioInput {
+sealed trait ScenarioInput derives BsonDecoder, BsonEncoder, Decoder, Encoder, Schema {
   def checkMessage(message: String): Boolean
 
   def extractJson(message: String): Option[Json]
@@ -49,6 +39,8 @@ object ScenarioInput {
 
   implicit val customConfiguration: TapirConfig =
     TapirConfig.default.withDiscriminator("mode").copy(toEncodedName = modes)
+
+  given CirceConfig = CirceConfig(transformConstructorNames = modes).withDiscriminator("mode")
 }
 
 @derive(decoder, encoder)

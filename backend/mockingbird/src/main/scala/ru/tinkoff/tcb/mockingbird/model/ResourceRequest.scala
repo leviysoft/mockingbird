@@ -1,24 +1,20 @@
 package ru.tinkoff.tcb.mockingbird.model
 
-import derevo.circe.decoder
-import derevo.circe.encoder
-import derevo.derive
-import sttp.tapir.derevo.schema
-
+import oolong.bson.*
+import oolong.bson.given
 import ru.tinkoff.tcb.utils.crypto.AES
 
-@derive(decoder, encoder, schema)
 final case class ResourceRequest(
-    url: SecureString,
+    url: SecureString.Type,
     method: HttpMethod,
-    headers: Map[String, SecureString] = Map(),
-    body: Option[SecureString] = None,
-)
+    headers: Map[String, SecureString.Type] = Map(),
+    body: Option[SecureString.Type] = None,
+) derives Decoder, Encoder, Schema
 
 object ResourceRequest {
   implicit def resourceRequestBsonEncoder(implicit aes: AES): BsonEncoder[ResourceRequest] =
-    DerivedEncoder.genBsonEncoder[ResourceRequest]
+    BsonEncoder.derived
 
   implicit def resourceRequestBsonDecoder(implicit aes: AES): BsonDecoder[ResourceRequest] =
-    DerivedDecoder.genBsonDecoder[ResourceRequest]
+    BsonDecoder.derived
 }

@@ -4,7 +4,6 @@ import enumeratum.values.*
 import oolong.bson.{BsonDecoder, BsonEncoder}
 import oolong.bson.given
 import org.mongodb.scala.bson.*
-import ru.tinkoff.tcb.bson.*
 
 object EnumHandler {
 

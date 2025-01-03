@@ -9,8 +9,6 @@ import mouse.boolean.*
 import mouse.option.*
 import zio.interop.catz.core.*
 
-import ru.tinkoff.tcb.criteria.*
-import ru.tinkoff.tcb.criteria.Typed.*
 import ru.tinkoff.tcb.logging.MDCLogging
 import ru.tinkoff.tcb.mockingbird.api.WLD
 import ru.tinkoff.tcb.mockingbird.dal.PersistentStateDAO

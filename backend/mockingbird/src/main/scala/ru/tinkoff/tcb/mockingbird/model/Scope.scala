@@ -3,10 +3,11 @@ package ru.tinkoff.tcb.mockingbird.model
 import enumeratum.*
 import enumeratum.EnumEntry.Lowercase
 import mouse.option.*
+import oolong.bson.*
+import oolong.bson.given
 import sttp.tapir.codec.enumeratum.TapirCodecEnumeratum
 import tofu.logging.Loggable
 
-import ru.tinkoff.tcb.bson.*
 import ru.tinkoff.tcb.bson.enumeratum.BsonEnum
 
 sealed abstract class Scope(val priority: Int) extends EnumEntry with Lowercase

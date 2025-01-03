@@ -23,7 +23,6 @@ final class SDFetcher(
 ) {
   private val log = MDCLogging.`for`[WLD](this)
 
-  @nowarn("cat=other-match-analysis")
   private def reloadSrc: Stream[RIO[WLD, *], Unit] =
     Stream
       .awakeEvery[RIO[WLD, *]](eventConfig.reloadInterval)
@@ -35,7 +34,6 @@ final class SDFetcher(
           Stream.sleep[RIO[WLD, *]](eventConfig.reloadInterval) ++ reloadSrc
       }
 
-  @nowarn("cat=other-match-analysis")
   private def reloadDest: Stream[RIO[WLD, *], Unit] =
     Stream
       .awakeEvery[RIO[WLD, *]](eventConfig.reloadInterval)

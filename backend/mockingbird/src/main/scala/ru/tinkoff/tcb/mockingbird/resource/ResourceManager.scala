@@ -25,7 +25,6 @@ final class ResourceManager(
 ) {
   private val log = MDCLogging.`for`[WLD](this)
 
-  @nowarn("cat=other-match-analysis")
   def startup(): URIO[WLD, Unit] =
     (for {
       sources      <- sourceDAO.getAll
@@ -47,7 +46,6 @@ final class ResourceManager(
         log.errorCause("Fatal error", thr) *> ZIO.die(thr)
     }
 
-  @nowarn("cat=other-match-analysis")
   def shutdown(): URIO[WLD, Unit] =
     (for {
       sources      <- sourceDAO.getAll

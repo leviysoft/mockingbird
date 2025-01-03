@@ -37,6 +37,7 @@ object Settings {
       "utf8",
       "-deprecation",
       "-experimental",
+      "-explain-cyclic",
       "-explaintypes",
       "-feature",
       "-language:higherKinds",

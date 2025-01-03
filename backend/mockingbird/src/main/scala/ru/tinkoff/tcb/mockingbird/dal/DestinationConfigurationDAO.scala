@@ -1,14 +1,12 @@
 package ru.tinkoff.tcb.mockingbird.dal
 
 import scala.annotation.implicitNotFound
-
-import cats.tagless.autoFunctorK
+import cats.tagless.FunctorK
 import com.github.dwickern.macros.NameOf.*
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.Indexes.descending
-
 import ru.tinkoff.tcb.mockingbird.model.DestinationConfiguration
 import ru.tinkoff.tcb.mongo.DAOBase
 import ru.tinkoff.tcb.mongo.MongoDAO
@@ -16,8 +14,7 @@ import ru.tinkoff.tcb.utils.crypto.AES
 import ru.tinkoff.tcb.utils.id.SID
 
 @implicitNotFound("Could not find an instance of DestinationConfigurationDAO for ${F}")
-@autoFunctorK
-trait DestinationConfigurationDAO[F[_]] extends MongoDAO[F, DestinationConfiguration] {
+trait DestinationConfigurationDAO[F[_]] extends MongoDAO[F, DestinationConfiguration] derives FunctorK {
   def getAll: F[Vector[DestinationConfiguration]] = findChunk(BsonDocument(), 0, Int.MaxValue)
   def getAllNames: F[Vector[SID[DestinationConfiguration]]]
 }

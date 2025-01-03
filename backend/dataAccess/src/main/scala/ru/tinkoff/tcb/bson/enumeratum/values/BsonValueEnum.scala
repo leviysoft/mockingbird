@@ -4,7 +4,6 @@ import scala.util.Try
 import enumeratum.values.*
 import oolong.bson.{BsonDecoder, BsonEncoder, BsonKeyDecoder, BsonKeyEncoder}
 import oolong.bson.given
-import ru.tinkoff.tcb.bson.*
 
 trait BsonValueEnum[ValueType, EntryType <: ValueEnumEntry[ValueType]] {
   this: ValueEnum[ValueType, EntryType] =>

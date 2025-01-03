@@ -8,8 +8,6 @@ import tofu.logging.Logging
 import tofu.logging.impl.ZUniversalLogging
 import zio.interop.catz.*
 
-import ru.tinkoff.tcb.criteria.*
-import ru.tinkoff.tcb.criteria.Typed.*
 import ru.tinkoff.tcb.mockingbird.dal.GrpcStubDAO
 import ru.tinkoff.tcb.mockingbird.dal.HttpStubDAO
 import ru.tinkoff.tcb.mockingbird.dal.ScenarioDAO
