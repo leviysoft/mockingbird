@@ -60,8 +60,7 @@ val mockingbird = (project in file("mockingbird"))
       Dependencies.logback
     ).flatten,
     libraryDependencies ++= Seq(
-      "com.github.pureconfig"         %% "pureconfig"     % "0.17.8",
-      "com.nrinaudo"                  %% "kantan.xpath"        % "0.5.2",
+      "com.github.pureconfig"         %% "pureconfig"          % "0.17.8",
       "com.lihaoyi"                   %% "scalatags"           % "0.9.1",
       "tf.tofu"                       %% "derevo-circe"        % Versions.derevo,
       "org.webjars.npm"                % "swagger-ui-dist"     % "3.32.5",

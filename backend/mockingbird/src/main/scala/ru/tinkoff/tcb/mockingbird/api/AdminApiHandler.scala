@@ -7,8 +7,6 @@ import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.*
 import eu.timepit.refined.types.string.NonEmptyString
 import io.scalaland.chimney.dsl.*
-import kantan.xpath.*
-import kantan.xpath.implicits.*
 import org.mongodb.scala.bson.*
 
 import ru.tinkoff.tcb.criteria.*

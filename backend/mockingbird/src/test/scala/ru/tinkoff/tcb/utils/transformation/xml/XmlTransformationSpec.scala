@@ -7,7 +7,6 @@ import advxml.transform.XmlZoom
 import advxml.xpath.*
 import io.circe.Json
 import io.circe.syntax.*
-import kantan.xpath.XmlSource
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -17,19 +16,6 @@ import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 import ru.tinkoff.tcb.utils.xml.SafeXML
 
 class XmlTransformationSpec extends AnyFunSuite with Matchers {
-  private def xml(str: String) = XmlSource[String].asUnsafeNode(str)
-
-  test("Fill template from KNode") {
-    val template: Node =
-      <root rt="${/root/rt}"><tag1 t1="a1">${{/root/tag1}}</tag1><tag2 t2="${root/tag2/@t2}">${{/root/tag2}}</tag2></root>
-
-    val data = xml("<root><tag1>test</tag1><tag2 t2=\"a2\">42</tag2><rt>kek</rt></root>")
-
-    val sut = template.substitute(data)
-
-    sut shouldBe <root rt="kek"><tag1 t1="a1">test</tag1><tag2 t2="a2">42</tag2></root>
-  }
-
   test("Fill template from Node") {
     val template: Node =
       <root rt="${/root/rt}"><tag1 t1="a1">${{/root/tag1}}</tag1><tag2 t2="${root/tag2}">${{/root/tag2}}</tag2></root>

@@ -22,7 +22,6 @@ import ru.tinkoff.tcb.circe.bson.*
 import ru.tinkoff.tcb.predicatedsl.Keyword
 import ru.tinkoff.tcb.predicatedsl.form.FormPredicate
 import ru.tinkoff.tcb.predicatedsl.json.JsonPredicate
-import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate
 import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate2
 import ru.tinkoff.tcb.protocol.bson.*
 import ru.tinkoff.tcb.protocol.json.*
