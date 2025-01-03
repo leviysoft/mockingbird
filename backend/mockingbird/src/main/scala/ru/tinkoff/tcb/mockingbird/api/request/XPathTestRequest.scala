@@ -6,7 +6,7 @@ import derevo.derive
 import sttp.tapir.derevo.schema
 
 import ru.tinkoff.tcb.utils.xml.XMLString
-import ru.tinkoff.tcb.xpath.Xpath
+import ru.tinkoff.tcb.xpath.SXpath
 
 @derive(decoder, encoder, schema)
-final case class XPathTestRequest(xml: XMLString, path: Xpath)
+final case class XPathTestRequest(xml: XMLString, path: SXpath)
