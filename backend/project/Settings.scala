@@ -44,27 +44,12 @@ object Settings {
       "-unchecked",
       "-Ybackend-parallelism",
       java.lang.Runtime.getRuntime.availableProcessors().toString,
-      "-Ycache-plugin-class-loader:last-modified",
-      "-Ycache-macro-class-loader:last-modified",
       prelude(), // standart imports + zio
-      "-Ymacro-annotations",
-      "-Xsource:3",
-      "-Vimplicits",
-      "-Vtype-diffs",
       // warning settings
-      "-Wconf:any:wv", // shows warning categories for nowarn (https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html)
+      //"-Wconf:any:wv", // shows warning categories for nowarn (https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html)
       "-Wunused:imports",
       "-Wunused:privates",
-      "-Wunused:synthetics",
-      "-Xlint:_",
-      "-Xlint:-byname-implicit",       // disabled due to scala bug https://github.com/scala/bug/issues/12072
-      "-Xlint:-unused",                // partially enabled via Wunused otherwise is false-positive in macros
-      "-Xlint:-missing-interpolator",  // false-positive on mongo request
-      "-Xlint:-type-parameter-shadow", // too many occurrences
-      "-Ywarn-unused:imports",
-      "-Ywarn-value-discard",
-      "-Ywarn-dead-code",
-      "-Ywarn-macros:after"
+      "-Wvalue-discard"
     ),
     wartremoverDependencies ~= (_.filterNot(_.name == "wartremover-contrib")),
     wartremoverDependencies += "org.wartremover" % "wartremover-contrib_2.13" % ContribWart.ContribVersion,
