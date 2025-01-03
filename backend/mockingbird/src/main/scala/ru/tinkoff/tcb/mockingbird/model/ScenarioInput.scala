@@ -17,7 +17,7 @@ import ru.tinkoff.tcb.bson.derivation.bsonDecoder
 import ru.tinkoff.tcb.bson.derivation.bsonEncoder
 import ru.tinkoff.tcb.circe.bson.*
 import ru.tinkoff.tcb.predicatedsl.json.JsonPredicate
-import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate2
+import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate
 import ru.tinkoff.tcb.protocol.schema.*
 import ru.tinkoff.tcb.utils.xml.SafeXML
 import ru.tinkoff.tcb.utils.xml.XMLString
@@ -94,7 +94,7 @@ final case class JLensInput(payload: JsonPredicate) extends ScenarioInput {
 }
 
 @derive(decoder, encoder)
-final case class XPathInput(payload: XmlPredicate2) extends ScenarioInput {
+final case class XPathInput(payload: XmlPredicate) extends ScenarioInput {
   override def checkMessage(message: String): Boolean =
     extractXML(message).exists(payload(_))
 

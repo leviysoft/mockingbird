@@ -29,39 +29,39 @@ import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.json.JObject
 import ru.tinkoff.tcb.xpath.SXpath
 
-abstract class XmlPredicate2 extends (NodeSeq => Boolean) {
-  def definition: XmlPredicate2.Spec
+abstract class XmlPredicate extends (NodeSeq => Boolean) {
+  def definition: XmlPredicate.Spec
 
   override def hashCode(): Int = definition.hashCode()
 
   override def equals(obj: Any): Boolean = obj match {
-    case xp: XmlPredicate2 => xp.definition == definition
-    case _                 => false
+    case xp: XmlPredicate => xp.definition == definition
+    case _                => false
   }
 }
 
-object XmlPredicate2 {
+object XmlPredicate {
   type Spec = Map[SXpath, Map[Keyword.Xml, Json]]
 
-  implicit val xmlPredicateDecoder: Decoder[XmlPredicate2] =
+  implicit val xmlPredicateDecoder: Decoder[XmlPredicate] =
     Decoder[Spec].emap(apply(_).toEither.leftMap(_.toList.mkString(", ")))
 
-  implicit val xmlPredicateEncoder: Encoder[XmlPredicate2] =
+  implicit val xmlPredicateEncoder: Encoder[XmlPredicate] =
     Encoder[Spec].contramap(_.definition)
 
-  implicit val xmlPredicateSchema: Schema[XmlPredicate2] =
-    implicitly[Schema[Spec]].as[XmlPredicate2]
+  implicit val xmlPredicateSchema: Schema[XmlPredicate] =
+    implicitly[Schema[Spec]].as[XmlPredicate]
 
-  implicit val xmlPredicateBsonDecoder: BsonDecoder[XmlPredicate2] =
+  implicit val xmlPredicateBsonDecoder: BsonDecoder[XmlPredicate] =
     BsonDecoder[Spec].afterReadTry(
       apply(_).toEither.leftMap(errs => new BsonInvalidOperationException(errs.toList.mkString(", "))).toTry
     )
 
-  implicit val xmlPredicateBsonEncoder: BsonEncoder[XmlPredicate2] =
+  implicit val xmlPredicateBsonEncoder: BsonEncoder[XmlPredicate] =
     BsonEncoder[Spec].beforeWrite(_.definition)
 
-  implicit val xmlPredicateRootOptionFields: RootOptionFields[XmlPredicate2] =
-    RootOptionFields.mk[XmlPredicate2](RootOptionFields[Spec].fields, RootOptionFields[Spec].isOptionItself)
+  implicit val xmlPredicateRootOptionFields: RootOptionFields[XmlPredicate] =
+    RootOptionFields.mk[XmlPredicate](RootOptionFields[Spec].fields, RootOptionFields[Spec].isOptionItself)
 
   /**
    * @param description
@@ -70,7 +70,7 @@ object XmlPredicate2 {
    */
   def apply(
       description: Spec
-  ): ValidatedNel[PredicateConstructionError, XmlPredicate2] =
+  ): ValidatedNel[PredicateConstructionError, XmlPredicate] =
     description.toVector
       .map { case (xPath, spec) =>
         spec.toVector
@@ -83,7 +83,7 @@ object XmlPredicate2 {
       .reduceOption(_ |+| _)
       .getOrElse(Validated.valid((_: NodeSeq) => true))
       .map(f =>
-        new XmlPredicate2 {
+        new XmlPredicate {
           override val definition: Map[SXpath, Map[Keyword.Xml, Json]] = description
 
           override def apply(xml: NodeSeq): Boolean = f(xml)

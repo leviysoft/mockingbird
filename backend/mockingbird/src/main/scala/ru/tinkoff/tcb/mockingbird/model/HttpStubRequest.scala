@@ -22,7 +22,7 @@ import ru.tinkoff.tcb.circe.bson.*
 import ru.tinkoff.tcb.predicatedsl.Keyword
 import ru.tinkoff.tcb.predicatedsl.form.FormPredicate
 import ru.tinkoff.tcb.predicatedsl.json.JsonPredicate
-import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate2
+import ru.tinkoff.tcb.predicatedsl.xml.XmlPredicate
 import ru.tinkoff.tcb.protocol.bson.*
 import ru.tinkoff.tcb.protocol.json.*
 import ru.tinkoff.tcb.protocol.schema.*
@@ -162,7 +162,7 @@ final case class JLensRequest(
 final case class XPathRequest(
     headers: Map[String, String],
     query: Map[JsonOptic, Map[Keyword.Json, Json]] = Map.empty,
-    body: XmlPredicate2,
+    body: XmlPredicate,
     extractors: Map[String, XmlExtractor] = Map.empty,
     inlineCData: Boolean = false
 ) extends HttpStubRequest {
@@ -333,7 +333,7 @@ final case class JLensPart(headers: Map[String, String], body: JsonPredicate) ex
 }
 
 @derive(decoder, encoder)
-final case class XPathPart(headers: Map[String, String], body: XmlPredicate2) extends RequestPart {
+final case class XPathPart(headers: Map[String, String], body: XmlPredicate) extends RequestPart {
   override def checkBody(value: String): Boolean = Try(SafeXML.loadString(value)).map(body).getOrElse(false)
 
   override def extractJson(body: String): Option[Json] = None
