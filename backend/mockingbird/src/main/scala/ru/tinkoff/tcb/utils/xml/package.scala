@@ -17,12 +17,12 @@ import ru.tinkoff.tcb.generic.RootOptionFields
 package object xml {
   val emptyNode: Elem = <empty/>
 
-  @newtype class XMLString private (val asString: String)
+  @newtype class XMLString private (val toNode: Node)
 
   object XMLString {
-    def fromString(xml: String): Try[XMLString] = Try(SafeXML.loadString(xml)).as(xml.coerce)
+    def fromString(xml: String): Try[XMLString] = Try(SafeXML.loadString(xml).asInstanceOf[Node].coerce)
 
-    def fromNode(node: Node): XMLString = node.mkString.coerce
+    def fromNode(node: Node): XMLString = node.coerce
 
     def unapply(str: String): Option[XMLString] =
       fromString(str).toOption
@@ -31,16 +31,13 @@ package object xml {
       Decoder.decodeString.emapTry(fromString)
 
     implicit val xmlStringEncoder: Encoder[XMLString] =
-      Encoder.encodeString.coerce
+      Encoder.encodeString.contramap[XMLString](_.asString)
 
-    /*
-      Validation is not performed here to speed up reading
-     */
     implicit val xmlStringBsonDecoder: BsonDecoder[XMLString] =
-      BsonDecoder[String].coerce
+      BsonDecoder[String].afterReadTry(fromString)
 
     implicit val xmlStringBsonEncoder: BsonEncoder[XMLString] =
-      BsonEncoder[String].coerce
+      BsonEncoder[String].beforeWrite(_.asString)
 
     implicit val xmlStringSchema: Schema[XMLString] =
       Schema.schemaForString.as[XMLString]
@@ -50,6 +47,6 @@ package object xml {
   }
 
   implicit class XMLStringSyntax(private val self: XMLString) extends AnyVal {
-    def toNode: Node = SafeXML.loadString(self.asString)
+    def asString: String = self.toNode.toString()
   }
 }
