@@ -59,8 +59,7 @@ package object xml {
   }
 
   implicit class XMLStringSyntax(private val self: XMLString) extends AnyVal {
-    def toNode: Node   = SafeXML.loadString(self.asString)
-    def toKNode: KNode = XmlSource[String].asUnsafeNode(self.asString)
+    def toNode: Node = SafeXML.loadString(self.asString)
   }
 
   implicit class NodePrinter(private val node: KNode) extends AnyVal {

@@ -184,9 +184,9 @@ final class AdminApiHandler(
     stateDAO.findBySpec(body.query)
 
   def testXpath(body: XPathTestRequest): String =
-    body.xml.toKNode.evalXPath[Node](body.path.toXPathExpr) match {
-      case Left(error) => s"Error: $error"
-      case Right(node) => s"Success: ${node.print()}"
+    body.path.toZoom.bind(<wrapper>{body.xml.toNode}</wrapper>).run[Option] match {
+      case None       => s"No match"
+      case Some(node) => s"Success: $node"
     }
 
   def tryResolveStub(

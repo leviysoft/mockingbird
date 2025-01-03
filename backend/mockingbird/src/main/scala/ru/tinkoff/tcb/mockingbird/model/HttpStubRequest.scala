@@ -109,7 +109,7 @@ final case class XmlRequest(
     inlineCData: Boolean = false
 ) extends HttpStubRequest {
   override def checkBody(rBody: RequestBody): Boolean =
-    extractXML(rBody).contains(body.toKNode)
+    extractXML(rBody).contains(body.toNode)
 
   override def extractJson(rBody: RequestBody): Option[Json] = None
 
