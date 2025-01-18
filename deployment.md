@@ -7,9 +7,11 @@ Environment requirements:
 mockingbird is available in two variants:
 - native application
 
-`ghcr.io/tinkoff/mockingbird:<TAG>-native`
+~~`ghcr.io/tinkoff/mockingbird:<TAG>-native`~~
 
-The recommended image for most cases. It is a Scala application compiled into a native image using GraalVM.
+~~The recommended image for most cases. It is a Scala application compiled into a native image using GraalVM.~~
+
+Temporarily not available (last available is 5.0.0)
 
 - image on classic JVM
 

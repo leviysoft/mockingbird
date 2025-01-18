@@ -7,9 +7,11 @@
 mockingbird доступен в двух вариантах
 - native приложение
 
-`ghcr.io/tinkoff/mockingbird:<TAG>-native`
+~~`ghcr.io/tinkoff/mockingbird:<TAG>-native`~~
 
-Рекомендуемый образ для большинства случаев. Представляет собой скомпилированное в native-image с помощью GraalVM Scala приложение
+~~Рекомендуемый образ для большинства случаев. Представляет собой скомпилированное в native-image с помощью GraalVM Scala приложение~~
+
+Временно недоступно.
 
 - образ на классической JVM
 
