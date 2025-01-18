@@ -4,7 +4,6 @@ import scala.xml.Node
 
 import io.circe.Json
 import mouse.option.*
-import oolong.bson.*
 import oolong.bson.given
 import oolong.dsl.*
 import oolong.mongo.*
