@@ -78,6 +78,8 @@ jobs:
           java-version: 21
           check-latest: true
 
+      - uses: sbt/setup-sbt@v1
+
       - name: Compile and test
         run: |
           cd backend
@@ -117,6 +119,8 @@ jobs:
           distribution: temurin
           java-version: 21
           check-latest: true
+
+      - uses: sbt/setup-sbt@v1
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v3
@@ -210,6 +214,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
 
+      - uses: sbt/setup-sbt@v1
+
       - name: Install Protoc
         uses: arduino/setup-protoc@v3
         with:
@@ -296,6 +302,8 @@ jobs:
           java-version: 17
           check-latest: true
 
+      - uses: sbt/setup-sbt@v1
+
       - name: Test docker image
         env:
           MOCKINGBIRD_IMAGE: ${{ env.MOCKINGBIRD_TEST_IMAGE_JVM }}
@@ -330,6 +338,8 @@ jobs:
           java-version: 17
           check-latest: true
 
+      - uses: sbt/setup-sbt@v1
+
       - name: Test docker image
         env:
           MOCKINGBIRD_IMAGE: ${{ env.MOCKINGBIRD_TEST_IMAGE_NATIVE }}
@@ -349,6 +359,8 @@ jobs:
           distribution: temurin
           java-version: 17
           check-latest: true
+
+      - uses: sbt/setup-sbt@v1
 
       - name: Run
         run: |
