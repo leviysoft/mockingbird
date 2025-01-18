@@ -7,7 +7,7 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.SSLEngine
 import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509ExtendedTrustManager
-import scala.annotation.nowarn
+import scala.util.boundary
 
 /*
   Rewritten from https://github.com/line/armeria/blob/main/core/src/main/java/com/linecorp/armeria/client/IgnoreHostsTrustManager.java
@@ -48,15 +48,15 @@ class TrustSomeHostsManager(delegate: X509ExtendedTrustManager, insecureHosts: S
 }
 
 object TrustSomeHostsManager {
-  @nowarn("cat=lint-nonlocal-return")
-  def of(insecureHosts: Set[String]): TrustSomeHostsManager = {
-    val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
-    trustManagerFactory.init(null.asInstanceOf[KeyStore])
-    val trustManagers = trustManagerFactory.getTrustManagers
-    for (tm <- trustManagers)
-      if (tm.isInstanceOf[X509ExtendedTrustManager])
-        return new TrustSomeHostsManager(tm.asInstanceOf[X509ExtendedTrustManager], insecureHosts)
+  def of(insecureHosts: Set[String]): TrustSomeHostsManager =
+    boundary {
+      val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
+      trustManagerFactory.init(null.asInstanceOf[KeyStore])
+      val trustManagers = trustManagerFactory.getTrustManagers
+      for (tm <- trustManagers)
+        if (tm.isInstanceOf[X509ExtendedTrustManager])
+          boundary.break(new TrustSomeHostsManager(tm.asInstanceOf[X509ExtendedTrustManager], insecureHosts))
 
-    throw new NoSuchElementException("cannot resolve default trust manager")
-  }
+      throw new NoSuchElementException("cannot resolve default trust manager")
+    }
 }

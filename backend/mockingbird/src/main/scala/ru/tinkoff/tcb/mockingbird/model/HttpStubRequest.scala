@@ -41,9 +41,8 @@ sealed trait HttpStubRequest derives BsonDecoder, BsonEncoder {
 
   def checkHeaders(hs: Map[String, String]): Boolean =
     headers.forall { case (k, v) =>
-      hs.exists {
-        case (kx, vx) => k.toLowerCase == kx.toLowerCase && v == vx
-        case _        => false
+      hs.exists { case (kx, vx) =>
+        k.toLowerCase == kx.toLowerCase && v == vx
       }
     }
 
@@ -235,9 +234,8 @@ sealed trait RequestPart derives BsonDecoder, BsonEncoder {
 
   def checkHeaders(hs: Map[String, String]): Boolean =
     headers.forall { case (k, v) =>
-      hs.exists {
-        case (kx, vx) => k.toLowerCase == kx.toLowerCase && v == vx
-        case _        => false
+      hs.exists { case (kx, vx) =>
+        k.toLowerCase == kx.toLowerCase && v == vx
       }
     }
 

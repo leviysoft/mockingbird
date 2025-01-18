@@ -6,7 +6,6 @@ import oolong.bson.given
 import org.mongodb.scala.bson.Document
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.IndexOptions
-import org.mongodb.scala.model.changestream.ChangeStreamDocument
 
 import ru.tinkoff.tcb.dataaccess.DAO
 import ru.tinkoff.tcb.dataaccess.UpdateResult
@@ -52,8 +51,6 @@ trait MongoDAO[F[_], T] extends DAO[F, T] {
       rof: RootOptionFields[P],
       ps: PropSubset[P, T]
   ): F[UpdateResult]
-
-  def subscribe(consumer: ChangeStreamDocument[T] => Unit): Unit
 
   def createIndex(fields: Sort, options: IndexOptions = IndexOptions()): F[Unit]
 }

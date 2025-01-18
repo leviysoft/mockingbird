@@ -6,12 +6,10 @@ import oolong.bson.*
 import oolong.bson.given
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
 import org.mongodb.scala.MongoCollection
-import org.mongodb.scala.Observer
 import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.bson.*
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.IndexOptions
-import org.mongodb.scala.model.changestream.*
 
 import ru.tinkoff.tcb.bson.PatchGenerator
 import ru.tinkoff.tcb.dataaccess.UpdateResult
@@ -167,33 +165,6 @@ abstract class DAOBase[T: BsonDecoder: BsonEncoder](
         else
           insert(create).map(UpdateResult(0, _))
       }
-
-  override def subscribe(consumer: ChangeStreamDocument[T] => Unit): Unit =
-    collection
-      .watch()
-      .fullDocument(FullDocument.UPDATE_LOOKUP)
-      .subscribe(new Observer[ChangeStreamDocument[BsonDocument]] {
-        override def onNext(result: ChangeStreamDocument[BsonDocument]): Unit =
-          consumer(
-            new ChangeStreamDocument[T](
-              result.getOperationType,
-              result.getResumeToken,
-              result.getNamespaceDocument,
-              result.getDestinationNamespaceDocument,
-              BsonDecoder[T].fromBson(result.getFullDocument).get,
-              result.getDocumentKey,
-              result.getClusterTime,
-              result.getUpdateDescription,
-              result.getTxnNumber,
-              result.getLsid
-            )
-          )
-
-        override def onError(e: Throwable): Unit =
-          subscribe(consumer)
-
-        override def onComplete(): Unit = ()
-      })
 
   override def createIndex(defn: Sort, options: IndexOptions): Task[Unit] =
     ZIO.fromFuture(implicit ec => collection.createIndex(defn, options).head()).unit
