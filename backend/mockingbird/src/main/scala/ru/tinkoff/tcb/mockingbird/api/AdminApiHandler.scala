@@ -238,7 +238,7 @@ final class AdminApiHandler(
       service: Option[String],
       labels: List[String]
   ): RIO[WLD, Vector[HttpStub]] = {
-    val basePred = query[HttpStub](hs => hs.scope != lift(Scope.Countdown) || hs.times.!! > 0)
+    val basePred = query[HttpStub](hs => hs.scope != lift(Scope.Countdown.asInstanceOf[Scope]) || hs.times.!! > 0)
 
     val queryPart = queryString.map(qs =>
       query[HttpStub](hs =>
@@ -269,7 +269,7 @@ final class AdminApiHandler(
       service: Option[String],
       labels: List[String]
   ): RIO[WLD, Vector[Scenario]] = {
-    val basePred = query[Scenario](s => s.scope != lift(Scope.Countdown) || s.times.!! > 0)
+    val basePred = query[Scenario](s => s.scope != lift(Scope.Countdown.asInstanceOf[Scope]) || s.times.!! > 0)
 
     val queryPart = queryString.map(qs =>
       query[Scenario](s =>
@@ -434,7 +434,7 @@ final class AdminApiHandler(
   ): RIO[WLD, Vector[GrpcStubView]] =
     for {
       scopeQuery <- ZIO.succeed(
-        query[GrpcStub](gs => gs.scope != lift(Scope.Countdown) && gs.times.!! > 0)
+        query[GrpcStub](gs => gs.scope != lift(Scope.Countdown.asInstanceOf[Scope]) && gs.times.!! > 0)
       )
       nameDescriptions <- ZIO
         .foreach(queryString) { qs =>
@@ -785,7 +785,7 @@ final class AdminApiHandler(
       queryString: Option[String],
       labels: List[String]
   ): RIO[WLD, Vector[GrpcStub]] = {
-    val baseQuery = query[GrpcStub](gs => gs.scope != lift(Scope.Countdown) || gs.times.!! > 0)
+    val baseQuery = query[GrpcStub](gs => gs.scope != lift(Scope.Countdown.asInstanceOf[Scope]) || gs.times.!! > 0)
 
     val queryPart = queryString.map(qs =>
       query[GrpcStub](gs =>
