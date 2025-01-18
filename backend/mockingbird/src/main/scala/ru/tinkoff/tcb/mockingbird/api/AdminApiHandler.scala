@@ -243,8 +243,8 @@ final class AdminApiHandler(
     val queryPart = queryString.map(qs =>
       query[HttpStub](hs =>
         hs.id == lift(qs) ||
-          Pattern.compile(lift(qs), Pattern.CASE_INSENSITIVE).matcher(hs.name).matches() ||
-          Pattern.compile(lift(qs), Pattern.CASE_INSENSITIVE).matcher(hs.path.!!).matches() ||
+          Pattern.compile(qs, Pattern.CASE_INSENSITIVE).matcher(hs.name).matches() ||
+          Pattern.compile(qs, Pattern.CASE_INSENSITIVE).matcher(hs.path.!!).matches() ||
           unchecked(BsonDocument("pathPattern" -> BsonDocument("$regex" -> qs, "$options" -> "i")))
       )
     )
@@ -274,9 +274,9 @@ final class AdminApiHandler(
     val queryPart = queryString.map(qs =>
       query[Scenario](s =>
         s.id == lift(qs) ||
-          Pattern.compile(lift(qs), Pattern.CASE_INSENSITIVE).matcher(s.name).matches() ||
-          Pattern.compile(lift(qs), Pattern.CASE_INSENSITIVE).matcher(s.source).matches() ||
-          Pattern.compile(lift(qs), Pattern.CASE_INSENSITIVE).matcher(s.destination.!!).matches()
+          Pattern.compile(qs, Pattern.CASE_INSENSITIVE).matcher(s.name).matches() ||
+          Pattern.compile(qs, Pattern.CASE_INSENSITIVE).matcher(s.source).matches() ||
+          Pattern.compile(qs, Pattern.CASE_INSENSITIVE).matcher(s.destination.!!).matches()
       )
     )
 
@@ -440,7 +440,7 @@ final class AdminApiHandler(
         .foreach(queryString) { qs =>
           grpcMethodDescriptionDAO.findChunk(
             query[GrpcMethodDescription](gmd =>
-              Pattern.compile(lift(qs), Pattern.CASE_INSENSITIVE).matcher(gmd.methodName).matches()
+              Pattern.compile(qs, Pattern.CASE_INSENSITIVE).matcher(gmd.methodName).matches()
             ),
             0,
             Integer.MAX_VALUE
@@ -460,7 +460,7 @@ final class AdminApiHandler(
         val queryPart = queryString.map(qs =>
           query[GrpcStub](gs =>
             gs.id == lift(qs) ||
-              Pattern.compile(lift(qs), Pattern.CASE_INSENSITIVE).matcher(gs.name).matches() ||
+              Pattern.compile(qs, Pattern.CASE_INSENSITIVE).matcher(gs.name).matches() ||
               lift(nameDescriptions.map(_.id)).contains(gs.methodDescriptionId)
           )
         )
@@ -790,7 +790,7 @@ final class AdminApiHandler(
     val queryPart = queryString.map(qs =>
       query[GrpcStub](gs =>
         gs.id == lift(qs) ||
-          Pattern.compile(lift(qs), Pattern.CASE_INSENSITIVE).matcher(gs.name).matches() ||
+          Pattern.compile(qs, Pattern.CASE_INSENSITIVE).matcher(gs.name).matches() ||
           gs.methodDescriptionId == lift(qs)
       )
     )
@@ -922,7 +922,7 @@ final class AdminApiHandler(
     val queryPart = queryString.map(qs =>
       query[GrpcMethodDescription](gs =>
         gs.id == lift(qs) ||
-          Pattern.compile(lift(qs), Pattern.CASE_INSENSITIVE).matcher(gs.service).matches()
+          Pattern.compile(qs, Pattern.CASE_INSENSITIVE).matcher(gs.service).matches()
       )
     )
 
