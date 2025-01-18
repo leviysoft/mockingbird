@@ -4,6 +4,7 @@ import java.net.http.HttpClient
 import java.security.SecureRandom
 import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.SSLContext
+import scala.annotation.nowarn
 import scala.jdk.DurationConverters.*
 
 import com.mongodb.ConnectionString
@@ -213,6 +214,7 @@ object Mockingbird {
     _ = builder.build().start()
   } yield ()
 
+  @nowarn("name=ValueDiscarding")
   def main(args: Array[String]): Unit =
     Unsafe.unsafe { implicit us =>
       wldRuntime.unsafe.run {

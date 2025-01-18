@@ -10,4 +10,4 @@ sealed private[optics] trait PathPart {
 }
 final private[optics] case class Field(name: String) extends PathPart
 final private[optics] case class Index(index: Int) extends PathPart
-final private[optics] case object Traverse extends PathPart
+private[optics] case object Traverse extends PathPart

@@ -49,7 +49,7 @@ object Settings {
       "-Yretain-trees", //for accessing default values by magnolia
       prelude(), // standart imports + zio
       // warning settings
-      //"-Wconf:any:wv", // shows warning categories for nowarn (https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html)
+      "-Wconf:any:v", // shows warning categories for nowarn (https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html)
       "-Wunused:imports",
       "-Wunused:privates",
       "-Wvalue-discard"
