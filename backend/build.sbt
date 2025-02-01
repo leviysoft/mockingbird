@@ -2,7 +2,7 @@ import ProjectKeys._
 import ch.epfl.scala.sbtmissinglink.MissingLinkPlugin.missinglinkConflictsTag
 import sbt.Keys.concurrentRestrictions
 
-ThisBuild / scalaVersion := "3.3.4"
+ThisBuild / scalaVersion := "3.6.3"
 
 ThisBuild / concurrentRestrictions += Tags.limit(missinglinkConflictsTag, 1)
 
