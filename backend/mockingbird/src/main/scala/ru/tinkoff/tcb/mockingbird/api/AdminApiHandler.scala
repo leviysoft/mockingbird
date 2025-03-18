@@ -31,8 +31,6 @@ import ru.tinkoff.tcb.mockingbird.dal.ScenarioDAO
 import ru.tinkoff.tcb.mockingbird.dal.ServiceDAO
 import ru.tinkoff.tcb.mockingbird.dal.SourceConfigurationDAO
 import ru.tinkoff.tcb.mockingbird.error.*
-import ru.tinkoff.tcb.mockingbird.error.DuplicationError
-import ru.tinkoff.tcb.mockingbird.error.ValidationError
 import ru.tinkoff.tcb.mockingbird.grpc.ProtobufSchemaResolver
 import ru.tinkoff.tcb.mockingbird.model.DestinationConfiguration
 import ru.tinkoff.tcb.mockingbird.model.GrpcMethodDescription
