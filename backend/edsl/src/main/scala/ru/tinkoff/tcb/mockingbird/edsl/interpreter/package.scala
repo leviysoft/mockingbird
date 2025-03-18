@@ -1,7 +1,6 @@
 package ru.tinkoff.tcb.mockingbird.edsl
 
 import sttp.client4.*
-import sttp.client4.DuplicateHeaderBehavior
 import sttp.model.Uri
 import sttp.model.Uri.QuerySegment
 

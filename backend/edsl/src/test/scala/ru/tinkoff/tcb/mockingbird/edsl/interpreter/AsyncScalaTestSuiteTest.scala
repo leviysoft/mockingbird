@@ -9,7 +9,6 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.Informer
 import org.scalatest.matchers.should.Matchers
 import sttp.client4.*
-import sttp.client4.Response
 import sttp.client4.httpclient.HttpClientFutureBackend
 import sttp.client4.testing.WebSocketBackendStub
 import sttp.model.Header
