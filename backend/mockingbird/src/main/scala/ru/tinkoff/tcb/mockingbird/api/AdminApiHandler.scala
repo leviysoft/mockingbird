@@ -4,8 +4,6 @@ import java.util.regex.Pattern
 import scala.util.control.NonFatal
 
 import eu.timepit.refined.*
-import eu.timepit.refined.collection.NonEmpty
-import eu.timepit.refined.numeric.*
 import eu.timepit.refined.types.string.NonEmptyString
 import io.scalaland.chimney.dsl.*
 import neotype.*
