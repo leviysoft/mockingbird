@@ -80,9 +80,9 @@ object Renderable {
     type TypeClassType <: Renderable[T]
     def self: T
     val typeClassInstance: TypeClassType
-    def renderJson: Json                                           = typeClassInstance.renderJson(self)
+    def renderJson: Json = typeClassInstance.renderJson(self)
     def fill[A](values: A)(implicit subst: Substitute[Json, A]): T = typeClassInstance.fill[A](self, values)(using subst)
-    def withPrefix(prefix: String): T                              = typeClassInstance.withPrefix(self, prefix)
+    def withPrefix(prefix: String): T = typeClassInstance.withPrefix(self, prefix)
   }
 
   trait AllOps[T] extends Ops[T]
