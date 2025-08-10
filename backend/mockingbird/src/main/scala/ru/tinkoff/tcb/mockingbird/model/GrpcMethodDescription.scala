@@ -14,7 +14,6 @@ import sttp.tapir.Schema
 
 import ru.tinkoff.tcb.mockingbird.api.request.CreateGrpcStubRequest
 import ru.tinkoff.tcb.mockingbird.error.ValidationError
-import ru.tinkoff.tcb.protocol.bson.*
 import ru.tinkoff.tcb.utils.id.SID
 
 final case class GrpcMethodDescription(
