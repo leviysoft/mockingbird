@@ -18,7 +18,6 @@ import ru.tinkoff.tcb.mockingbird.model.ByteArray
 import ru.tinkoff.tcb.mockingbird.model.GrpcConnectionType
 import ru.tinkoff.tcb.mockingbird.model.GrpcMethodDescription
 import ru.tinkoff.tcb.mockingbird.model.GrpcProtoDefinition
-import ru.tinkoff.tcb.protocol.bson.*
 import ru.tinkoff.tcb.utils.id.SID
 
 final case class UpdateGrpcMethodDescriptionRequest(
