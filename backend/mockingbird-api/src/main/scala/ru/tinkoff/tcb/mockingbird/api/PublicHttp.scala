@@ -79,7 +79,7 @@ final class PublicHttp(handler: PublicApiHandler) {
 
   val http: List[Router => Route] =
     (withString ++ withMultipart ++ swaggerEndpoints)
-      .map(VertxZioServerInterpreter(options).route(_)(wldRuntime))
+      .map(VertxZioServerInterpreter(options).route(_)(using wldRuntime))
 
   private def handle(
       method: HttpMethod,

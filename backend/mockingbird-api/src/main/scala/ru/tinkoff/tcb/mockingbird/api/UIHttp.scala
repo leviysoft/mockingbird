@@ -39,7 +39,7 @@ class UIHttp {
     )
 
   val http: List[Router => Route] =
-    List(versionEndpoint, staticEndpoint, indexEndpoint).map(VertxZioServerInterpreter().route(_)(wldRuntime))
+    List(versionEndpoint, staticEndpoint, indexEndpoint).map(VertxZioServerInterpreter().route(_)(using wldRuntime))
 
   private def resourcesGetServerEndpoint2[F[_]](prefix: EndpointInput[Unit])(
       classLoader: ClassLoader,

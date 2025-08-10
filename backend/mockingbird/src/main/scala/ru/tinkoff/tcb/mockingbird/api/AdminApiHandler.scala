@@ -1082,6 +1082,6 @@ object AdminApiHandler {
       scenarioResolver,
       protoResolver,
       rm
-    )(aes)
+    )(using aes)
   }
 }

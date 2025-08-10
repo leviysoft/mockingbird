@@ -132,7 +132,7 @@ final class AdminHttp(config: ServerConfig, handler: AdminApiHandler) {
 
   val http: List[Router => Route] =
     (allLogic ++ swaggerEndpoints).map(
-      VertxZioServerInterpreter(serverOptions).route(_)(wldRuntime)
+      VertxZioServerInterpreter(serverOptions).route(_)(using wldRuntime)
     )
 }
 
