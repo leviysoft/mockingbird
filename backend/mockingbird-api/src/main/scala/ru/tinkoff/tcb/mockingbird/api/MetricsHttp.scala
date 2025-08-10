@@ -15,7 +15,7 @@ class MetricsHttp(registry: PrometheusMeterRegistry) {
 
   val http: Router => Route =
     VertxZioServerInterpreter()
-      .route(metricsEndpoint.zServerLogic[WLD](_ => ZIO.succeed(registry.scrape())))(wldRuntime)
+      .route(metricsEndpoint.zServerLogic[WLD](_ => ZIO.succeed(registry.scrape())))(using wldRuntime)
 }
 
 object MetricsHttp {

@@ -14,9 +14,9 @@ import sttp.model.Uri
 import ru.tinkoff.tcb.mockingbird.edsl.interpreter.AsyncScalaTestSuite
 
 trait BaseSuite extends AsyncScalaTestSuite with TestContainerForAll {
-  private var httpHost: Uri = _
+  private var httpHost: Uri = scala.compiletime.uninitialized
   @annotation.nowarn("msg=is never used")
-  private var grpcHost: String = _
+  private var grpcHost: String = scala.compiletime.uninitialized
 
   override def baseUri = httpHost
 

@@ -54,7 +54,7 @@ trait AsyncScalaTestSuite extends AsyncFunSuiteLike {
   private[interpreter] def stepsBuilder: FunctionK[Step, Future] = new (Step ~> Future) {
     override def apply[A](fa: Step[A]): Future[A] =
       fa match {
-        case Describe(text, pos) => Future(info(text)(pos))
+        case Describe(text, pos) => Future(info(text)(using pos))
         case SendHttp(request, pos) =>
           buildRequest(baseUri, request).send(sttpbackend).map(_.asInstanceOf[A])
         case CheckHttp(response, expects, pos) =>
