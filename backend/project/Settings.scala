@@ -41,7 +41,7 @@ object Settings {
       "-feature",
       "-language:higherKinds",
       "-language:implicitConversions",
-      "-release:21",
+      "-release", "21",
       "-unchecked",
       "-Xmax-inlines", "64",
       "-Ybackend-parallelism",
