@@ -41,7 +41,7 @@ object Settings {
       "-feature",
       "-language:higherKinds",
       "-language:implicitConversions",
-      "-release", "17", //https://github.com/scala/scala3/issues/20373
+      "-release", "21",
       "-unchecked",
       "-Xmax-inlines", "64",
       "-Ybackend-parallelism",

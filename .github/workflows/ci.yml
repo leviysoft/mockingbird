@@ -299,7 +299,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
           check-latest: true
 
       - uses: sbt/setup-sbt@v1
@@ -357,7 +357,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
           check-latest: true
 
       - uses: sbt/setup-sbt@v1
