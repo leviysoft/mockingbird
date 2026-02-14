@@ -28,7 +28,7 @@ object Settings {
 
   val common = Seq(
     organization := "ru.tinkoff",
-    scalaVersion := "3.7.4",
+    scalaVersion := "3.8.1",
     Compile / packageDoc / publishArtifact := false,
     Compile / packageSrc / publishArtifact := false,
     Compile / doc / sources := Seq.empty,
@@ -41,7 +41,7 @@ object Settings {
       "-feature",
       "-language:higherKinds",
       "-language:implicitConversions",
-      "-release:11",
+      "-release:24",
       "-unchecked",
       "-Xmax-inlines", "64",
       "-Ybackend-parallelism",
