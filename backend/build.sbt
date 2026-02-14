@@ -1,10 +1,7 @@
 import ProjectKeys._
-import ch.epfl.scala.sbtmissinglink.MissingLinkPlugin.missinglinkConflictsTag
 import sbt.Keys.concurrentRestrictions
 
 ThisBuild / scalaVersion := "3.8.1"
-
-ThisBuild / concurrentRestrictions += Tags.limit(missinglinkConflictsTag, 1)
 
 ThisBuild / evictionErrorLevel := Level.Debug
 

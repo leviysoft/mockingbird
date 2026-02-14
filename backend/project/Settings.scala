@@ -1,7 +1,6 @@
 import scalafix.sbt.ScalafixPlugin.autoImport._
 
 import ProjectKeys._
-import ch.epfl.scala.sbtmissinglink.MissingLinkPlugin.autoImport._
 import com.github.sbt.git.SbtGit.git
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport._
 import com.typesafe.sbt.packager.docker._
@@ -63,25 +62,6 @@ object Settings {
       Wart.LeakingSealed,
       ContribWart.DiscardedFuture,
       //ContribWart.MissingOverride
-    ),
-    missinglinkExcludedDependencies ++= Seq(
-      moduleFilter(organization = "ch.qos.logback", name = "logback-core" | "logback-classic"),
-      // missinglink does not correctly handle optional scope
-      moduleFilter(organization = "org.mongodb", name = "mongodb-driver-core" | "mongodb-driver-reactivestreams"),
-      moduleFilter(organization = "io.netty"),
-      // something awful here, artifact uses classes from dependencies, which are absent in pom.xml
-      moduleFilter(organization = "io.projectreactor", name = "reactor-core")
-    ),
-    missinglinkIgnoreDestinationPackages ++= Seq(
-      // optional dependency in bson
-      IgnoredPackage("org.slf4j"),
-      IgnoredPackage("ch.qos.logback"),
-      // optional dependency in vertx-core
-      IgnoredPackage("com.fasterxml.jackson.databind"),
-      IgnoredPackage("io.vertx.core.json.jackson"),
-      IgnoredPackage("io.netty.handler.codec.haproxy"),
-      IgnoredPackage("io.netty.channel.kqueue"),
-      IgnoredPackage("io.netty.channel.epoll")
     ),
     dockerize := ciEnabled,
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),

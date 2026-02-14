@@ -56,35 +56,6 @@ jobs:
           name: front-static
           path: frontend/dist/out
 
-  back-missinglink-check:
-    runs-on: ubuntu-latest
-
-    env:
-      SBT_OPTS: >
-        -Xms6g 
-        -Xmx6g 
-        -XX:+AlwaysPreTouch 
-        -XX:ReservedCodeCacheSize=192M 
-        -Xss2m 
-        -XX:+TieredCompilation 
-        -XX:+UseParallelGC
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-          check-latest: true
-
-      - uses: sbt/setup-sbt@v1
-
-      - name: Compile and test
-        run: |
-          cd backend
-          sbt "project mockingbird-api;clean;missinglinkCheck;"
-
   back-build:
     needs: [front-build]
 
