@@ -72,7 +72,7 @@ object Check {
    * null value
    * @group CheckJson
    */
-  final case object CheckJsonNull extends CheckJson
+  case object CheckJsonNull extends CheckJson
 
   /**
    * Any valid JSON.

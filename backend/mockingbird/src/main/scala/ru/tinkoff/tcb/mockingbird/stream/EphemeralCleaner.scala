@@ -17,6 +17,7 @@ import ru.tinkoff.tcb.mockingbird.model.HttpStub
 import ru.tinkoff.tcb.mockingbird.model.Scenario
 import ru.tinkoff.tcb.mockingbird.model.Scope
 
+@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 final class EphemeralCleaner(
     stubDAO: HttpStubDAO[Task],
     scenarioDAO: ScenarioDAO[Task],

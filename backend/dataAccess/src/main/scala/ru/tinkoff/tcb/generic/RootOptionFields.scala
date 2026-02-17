@@ -35,7 +35,7 @@ object RootOptionFields extends AutoDerivation[RootOptionFields] {
   implicit def refn[T, R, F[_, _]](implicit rt: RefType[F], rof: RootOptionFields[T]): RootOptionFields[F[T, R]] =
     mk(rof.fields)
 
-  def join[T](caseClass: CaseClass[RootOptionFields, T]): RootOptionFields[T] =
+  override def join[T](caseClass: CaseClass[RootOptionFields, T]): RootOptionFields[T] =
     mk(
       caseClass.parameters
         .foldLeft(Set.newBuilder[String])((acc, fld) =>
@@ -45,5 +45,5 @@ object RootOptionFields extends AutoDerivation[RootOptionFields] {
         .result()
     )
 
-  def split[T](sealedTrait: SealedTrait[RootOptionFields, T]): RootOptionFields[T] = mk(Set.empty)
+  override def split[T](sealedTrait: SealedTrait[RootOptionFields, T]): RootOptionFields[T] = mk(Set.empty)
 }

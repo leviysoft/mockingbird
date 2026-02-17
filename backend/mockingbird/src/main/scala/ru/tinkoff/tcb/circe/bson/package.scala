@@ -57,7 +57,7 @@ package object bson {
       final override def onNumber(value: JsonNumber): Either[Throwable, BsonValue] = {
         val asDouble = value.toDouble
 
-        if (java.lang.Double.compare(asDouble, -0.0) == 0) {
+        if (java.lang.Double.compare(asDouble, -0.0) === 0) {
           Right(BsonDecimal128(Decimal128.NEGATIVE_ZERO))
         } else
           value.toLong match {
@@ -110,5 +110,5 @@ package object bson {
     (value: BsonValue) => bsonToJson(value).toTry
 
   implicit final lazy val jsonBsonWriter: BsonEncoder[Json] =
-    (value: Json) => jsonToBson(value).toTry.get
+    (value: Json) => jsonToBson(value).fold(throw _, identity)
 }

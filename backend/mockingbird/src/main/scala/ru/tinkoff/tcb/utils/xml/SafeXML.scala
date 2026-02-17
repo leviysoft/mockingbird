@@ -53,7 +53,7 @@ object SafeXML extends XMLLoader[Elem] {
 
     newAdapter.scopeStack = TopScope :: newAdapter.scopeStack
     parser.parse(source, newAdapter)
-    newAdapter.scopeStack = newAdapter.scopeStack.tail
+    newAdapter.scopeStack = newAdapter.scopeStack.drop(1)
 
     newAdapter.rootElem.asInstanceOf[Elem]
   }

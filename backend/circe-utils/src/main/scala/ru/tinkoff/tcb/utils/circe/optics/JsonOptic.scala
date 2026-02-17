@@ -50,13 +50,17 @@ final case class JsonOptic private[optics] (private val jsonPath: Seq[PathPart])
 
   def prune: Json => Json = { json =>
     if (validate(json))
-      jsonPath.init.foldRight[Json => Json] { json =>
-        jsonPath.last.fold(
-          f => json.withObject(jo => Json.fromJsonObject(jo.remove(f))),
-          i => json.withArray(ja => Json.fromValues(ja.take(i) ++ ja.drop(i + 1))),
-          if (json.isArray) Json.Null else json
-        )
-      }((part, f) => modifyPart(Json.Null)(part)(f))(json)
+      jsonPath.lastOption.fold(json) { lastPart =>
+        jsonPath
+          .dropRight(1)
+          .foldRight[Json => Json] { innerJson =>
+            lastPart.fold(
+              f => innerJson.withObject(jo => Json.fromJsonObject(jo.remove(f))),
+              i => innerJson.withArray(ja => Json.fromValues(ja.take(i) ++ ja.drop(i + 1))),
+              if (innerJson.isArray) Json.Null else innerJson
+            )
+          }((part, f) => modifyPart(Json.Null)(part)(f))(json)
+      }
     else json
   }
 
@@ -82,7 +86,9 @@ final case class JsonOptic private[optics] (private val jsonPath: Seq[PathPart])
     jsonPath.foldRight[Json => Json](op)((part, f) => modifyPart(Json.Null)(part)(f))
 
   def modifyOpt(op: Option[Json] => Json): Json => Json =
-    jsonPath.init.foldRight[Json => Json](modifyPart(jsonPath.last)(op))((part, f) => modifyPart(Json.Null)(part)(f))
+    jsonPath.lastOption.fold[Json => Json](identity) { lastPart =>
+      jsonPath.dropRight(1).foldRight[Json => Json](modifyPart(lastPart)(op))((part, f) => modifyPart(Json.Null)(part)(f))
+    }
 
   def modifyObjectValues(op: Json => Json): Json => Json = { json =>
     getOpt(json)

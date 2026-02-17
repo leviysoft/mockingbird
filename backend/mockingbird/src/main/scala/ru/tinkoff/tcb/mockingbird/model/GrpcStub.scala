@@ -64,9 +64,11 @@ object GrpcStub {
       case Right(fieldName) =>
         for {
           fs <- fields.get
-          field <- ZIO.getOrFailWith(ValidationError(Vector(s"Field $fieldName not found")))(fs.find(_.name == fieldName))
+          field <- ZIO.getOrFailWith(ValidationError(Vector(s"Field $fieldName not found")))(
+            fs.find(_.name === fieldName)
+          )
           _ <-
-            if (primitiveTypes.values.exists(_ == field.typeName)) fields.set(List.empty)
+            if (primitiveTypes.values.exists(_ === field.typeName)) fields.set(List.empty)
             else
               types.get(NormalizedTypeName.fromString(field.typeName)) match {
                 case Some(message) =>
@@ -89,5 +91,5 @@ object GrpcStub {
   private val stateNonEmpty: Rule[GrpcStub] =
     _.state.exists(_.isEmpty).valueOrZero(Vector("The state predicate cannot be empty"))
 
-  val validationRules: Rule[GrpcStub] = Vector(stateNonEmpty).reduce(_ |+| _)
+  val validationRules: Rule[GrpcStub] = stateNonEmpty
 }

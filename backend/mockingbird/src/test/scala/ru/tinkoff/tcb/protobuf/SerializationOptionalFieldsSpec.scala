@@ -37,7 +37,7 @@ object SerializationOptionalFieldsSpec extends ZIOSpecDefault {
                |  "field1": "$field1Val",
                |  "field2": "$field2DefaultVal"
                |}""".stripMargin)
-        } yield assertTrue(obtain == expected)
+        } yield assert(obtain)(equalTo(expected))
       },
       test("An optional field in proto2 syntax: the field has default value") {
         for {
@@ -47,7 +47,7 @@ object SerializationOptionalFieldsSpec extends ZIOSpecDefault {
                |  "field1": "$field1Val",
                |  "field2": "$field2DefaultVal"
                |}""".stripMargin)
-        } yield assertTrue(obtain == expected)
+        } yield assert(obtain)(equalTo(expected))
       },
       test("An optional field in proto2 syntax: the field has another value") {
         for {
@@ -57,7 +57,7 @@ object SerializationOptionalFieldsSpec extends ZIOSpecDefault {
                |  "field1": "$field1Val",
                |  "field2": "$field2AnotherVal"
                |}""".stripMargin)
-        } yield assertTrue(obtain == expected)
+        } yield assert(obtain)(equalTo(expected))
       },
       test("An required field in proto2 syntax: the field is absent") {
         for {
@@ -72,7 +72,7 @@ object SerializationOptionalFieldsSpec extends ZIOSpecDefault {
                |  "field1": "$field1Val",
                |  "field2": "$field2DefaultVal"
                |}""".stripMargin)
-        } yield assertTrue(obtain == expected)
+        } yield assert(obtain)(equalTo(expected))
       },
       test("An required field in proto2 syntax: the field has another value") {
         for {
@@ -82,7 +82,7 @@ object SerializationOptionalFieldsSpec extends ZIOSpecDefault {
                |  "field1": "$field1Val",
                |  "field2": "$field2AnotherVal"
                |}""".stripMargin)
-        } yield assertTrue(obtain == expected)
+        } yield assert(obtain)(equalTo(expected))
       },
       test("An optional field in proto3 syntax: the field is absent") {
         for {
@@ -91,7 +91,7 @@ object SerializationOptionalFieldsSpec extends ZIOSpecDefault {
           expected <- parseJson(s"""{
                |  "field1": "$field1Val"
                |}""".stripMargin)
-        } yield assertTrue(obtain == expected)
+        } yield assert(obtain)(equalTo(expected))
       },
       test("An optional field in proto3 syntax: the field has default value") {
         for {
@@ -101,7 +101,7 @@ object SerializationOptionalFieldsSpec extends ZIOSpecDefault {
                |  "field1": "$field1Val",
                |  "field2": "$field2DefaultVal"
                |}""".stripMargin)
-        } yield assertTrue(obtain == expected)
+        } yield assert(obtain)(equalTo(expected))
       },
       test("An optional field in proto3 syntax: the field has another value") {
         for {
@@ -111,7 +111,7 @@ object SerializationOptionalFieldsSpec extends ZIOSpecDefault {
                |  "field1": "$field1Val",
                |  "field2": "$field2AnotherVal"
                |}""".stripMargin)
-        } yield assertTrue(obtain == expected)
+        } yield assert(obtain)(equalTo(expected))
       },
       test("An regular field in proto3 syntax: the field is absent") {
         for {
@@ -121,7 +121,7 @@ object SerializationOptionalFieldsSpec extends ZIOSpecDefault {
                |  "field1": "$field1Val",
                |  "field2": "$field2DefaultVal"
                |}""".stripMargin)
-        } yield assertTrue(obtain == expected)
+        } yield assert(obtain)(equalTo(expected))
       },
       test("An regular field in proto3 syntax: the field has default value") {
         for {
@@ -131,7 +131,7 @@ object SerializationOptionalFieldsSpec extends ZIOSpecDefault {
                |  "field1": "$field1Val",
                |  "field2": "$field2DefaultVal"
                |}""".stripMargin)
-        } yield assertTrue(obtain == expected)
+        } yield assert(obtain)(equalTo(expected))
       },
       test("An regular field in proto3 syntax: the field has another value") {
         for {
@@ -141,7 +141,7 @@ object SerializationOptionalFieldsSpec extends ZIOSpecDefault {
                |  "field1": "$field1Val",
                |  "field2": "$field2AnotherVal"
                |}""".stripMargin)
-        } yield assertTrue(obtain == expected)
+        } yield assert(obtain)(equalTo(expected))
       },
     )
 

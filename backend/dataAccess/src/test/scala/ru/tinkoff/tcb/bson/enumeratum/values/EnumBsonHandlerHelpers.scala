@@ -3,10 +3,11 @@ package ru.tinkoff.tcb.bson.enumeratum.values
 import enumeratum.values.*
 import oolong.bson.*
 import org.mongodb.scala.bson.*
+import org.scalatest.TryValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-trait EnumBsonHandlerHelpers { this: AnyFunSpec & Matchers =>
+trait EnumBsonHandlerHelpers { this: AnyFunSpec & Matchers & TryValues =>
   def testWriter[EntryType <: ValueEnumEntry[ValueType], ValueType](
       enumKind: String,
       `enum`: ValueEnum[ValueType, EntryType],
@@ -28,7 +29,7 @@ trait EnumBsonHandlerHelpers { this: AnyFunSpec & Matchers =>
     val reader = providedReader.getOrElse(EnumHandler.reader(`enum`))
     describe(enumKind) {
       it("should read valid values") {
-        `enum`.values.foreach(entry => reader.fromBson(entry.value.bson).get shouldBe entry)
+        `enum`.values.foreach(entry => reader.fromBson(entry.value.bson).success.value shouldBe entry)
       }
       it("should fail to read with invalid values") {
         reader.fromBson(BsonInt32(Int.MaxValue)) shouldBe Symbol("failure")

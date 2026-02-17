@@ -14,11 +14,9 @@ import sttp.model.Uri
 import ru.tinkoff.tcb.mockingbird.edsl.interpreter.AsyncScalaTestSuite
 
 trait BaseSuite extends AsyncScalaTestSuite with TestContainerForAll {
-  private var httpHost: Uri = scala.compiletime.uninitialized
-  @annotation.nowarn("msg=is never used")
-  private var grpcHost: String = scala.compiletime.uninitialized
+  private var httpHost: Option[Uri] = None
 
-  override def baseUri = httpHost
+  override def baseUri = httpHost.getOrElse(throw new IllegalStateException("httpHost not initialized"))
 
   override val containerDef: DockerComposeContainer.Def =
     DockerComposeContainer.Def(
@@ -34,10 +32,8 @@ trait BaseSuite extends AsyncScalaTestSuite with TestContainerForAll {
 
     val host     = containers.getServiceHost("mockingbird", 8228)
     val httpPort = containers.getServicePort("mockingbird", 8228)
-    val grpcPort = containers.getServicePort("mockingbird", 9000)
 
-    httpHost = uri"http://$host:$httpPort"
-    grpcHost = s"$host:$grpcPort"
+    httpHost = Some(uri"http://$host:$httpPort")
 
     val sb = HttpClientSyncBackend()
     val resp = quickRequest

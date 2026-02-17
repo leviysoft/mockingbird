@@ -26,6 +26,8 @@ class AsyncScalaTestSuiteWholeTest
     with AsyncMockFactory
     with BeforeAndAfterAll {
 
+  given Eq[sttp.model.Method] = Eq.fromUniversalEquals
+
   val eset = new CatsFacts[HttpResponseR]()
 
   var sttpbackend_ : WebSocketBackendStub[Future] =
@@ -58,8 +60,8 @@ class AsyncScalaTestSuiteWholeTest
     sttpbackend_ = HttpClientFutureBackend
       .stub()
       .whenRequestMatches { req =>
-        req.method == GET && req.uri.toString() == s"https://localhost.example:9977/fact" &&
-        req.headers.exists(h => h.name == "X-CSRF-TOKEN" && h.value == "unEENxJqSLS02rji2GjcKzNLc0C0ySlWih9hSxwn")
+        req.method === GET && req.uri.toString() === s"https://localhost.example:9977/fact" &&
+        req.headers.exists(h => h.name === "X-CSRF-TOKEN" && h.value === "unEENxJqSLS02rji2GjcKzNLc0C0ySlWih9hSxwn")
       }
       .thenRespond(
         new Response(

@@ -2,6 +2,7 @@ package ru.tinkoff.tcb.protobuf
 
 import com.github.os72.protobuf.dynamic.DynamicSchema
 import zio.test.*
+import zio.test.Assertion.*
 
 import ru.tinkoff.tcb.mockingbird.grpc.GrpcExractor.toDynamicSchema
 import ru.tinkoff.tcb.mockingbird.grpc.GrpcExractor.toGrpcProtoDefinition
@@ -43,7 +44,7 @@ object MappersSpec extends ZIOSpecDefault {
           content <- Utils.getProtoDescriptionFromResource("requests.proto")
           schema          = DynamicSchema.parseFrom(content)
           protoDefinition = schema.toGrpcProtoDefinition
-        } yield assertTrue(getAllTypes(protoDefinition) == allTypesInRequests)
+        } yield assert(getAllTypes(protoDefinition))(equalTo(allTypesInRequests))
       },
       test("Mappers from DynamicSchema to GrpcProtoDefinition and back are consistent") {
         for {
@@ -51,7 +52,7 @@ object MappersSpec extends ZIOSpecDefault {
           schema               = DynamicSchema.parseFrom(content)
           protoDefinition      = schema.toGrpcProtoDefinition
           protoDefinitionAgain = protoDefinition.toDynamicSchema.toGrpcProtoDefinition
-        } yield assertTrue(protoDefinition == protoDefinitionAgain)
+        } yield assert(protoDefinition)(equalTo(protoDefinitionAgain))
       },
       test("Mappers from nested DynamicSchema to GrpcProtoDefinition and back are consistent") {
         for {
@@ -59,7 +60,7 @@ object MappersSpec extends ZIOSpecDefault {
           schema               = DynamicSchema.parseFrom(content)
           protoDefinition      = schema.toGrpcProtoDefinition
           protoDefinitionAgain = protoDefinition.toDynamicSchema.toGrpcProtoDefinition
-        } yield assertTrue(protoDefinition == protoDefinitionAgain)
+        } yield assert(protoDefinition)(equalTo(protoDefinitionAgain))
       }
     )
 

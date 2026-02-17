@@ -26,6 +26,7 @@ import ru.tinkoff.tcb.utils.id.SID
 import ru.tinkoff.tcb.utils.regex.*
 import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 
+@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 final class StubResolver(
     stubDAO: HttpStubDAO[Task],
     stateDAO: PersistentStateDAO[Task],

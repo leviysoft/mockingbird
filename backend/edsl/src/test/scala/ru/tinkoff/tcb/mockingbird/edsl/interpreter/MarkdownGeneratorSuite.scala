@@ -1,5 +1,6 @@
 package ru.tinkoff.tcb.mockingbird.edsl.interpreter
 
+import org.scalatest.OptionValues
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import pl.muninn.scalamdtag.*
@@ -11,7 +12,7 @@ import ru.tinkoff.tcb.mockingbird.edsl.model.Check.*
 import ru.tinkoff.tcb.mockingbird.edsl.model.ValueMatcher.syntax.*
 import ru.tinkoff.tcb.mockingbird.examples.CatsFacts
 
-class MarkdownGeneratorSuite extends AnyFunSuite with Matchers {
+class MarkdownGeneratorSuite extends AnyFunSuite with Matchers with OptionValues {
   val eset = new ExampleSet[MarkdownGenerator.HttpResponseR] {
     override def name: String = ""
   }
@@ -36,7 +37,7 @@ class MarkdownGeneratorSuite extends AnyFunSuite with Matchers {
 
     val mds = eset.describe(text).foldMap(mdg.stepsPrinterW).written
     mds should have length 1
-    mds.head.md shouldBe ("\n".concat(text).concat("\n"))
+    mds.headOption.value.md shouldBe ("\n".concat(text).concat("\n"))
   }
 
   test("sendHttp produces curl command") {
@@ -58,7 +59,7 @@ class MarkdownGeneratorSuite extends AnyFunSuite with Matchers {
       .written
     mds should have length 1
 
-    val obtains = mds.head.md
+    val obtains = mds.headOption.value.md
     val expected =
       raw"""```
            |curl \

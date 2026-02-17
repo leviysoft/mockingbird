@@ -82,7 +82,7 @@ final class EventSpawner(
 
     for {
       response <- request.send(httpBackend)
-      reInit = triggers.exists(sp => sp.code.forall(_ == response.code.code) && sp.checkBody(response.body.merge))
+      reInit = triggers.exists(sp => sp.code.forall(_ === response.code.code) && sp.checkBody(response.body.merge))
       body <- ZIO
         .fromEither(response.body)
         .mapError[Exception](err =>
@@ -130,9 +130,12 @@ final class EventSpawner(
           Stream.eval(recover(thr)) ++ Stream.sleep[[X] =>> RIO[WLD, X]](eventConfig.fetchInterval) ++ fetchStream
         case CompoundError(errs) =>
           val recoverable = errs.filter(recover.isDefinedAt)
-          val fatal       = errs.find(!recover.isDefinedAt(_))
+          val fatalOpt    = errs.find(!recover.isDefinedAt(_))
 
-          Stream.evalSeq(ZIO.foreach(recoverable)(recover)) ++ Stream.raiseError[[X] =>> RIO[WLD, X]](fatal.get).as(())
+          Stream.evalSeq(ZIO.foreach(recoverable)(recover)) ++
+            fatalOpt.fold[Stream[[X] =>> RIO[WLD, X], Unit]](Stream.empty)(f =>
+              Stream.raiseError[[X] =>> RIO[WLD, X]](f).as(())
+            )
         case thr =>
           Stream.raiseError[[X] =>> RIO[WLD, X]](thr).as(())
       }

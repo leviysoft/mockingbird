@@ -7,6 +7,7 @@ import advxml.transform.XmlZoom
 import advxml.xpath.*
 import io.circe.Json
 import io.circe.syntax.*
+import org.scalatest.OptionValues
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -15,7 +16,7 @@ import ru.tinkoff.tcb.utils.resource.readStr
 import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 import ru.tinkoff.tcb.utils.xml.SafeXML
 
-class XmlTransformationSpec extends AnyFunSuite with Matchers {
+class XmlTransformationSpec extends AnyFunSuite with Matchers with OptionValues {
   test("Fill template from Node") {
     val template: Node =
       <root rt="${/root/rt}"><tag1 t1="a1">${{/root/tag1}}</tag1><tag2 t2="${root/tag2}">${{/root/tag2}}</tag2></root>
@@ -120,8 +121,8 @@ class XmlTransformationSpec extends AnyFunSuite with Matchers {
       </data>
 
     val schema = Map(
-      XmlZoom.fromXPath("/root/inner").toOption.get  -> "${comment}",
-      XmlZoom.fromXPath("/root/second").toOption.get -> "${/data/value}"
+      XmlZoom.fromXPath("/root/inner").toOption.value  -> "${comment}",
+      XmlZoom.fromXPath("/root/second").toOption.value -> "${/data/value}"
     )
 
     val sut = target.patchFromValues(source, xSource, schema).useAsIs

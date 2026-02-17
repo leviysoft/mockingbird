@@ -51,14 +51,15 @@ object ResponseSpec {
 }
 
 final case class RawResponseSpec(code: Option[Int], body: Option[String]) extends ResponseSpec {
-  override def checkBody(data: String): Boolean = body.forall(_ == data)
+  override def checkBody(data: String): Boolean = body.forall(_ === data)
 }
 
 final case class JsonResponseSpec(code: Option[Int], body: Option[Json]) extends ResponseSpec {
-  override def checkBody(data: String): Boolean = parse(data).map(jx => body.forall(_ == jx)).getOrElse(false)
+  override def checkBody(data: String): Boolean = parse(data).map(jx => body.forall(_ === jx)).getOrElse(false)
 }
 
 final case class XmlResponseSpec(code: Option[Int], body: Option[XMLString.Type]) extends ResponseSpec {
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   override def checkBody(data: String): Boolean =
     Try(SafeXML.loadString(data)).toOption.exists(nx => body.forall(_.unwrap == nx))
 }

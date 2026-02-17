@@ -48,7 +48,7 @@ class UIHttp {
   ): ServerEndpoint[Any, F] =
     ServerEndpoint.public(
       staticResourcesGetEndpoint(prefix).mapIn(si => si.copy(path = si.path.appended("index.html")))(si =>
-        si.copy(path = si.path.init)
+        si.copy(path = si.path.dropRight(1))
       ),
       (m: MonadError[F]) => Resources.get(classLoader, resourcePrefix, options)(m)
     )

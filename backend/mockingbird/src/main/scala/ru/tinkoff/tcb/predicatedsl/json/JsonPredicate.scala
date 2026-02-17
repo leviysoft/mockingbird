@@ -31,6 +31,7 @@ abstract class JsonPredicate extends (Json => Boolean) {
 
   override def hashCode(): Int = definition.hashCode()
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   override def equals(obj: Any): Boolean = obj match {
     case jp: JsonPredicate => jp.definition == definition
     case _                 => false
@@ -85,8 +86,8 @@ object JsonPredicate {
   private val mkPredicate: (Keyword.Json, Json) => ValidatedNel[(Keyword, Json), Json => Boolean] =
     (kwd, jv) =>
       (kwd, jv) match {
-        case (Equals, value)             => Validated.valid(_ == value)
-        case (NotEq, value)              => Validated.valid(_ != value)
+        case (Equals, value)             => Validated.valid(j => j === value)
+        case (NotEq, value)              => Validated.valid(j => j =!= value)
         case (Greater, JsonNumber(jnum)) => Validated.valid(_.asNumber.exists(_ > jnum))
         case (Gte, JsonNumber(jnum))     => Validated.valid(_.asNumber.exists(_ >= jnum))
         case (Less, JsonNumber(jnum))    => Validated.valid(_.asNumber.exists(_ < jnum))
@@ -94,8 +95,8 @@ object JsonPredicate {
         case (Rx, JsonString(str))       => Validated.valid(_.asString.exists(_.matches(str)))
         case (Size, JsonNumber(jnum)) if jnum.toInt.isDefined =>
           Validated.valid {
-            case JsonString(str) => str.length == jnum.toInt.get
-            case JsonVector(vec) => vec.length == jnum.toInt.get
+            case JsonString(str) => jnum.toInt.exists(str.length === _)
+            case JsonVector(vec) => jnum.toInt.exists(vec.length === _)
             case _               => false
           }
         case (Exists, JsonBoolean(true))  => Validated.valid(!_.isNull)

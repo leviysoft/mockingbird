@@ -2,8 +2,8 @@ package ru.tinkoff.tcb.dataaccess
 
 final case class UpdateResult(matched: Long, modified: Long) {
   val successful: Boolean   = matched > 0 || modified > 0
-  val noMatch: Boolean      = matched == 0
-  val noOp: Boolean         = modified == 0
+  val noMatch: Boolean      = matched === 0L
+  val noOp: Boolean         = modified === 0L
   val unsuccessful: Boolean = noMatch && noOp
 }
 

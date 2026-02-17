@@ -23,6 +23,7 @@ package object json {
 
   private object JORxs extends OneOrMore(JORx)
 
+  @SuppressWarnings(Array("org.wartremover.warts.Null"))
   private object JOptic {
     def unapply(defn: String): Option[(Option[String], JsonOptic)] =
       defn match {
@@ -121,8 +122,9 @@ package object json {
   }
 
   private val castToString: PartialFunction[Json, Json] = {
-    case JsonBoolean(b)                            => Json.fromString(b.toString)
-    case JsonNumber(n) if n.toBigDecimal.isDefined => Json.fromString(n.toBigDecimal.get.bigDecimal.toPlainString)
+    case JsonBoolean(b) => Json.fromString(b.toString)
+    case JsonNumber(n) if n.toBigDecimal.isDefined =>
+      Json.fromString(n.toBigDecimal.map(_.bigDecimal.toPlainString).getOrElse(""))
   }
 
   private object JNum {

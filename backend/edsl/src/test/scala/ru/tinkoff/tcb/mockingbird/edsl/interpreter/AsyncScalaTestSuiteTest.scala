@@ -24,6 +24,8 @@ import ru.tinkoff.tcb.mockingbird.edsl.model.Check.*
 import ru.tinkoff.tcb.mockingbird.edsl.model.ValueMatcher.syntax.*
 
 class AsyncScalaTestSuiteTest extends AsyncScalaTestSuite with Matchers with AsyncMockFactory with BeforeAndAfterEach {
+  given Eq[Uri] = Eq.fromUniversalEquals
+
   val eset = new ExampleSet[HttpResponseR] {
     override def name: String = ""
   }
@@ -65,9 +67,9 @@ class AsyncScalaTestSuiteTest extends AsyncScalaTestSuite with Matchers with Asy
 
     sttpbackend_ = HttpClientFutureBackend.stub().whenRequestMatchesPartial {
       case Request(POST, uri, StringBody(`body`, _, _), hs, _, _, _)
-          if uri == uri"http://some.domain.com:8090/api/handler?service=world"
-            && hs.exists(h => h.name == "x-token" && h.value == "asd5453qwe")
-            && hs.exists(h => h.name == "Content-Type" && h.value == "application/json") =>
+          if uri === uri"http://some.domain.com:8090/api/handler?service=world"
+            && hs.exists(h => h.name === "x-token" && h.value === "asd5453qwe")
+            && hs.exists(h => h.name === "Content-Type" && h.value === "application/json") =>
         new Response[String](
           body = "got request",
           code = StatusCode.Ok,

@@ -1,5 +1,6 @@
 package ru.tinkoff.tcb.utils.id
 
+import cats.Eq
 import com.softwaremill.tagging.*
 import glass.Equivalent
 import io.circe.*
@@ -40,4 +41,6 @@ trait IDCompanion[I] {
   implicit def idLoggable[T](implicit il: Loggable[I]): Loggable[I @@ T] = il.narrow
 
   implicit def idConfigReader[T](implicit cr: ConfigReader[I]): ConfigReader[I @@ T] = cr.map(apply)
+
+  implicit def eqForID[T](implicit ei: Eq[I]): Eq[I @@ T] = (a, b) => ei.eqv(a, b)
 }

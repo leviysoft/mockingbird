@@ -121,16 +121,16 @@ package object xml {
             case jp if jt.isDefinedAt(jp) =>
               (zoom ==> Replace(_.map(_.transform { case Text(_) => Text(jt(jp).foldWith(json2StringFolder)) }.result)))
                 .transform[Try](acc)
-                .map(_.head)
+                .map(_.headOption.getOrElse(acc))
                 .getOrElse(acc)
             case xp if nt.isDefinedAt(xp) =>
               (zoom ==> Replace(_.map(_.transform { case Text(_) => Text(nt(xp)) }.result)))
                 .transform[Try](acc)
-                .map(_.head)
+                .map(_.headOption.getOrElse(acc))
                 .getOrElse(acc)
             case _ => acc
           }
         }
-        .pipe(_.child.head)
+        .pipe(_.child.headOption.getOrElse(n))
   }
 }

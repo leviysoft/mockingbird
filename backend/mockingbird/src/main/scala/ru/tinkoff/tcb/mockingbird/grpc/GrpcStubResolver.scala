@@ -31,6 +31,7 @@ trait GrpcStubResolver {
   )(scope: Scope): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]]
 }
 
+@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 class GrpcStubResolverImpl(
     stubDAO: GrpcStubDAO[Task],
     stateDAO: PersistentStateDAO[Task],
@@ -95,7 +96,7 @@ class GrpcStubResolverImpl(
     )
     res = candidates.find(_._2.size == 1) orElse candidates.find(_._1.state.isEmpty)
   } yield res.map { case (stub, states) =>
-    (stub, pairs.find(_._2.id == stub.id).map(_._1).get, states.headOption)
+    (stub, pairs.find(_._2.id == stub.id).map(_._1).getOrElse(Json.Null), states.headOption)
   }
 
   private def parseJson(methodDescription: GrpcMethodDescription, bytes: Array[Byte]): URIO[WLD, Option[Json]] =

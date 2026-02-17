@@ -19,10 +19,12 @@ object Scope extends Enum[Scope] with BsonEnum[Scope] with TapirCodecEnumeratum 
 
   val values = findValues
 
+  implicit val scopeEq: cats.Eq[Scope] = cats.Eq.fromUniversalEquals
+
   implicit val scopeLoggable: Loggable[Scope] = Loggable.stringValue.contramap(_.toString)
 
   implicit val scopeBsonEncoder: BsonEncoder[Scope] = BsonEncoder[Int].beforeWrite(_.priority)
 
   implicit val scopeBsonDecoder: BsonDecoder[Scope] =
-    BsonDecoder[Int].afterReadTry(p => values.find(_.priority == p).toTry(new Exception(s"No Scope with priority $p")))
+    BsonDecoder[Int].afterReadTry(p => values.find(_.priority === p).toTry(new Exception(s"No Scope with priority $p")))
 }

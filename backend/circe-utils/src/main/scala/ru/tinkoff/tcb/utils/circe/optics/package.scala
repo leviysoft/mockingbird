@@ -27,7 +27,7 @@ package object optics {
               else {
                 val itemsToAdd = index - ja.length + 1
                 Json.fromValues(
-                  ja ++ Vector.tabulate(itemsToAdd)(idx => if (idx == itemsToAdd - 1) mod(None) else Json.Null)
+                  ja ++ Vector.tabulate(itemsToAdd)(idx => if (idx === itemsToAdd - 1) mod(None) else Json.Null)
                 )
               }
             }

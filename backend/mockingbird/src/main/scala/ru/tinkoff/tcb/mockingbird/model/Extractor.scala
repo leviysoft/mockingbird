@@ -48,7 +48,7 @@ object XmlExtractor {
  *   Path inside CDATA
  */
 final case class JsonCDataExtractor(prefix: SXpath, path: JsonOptic) extends XmlExtractor {
-  def apply(node: NodeSeq): Option[Json] =
+  override def apply(node: NodeSeq): Option[Json] =
     prefix.toZoom
       .bind(node)
       .run[Option]

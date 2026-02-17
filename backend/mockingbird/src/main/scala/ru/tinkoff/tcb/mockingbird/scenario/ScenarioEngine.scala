@@ -97,22 +97,23 @@ final class ScenarioEngine(
         .filter(_.nonEmpty)
         .fold(ZIO.attempt(()))(_.traverse_(stateDAO.createIndexForDataField))
       dests <- fetcher.getDestinations
-      _ <- ZIO.when(scenario.destination.isDefined && !dests.exists(_.name == scenario.destination.get))(
-        ZIO.fail(ScenarioExecError(s"Destination with the name ${scenario.destination.get} is not configured"))
-      )
-      destOut = scenario.destination.flatMap(dn => dests.find(_.name == dn)) zip scenario.output
-      _ <- ZIO.when(destOut.isDefined) {
-        val (dest, out) = destOut.get
+      _ <- ZIO.foreachDiscard(scenario.destination) { destName =>
+        ZIO.when(!dests.exists(_.name === destName))(
+          ZIO.fail(ScenarioExecError(s"Destination with the name $destName is not configured"))
+        )
+      }
+      destOut = scenario.destination.flatMap(dn => dests.find(_.name === dn)) zip scenario.output
+      _ <- ZIO.foreachDiscard(destOut) { case (dest, out) =>
         sendTo(dest, out, data, xdata)
       }
-      _ <- ZIO.when(scenario.scope == Scope.Countdown)(
+      _ <- ZIO.when(scenario.scope === Scope.Countdown)(
         scenarioDAO.updateById(scenario.id, Document("$inc" -> Document("times" -> -1.bson)))
       )
-      _ <- ZIO.when(scenario.callback.isDefined)(recurseCallback(state, scenario.callback.get, data, xdata))
+      _ <- ZIO.foreachDiscard(scenario.callback)(recurseCallback(state, _, data, xdata))
     } yield ()
   }
 
-  def recurseCallback(
+  override def recurseCallback(
       state: PersistentState,
       callback: Callback,
       data: Json,
@@ -121,19 +122,18 @@ final class ScenarioEngine(
     callback match {
       case MessageCallback(destinationId, output, callback, delay) =>
         for {
-          _     <- ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get)))
+          _     <- ZIO.foreachDiscard(delay)(d => ZIO.sleep(Duration.fromScala(d)))
           _     <- log.info("Executing MessageCallback with destinationId={}", destinationId)
           dests <- fetcher.getDestinations
-          _ <- ZIO.when(!dests.exists(_.name == destinationId))(
-            ZIO.fail(CallbackError(s"Destination with the name $destinationId is not configured"))
+          destination <- ZIO.getOrFailWith(CallbackError(s"Destination with the name $destinationId is not configured"))(
+            dests.find(_.name === destinationId)
           )
-          destination = dests.find(_.name == destinationId).get
           _ <- sendTo(destination, output, data, xdata)
-          _ <- ZIO.when(callback.isDefined)(recurseCallback(state, callback.get, data, xdata))
+          _ <- ZIO.foreachDiscard(callback)(recurseCallback(state, _, data, xdata))
         } yield ()
       case HttpCallback(request, responseMode, persist, callback, delay) =>
         for {
-          _ <- ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get)))
+          _ <- ZIO.foreachDiscard(delay)(d => ZIO.sleep(Duration.fromScala(d)))
           requestUrl = request.url.value.substitute(data, xdata)
           _ <- log.info("Executing HttpCallback to {}", requestUrl)
           res <-
@@ -165,15 +165,13 @@ final class ScenarioEngine(
               .flatten
           data1  = jsonBody.cata(j => data.mapObject(("req" -> j) +: _), data)
           xdata1 = xmlBody.getOrElse(xdata)
-          _ <- ZIO.when(persist.isDefined) {
-            stateDAO.upsertBySpec(state.id, persist.get.fill(data1).fill(xdata1))
-          }
-          _ <- ZIO.when(callback.isDefined)(recurseCallback(state, callback.get, data1, xdata1))
+          _ <- ZIO.foreachDiscard(persist)(p => stateDAO.upsertBySpec(state.id, p.fill(data1).fill(xdata1)))
+          _ <- ZIO.foreachDiscard(callback)(recurseCallback(state, _, data1, xdata1))
         } yield ()
     }
 
   private def sendTo(dest: DestinationConfiguration, out: ScenarioOutput, data: Json, xdata: Node): RIO[WLD, Unit] =
-    ZIO.when(out.delay.isDefined)(ZIO.sleep(Duration.fromScala(out.delay.get))) *> basicRequest
+    ZIO.foreachDiscard(out.delay)(d => ZIO.sleep(Duration.fromScala(d))) *> basicRequest
       .pipe(rt =>
         dest.request.body.fold {
           rt.body(
