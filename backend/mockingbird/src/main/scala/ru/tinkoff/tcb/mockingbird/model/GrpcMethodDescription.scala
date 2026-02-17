@@ -80,7 +80,7 @@ object GrpcMethodDescription {
 
   extension (pp: PackagePrefix.Type) {
     def :+(nested: String): PackagePrefix.Type =
-      PackagePrefix(pp.unwrap ++ nested.dropWhile(_ == '.') ++ ".")
+      PackagePrefix(pp.unwrap ++ nested.dropWhile(_ === '.') ++ ".")
 
     def resolve(n: String): NormalizedTypeName.Type =
       if (n.startsWith(".")) NormalizedTypeName.fromString(n)
@@ -90,7 +90,7 @@ object GrpcMethodDescription {
 
   object NormalizedTypeName extends Newtype[String] {
     def fromString(name: String): NormalizedTypeName.Type =
-      this.unsafeMake(s".${name.dropWhile(_ == '.')}")
+      this.unsafeMake(s".${name.dropWhile(_ === '.')}")
   }
 
   def makeDictTypes(p: PackagePrefix.Type, ms: Seq[GrpcRootMessage]): Vector[(NormalizedTypeName.Type, GrpcRootMessage)] =
@@ -103,6 +103,7 @@ object GrpcMethodDescription {
         b :+ (p.resolve(name) -> m)
     }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   def validate(methodDescription: GrpcMethodDescription)(
       requestClass: String,
       requestSchema: GrpcProtoDefinition,

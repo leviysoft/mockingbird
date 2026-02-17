@@ -43,6 +43,7 @@ trait GrpcRequestHandler {
   def exec(stream: Stream[StatusException, Array[Byte]]): ZStream[WLD & RequestContext, Throwable, Array[Byte]]
 }
 
+@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 class GrpcRequestHandlerImpl(
     stateDAO: PersistentStateDAO[Task],
     stubDAO: GrpcStubDAO[Task],
@@ -116,7 +117,7 @@ class GrpcRequestHandlerImpl(
             .map(_.keys.map(_.path).filter(_.startsWith("_")).toVector)
             .filter(_.nonEmpty)
             .cata(_.traverse(stateDAO.createIndexForDataField), ZIO.unit)
-          _ <- ZIO.when(stub.scope == Scope.Countdown)(
+          _ <- ZIO.when(stub.scope === Scope.Countdown)(
             stubDAO.updateById(stub.id, Document("$inc" -> Document("times" -> -1.bson)))
           )
         } yield (stub, data, bytes)
@@ -130,7 +131,7 @@ class GrpcRequestHandlerImpl(
   ): Stream[Throwable, Array[Byte]] = stubResponse match {
     case FillResponse(rdata, delay) =>
       ZStream.fromZIO {
-        ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get))) *>
+        ZIO.foreachDiscard(delay)(d => ZIO.sleep(Duration.fromScala(d))) *>
           ZIO
             .attemptBlocking(
               methodDescription.responseSchema
@@ -140,7 +141,7 @@ class GrpcRequestHandlerImpl(
     case FillStreamResponse(rdataArr, delay, streamDelay) =>
       ZStream
         .fromIterableZIO {
-          ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get))) *>
+          ZIO.foreachDiscard(delay)(d => ZIO.sleep(Duration.fromScala(d))) *>
             ZIO.foreach(rdataArr) { rdata =>
               ZIO.attemptBlocking(
                 methodDescription.responseSchema
@@ -148,13 +149,13 @@ class GrpcRequestHandlerImpl(
               )
             }
         }
-        .tap(_ => ZIO.when(streamDelay.isDefined)(ZIO.sleep(Duration.fromScala(streamDelay.get))))
+        .tap(_ => ZIO.foreachDiscard(streamDelay)(d => ZIO.sleep(Duration.fromScala(d))))
     case NoBodyResponse(delay) =>
-      ZStream.fromZIO(ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get)))).drain
+      ZStream.fromZIO(ZIO.foreachDiscard(delay)(d => ZIO.sleep(Duration.fromScala(d)))).drain
     case RepeatResponse(rdata, repeats, delay, streamDelay) =>
       ZStream
         .unwrap {
-          ZIO.when(delay.isDefined)(ZIO.sleep(Duration.fromScala(delay.get))) *>
+          ZIO.foreachDiscard(delay)(d => ZIO.sleep(Duration.fromScala(d))) *>
             ZIO
               .attemptBlocking(
                 methodDescription.responseSchema
@@ -162,7 +163,7 @@ class GrpcRequestHandlerImpl(
               )
               .map(bytes => ZStream.repeatWithSchedule(bytes, Schedule.recurs(repeats.value - 1)))
         }
-        .tap(_ => ZIO.when(streamDelay.isDefined)(ZIO.sleep(Duration.fromScala(streamDelay.get))))
+        .tap(_ => ZIO.foreachDiscard(streamDelay)(d => ZIO.sleep(Duration.fromScala(d))))
     case _: GProxyResponse => ZStream.fail(ValidationError(Vector("Found proxy-stub during processing fill-stubs")))
   }
 
@@ -174,7 +175,7 @@ class GrpcRequestHandlerImpl(
       ZIO
         .foreach(methodDescription.proxyUrl) { proxyUrl =>
           val bytesStream = stream.mapZIO { case (proxyStub, _, bytes) =>
-            ZIO.when(proxyStub.delay.isDefined)(ZIO.sleep(Duration.fromScala(proxyStub.delay.get))).as(bytes)
+            ZIO.foreachDiscard(proxyStub.delay)(d => ZIO.sleep(Duration.fromScala(d))).as(bytes)
           }
 
           val binaryResp = methodDescription.connectionType match {

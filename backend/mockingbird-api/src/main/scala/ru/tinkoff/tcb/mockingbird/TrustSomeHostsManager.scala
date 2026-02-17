@@ -48,6 +48,7 @@ class TrustSomeHostsManager(delegate: X509ExtendedTrustManager, insecureHosts: S
 }
 
 object TrustSomeHostsManager {
+  @SuppressWarnings(Array("org.wartremover.warts.Null"))
   def of(insecureHosts: Set[String]): TrustSomeHostsManager =
     boundary {
       val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)

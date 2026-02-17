@@ -105,7 +105,11 @@ class BasicHttpStub[HttpResponseR] extends ExampleSet[HttpResponseR] {
           ).some,
         )
       )
-      idEphemeral = parser.parse(r.body.get).toOption.flatMap((JLens \ "id").getOpt).flatMap(_.asString).get
+      idEphemeral = r.body
+        .flatMap(b => parser.parse(b).toOption)
+        .flatMap((JLens \ "id").getOpt)
+        .flatMap(_.asString)
+        .getOrElse(throw new NoSuchElementException("Expected 'id' field in response"))
 
       _ <- describe("And creating a stub in the `countdown` scope with `times` equal to 2.")
       resp <- sendHttp(

@@ -268,8 +268,13 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
           ).some
         )
       )
-      o1v1        = checked.body.flatMap(b => parser.parse(b).toOption).get
-      o1v1created = (JLens \ "meta" \ "created").getOpt(o1v1).flatMap(_.asString).get
+      o1v1 = checked.body
+        .flatMap(b => parser.parse(b).toOption)
+        .getOrElse(throw new NoSuchElementException("Expected JSON response body"))
+      o1v1created = (JLens \ "meta" \ "created")
+        .getOpt(o1v1)
+        .flatMap(_.asString)
+        .getOrElse(throw new NoSuchElementException("Expected meta.created in response"))
       _ <- describe("And now retrieve the state")
       resp <- sendHttp(
         method = Post,
@@ -328,8 +333,13 @@ class HttpStubWithState[HttpResponseR] extends ExampleSet[HttpResponseR] {
           ).some
         )
       )
-      o1v2         = checked.body.flatMap(b => parser.parse(b).toOption).get
-      o1v2modified = (JLens \ "meta" \ "modified").getOpt(o1v2).flatMap(_.asString).get
+      o1v2 = checked.body
+        .flatMap(b => parser.parse(b).toOption)
+        .getOrElse(throw new NoSuchElementException("Expected JSON response body"))
+      o1v2modified = (JLens \ "meta" \ "modified")
+        .getOpt(o1v2)
+        .flatMap(_.asString)
+        .getOrElse(throw new NoSuchElementException("Expected meta.modified in response"))
       _ <- describe("And again, we request the state of object `o1`")
       resp <- sendHttp(
         method = Post,

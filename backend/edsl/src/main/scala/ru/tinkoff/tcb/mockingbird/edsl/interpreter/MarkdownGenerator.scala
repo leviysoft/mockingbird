@@ -105,7 +105,7 @@ final class MarkdownGenerator(baseUri: Uri) {
     } yield ()
 
   private[interpreter] def stepsPrinterW: FunctionK[Step, W] = new (Step ~> W) {
-    def apply[A](fa: Step[A]): W[A] =
+    override def apply[A](fa: Step[A]): W[A] =
       fa match {
         case Describe(text, pos) => Vector(p(text)).tell
 

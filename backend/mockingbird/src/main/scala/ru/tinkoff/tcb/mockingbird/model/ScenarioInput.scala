@@ -55,7 +55,7 @@ object ScenarioInput {
 }
 
 final case class RawInput(payload: String) extends ScenarioInput {
-  override def checkMessage(message: String): Boolean = message == payload
+  override def checkMessage(message: String): Boolean = message === payload
 
   override def extractJson(message: String): Option[Json] = None
 

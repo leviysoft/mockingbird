@@ -53,6 +53,7 @@ import ru.tinkoff.tcb.utils.id.SID
 import ru.tinkoff.tcb.utils.refinedchimney.*
 import ru.tinkoff.tcb.utils.xml.*
 
+@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 final class AdminApiHandler(
     stubDAO: HttpStubDAO[Task],
     scenarioDAO: ScenarioDAO[Task],
@@ -75,14 +76,13 @@ final class AdminApiHandler(
     for {
       service1 <- ZIO.foreach(body.path)(serviceDAO.getServiceFor).map(_.flatten)
       service2 <- ZIO.foreach(body.pathPattern)(serviceDAO.getServiceFor).map(_.flatten)
-      _ <- ZIO.when(service1.isEmpty && service2.isEmpty)(
-        ZIO.fail(
+      service <- ZIO
+        .fromOption(service1.orElse(service2))
+        .orElseFail(
           ValidationError(
             Vector(s"Can't find service for ${body.path.orElse(body.pathPattern.map(_.regex)).getOrElse("")}")
           )
         )
-      )
-      service = service1.orElse(service2).get
       candidatesQuery = {
         val baseQ = query[HttpStub](hs =>
           hs.method == lift(body.method) &&
@@ -163,7 +163,7 @@ final class AdminApiHandler(
       vr        = Scenario.validationRules(sourceNames, destNames)(scenario)
       _   <- ZIO.when(vr.nonEmpty)(ZIO.fail(ValidationError(vr)))
       res <- scenarioDAO.insert(scenario)
-      _   <- labelDAO.ensureLabels(service.get.suffix, scenario.labels.to(Vector))
+      _   <- ZIO.foreachDiscard(service)(s => labelDAO.ensureLabels(s.suffix, scenario.labels.to(Vector)))
     } yield if (res > 0) OperationResult("success", scenario.id) else OperationResult("nothing inserted")
 
   def createService(body: CreateServiceRequest): RIO[WLD, OperationResult[String]] =
@@ -312,14 +312,13 @@ final class AdminApiHandler(
     for {
       service1 <- ZIO.foreach(body.path.map(_.value))(serviceDAO.getServiceFor).map(_.flatten)
       service2 <- ZIO.foreach(body.pathPattern)(serviceDAO.getServiceFor).map(_.flatten)
-      _ <- ZIO.when(service1.isEmpty && service2.isEmpty)(
-        ZIO.fail(
+      service <- ZIO
+        .fromOption(service1.orElse(service2))
+        .orElseFail(
           ValidationError(
             Vector(s"Can't find a service for ${body.path.orElse(body.pathPattern.map(_.regex)).getOrElse("")}")
           )
         )
-      )
-      service = service1.orElse(service2).get
       candidatesQuery = {
         val baseQ = query[HttpStub](hs =>
           hs.id != lift(id) &&
@@ -564,9 +563,7 @@ final class AdminApiHandler(
       service: Option[NonEmptyString]
   ): RIO[WLD, Vector[SourceDTO]] = {
     var queryDoc = BsonDocument()
-    if (service.isDefined) {
-      queryDoc = BsonDocument("service" -> service.get.bson)
-    }
+    service.foreach(svc => queryDoc = BsonDocument("service" -> svc.bson))
     sourceDAO
       .findChunkProjection[SourceDTO](queryDoc, 0, Int.MaxValue, BsonDocument("created" -> -1) :: Nil)
   }
@@ -673,7 +670,7 @@ final class AdminApiHandler(
       )
       _ <- sourceDAO.deleteById(name) // TODO: delete in transaction
       _ <- ZIO
-        .foreachDiscard(source.get.shutdown.map(_.toVector).getOrElse(Vector.empty))(rm.execute)
+        .foreachDiscard(source.fold(Vector.empty)(_.shutdown.map(_.toVector).getOrElse(Vector.empty)))(rm.execute)
         .catchSomeDefect { case NonFatal(ex) =>
           ZIO.fail(ex)
         }
@@ -687,9 +684,7 @@ final class AdminApiHandler(
       service: Option[NonEmptyString]
   ): RIO[WLD, Vector[DestinationDTO]] = {
     var queryDoc = BsonDocument()
-    if (service.isDefined) {
-      queryDoc = BsonDocument("service" -> service.get.bson)
-    }
+    service.foreach(svc => queryDoc = BsonDocument("service" -> svc.bson))
     destinationDAO.findChunkProjection[DestinationDTO](
       queryDoc,
       0,

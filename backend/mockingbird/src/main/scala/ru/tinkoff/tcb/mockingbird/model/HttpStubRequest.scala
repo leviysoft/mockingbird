@@ -42,7 +42,7 @@ sealed trait HttpStubRequest derives BsonDecoder, BsonEncoder {
   def checkHeaders(hs: Map[String, String]): Boolean =
     headers.forall { case (k, v) =>
       hs.exists { case (kx, vx) =>
-        k.toLowerCase == kx.toLowerCase && v == vx
+        k.toLowerCase === kx.toLowerCase && v === vx
       }
     }
 
@@ -235,7 +235,7 @@ sealed trait RequestPart derives BsonDecoder, BsonEncoder {
   def checkHeaders(hs: Map[String, String]): Boolean =
     headers.forall { case (k, v) =>
       hs.exists { case (kx, vx) =>
-        k.toLowerCase == kx.toLowerCase && v == vx
+        k.toLowerCase === kx.toLowerCase && v === vx
       }
     }
 
@@ -281,7 +281,7 @@ final case class AnyContentPart(headers: Map[String, String]) extends RequestPar
 }
 
 final case class RawPart(headers: Map[String, String], body: String) extends RequestPart {
-  override def checkBody(value: String): Boolean = value == body
+  override def checkBody(value: String): Boolean = value === body
 
   override def extractJson(body: String): Option[Json] = None
 
@@ -305,6 +305,7 @@ final case class JsonPart(headers: Map[String, String], body: Json) extends Requ
 }
 
 final case class XMLPart(headers: Map[String, String], body: XMLString.Type) extends RequestPart {
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   override def checkBody(value: String): Boolean = Try(SafeXML.loadString(value)).exists(_ == body.unwrap)
 
   override def extractJson(body: String): Option[Json] = None

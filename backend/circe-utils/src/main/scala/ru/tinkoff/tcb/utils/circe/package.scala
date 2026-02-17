@@ -52,7 +52,10 @@ package object circe {
 
         if (baseArr.length >= patchArr.length)
           Json.fromValues((baseArr zip patchArr).map(mrgPair.tupled))
-        else Json.fromValues(baseArr.zipAll(patchArr, Json.Null, patchArr.last).map(mrgPair.tupled))
+        else
+          Json.fromValues(
+            baseArr.zipAll(patchArr, Json.Null, patchArr.lastOption.getOrElse(Json.Null)).map(mrgPair.tupled)
+          )
       case (p, JsonNull()) if arraySubvalues => p
       case (_, p)                            => p
     }

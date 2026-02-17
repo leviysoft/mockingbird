@@ -25,6 +25,7 @@ abstract class FormPredicate extends (Map[String, List[String]] => Boolean) {
 
   override def hashCode(): Int = definition.hashCode()
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   override def equals(obj: Any): Boolean = obj match {
     case sp: FormPredicate => sp.definition == definition
     case _                 => false

@@ -24,6 +24,7 @@ trait LabelDAO[F[_]] extends MongoDAO[F, Label] {
 
 object LabelDAO
 
+@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 class LabelDAOImpl(collection: MongoCollection[BsonDocument]) extends DAOBase[Label](collection) with LabelDAO[Task] {
   def createIndexes: Task[Unit] =
     createIndex(

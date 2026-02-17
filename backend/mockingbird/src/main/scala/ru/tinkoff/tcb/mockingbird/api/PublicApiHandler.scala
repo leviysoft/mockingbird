@@ -138,12 +138,12 @@ final class PublicApiHandler(
               )
           )
       }
-      _ <- ZIO.when(stub.scope == Scope.Countdown)(
+      _ <- ZIO.when(stub.scope === Scope.Countdown)(
         stubDAO.updateById(stub.id, Document("$inc" -> Document("times" -> -1.bson)))
       )
-      _ <- ZIO.when(stub.callback.isDefined)(
+      _ <- ZIO.foreachDiscard(stub.callback)(cb =>
         engine
-          .recurseCallback(state, stub.callback.get, data, xdata)
+          .recurseCallback(state, cb, data, xdata)
           .catchSomeDefect { case NonFatal(ex) =>
             ZIO.fail(ex)
           }

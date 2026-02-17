@@ -5,6 +5,7 @@ import scala.util.matching.Regex
 
 import com.github.dwickern.macros.NameOf.*
 import eu.timepit.refined.*
+import eu.timepit.refined.cats.*
 import io.circe.Decoder
 import io.circe.Encoder
 import io.circe.Json
@@ -92,7 +93,8 @@ object HttpStub extends CallbackChecker {
   private val responseCodes204and304: Rule[HttpStub] = stub =>
     stub.response match {
       case StubCode(rc)
-          if rc == refineV[HttpStatusCodeRange].unsafeFrom(204) || rc == refineV[HttpStatusCodeRange].unsafeFrom(304) =>
+          if rc === refineV[HttpStatusCodeRange]
+            .unsafeFrom(204) || rc === refineV[HttpStatusCodeRange].unsafeFrom(304) =>
         stub.response match {
           case EmptyResponse(_, _, _) => Vector.empty
           case _ =>
@@ -102,12 +104,10 @@ object HttpStub extends CallbackChecker {
     }
 
   def validationRules(destinations: Set[SID[DestinationConfiguration]]): Rule[HttpStub] =
-    Vector(
-      pathOrPattern,
-      (h: HttpStub) => checkCallback(h.callback, destinations),
-      stateNonEmpty,
-      persistNonEmpty,
-      jsonProxyReq,
+    pathOrPattern |+|
+      ((h: HttpStub) => checkCallback(h.callback, destinations)) |+|
+      stateNonEmpty |+|
+      persistNonEmpty |+|
+      jsonProxyReq |+|
       responseCodes204and304
-    ).reduce(_ |+| _)
 }

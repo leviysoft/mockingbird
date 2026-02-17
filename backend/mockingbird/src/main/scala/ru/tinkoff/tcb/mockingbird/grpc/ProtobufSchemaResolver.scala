@@ -25,7 +25,7 @@ class ProtobufSchemaResolverImpl extends ProtobufSchemaResolver {
 
   private val log = MDCLogging.`for`[Tracing](this)
 
-  def parseDefinitionFrom(bytes: Array[Byte]): ZIO[Tracing, IOException, GrpcProtoDefinition] = {
+  override def parseDefinitionFrom(bytes: Array[Byte]): ZIO[Tracing, IOException, GrpcProtoDefinition] = {
     val managed = ZManaged.acquireReleaseWith(ZIO.attemptBlockingIO(Files.createTempDirectory("temp"))) { path =>
       log.info("Deleting files in path", path.toString) *>
         ZIO.attemptBlockingIO {

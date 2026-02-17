@@ -17,6 +17,7 @@ import org.graalvm.polyglot.proxy.*
 package object conversion {
   object GValue extends Newtype[AnyRef]
 
+  @SuppressWarnings(Array("org.wartremover.warts.Null"))
   val circe2js: Json.Folder[GValue.Type] = new Json.Folder[GValue.Type] {
     override def onNull: GValue.Type = GValue(null)
 
@@ -34,6 +35,7 @@ package object conversion {
     })
 
     override def onObject(value: JsonObject): GValue.Type = GValue(new ProxyObject {
+      @SuppressWarnings(Array("org.wartremover.warts.Null"))
       override def getMember(key: String): AnyRef = value.apply(key).map(_.foldWith(circe2js).unwrap).orNull
       override def getMemberKeys: AnyRef = new ProxyArray {
         private val keys                                  = value.keys.toVector
@@ -41,7 +43,7 @@ package object conversion {
         override def set(index: Long, value: Value): Unit = throw new UnsupportedOperationException()
         override def getSize: Long                        = keys.size
       }
-      override def hasMember(key: String): Boolean            = value.keys.exists(_ == key)
+      override def hasMember(key: String): Boolean            = value.keys.exists(_ === key)
       override def putMember(key: String, value: Value): Unit = throw new UnsupportedOperationException()
     })
   }

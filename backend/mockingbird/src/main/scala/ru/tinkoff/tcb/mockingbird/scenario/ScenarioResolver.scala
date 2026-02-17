@@ -25,6 +25,7 @@ import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.id.SID
 import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 
+@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 class ScenarioResolver(
     scenarioDAO: ScenarioDAO[Task],
     stateDAO: PersistentStateDAO[Task],
@@ -82,7 +83,7 @@ class ScenarioResolver(
         log.error("More than one stateless scenario found") *>
           ZIO.fail(ScenarioSearchError("More than one stateless scenario found"))
       )
-      res = scenarios2.find(_._2.size == 1) orElse scenarios2.find(_._1.state.isEmpty)
+      res = scenarios2.find(_._2.size === 1) orElse scenarios2.find(_._1.state.isEmpty)
     } yield res.map { case (scenario, states) => scenario -> states.headOption }).catchSome { case EarlyReturn =>
       ZIO.none
     }

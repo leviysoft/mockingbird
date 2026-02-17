@@ -183,10 +183,12 @@ object GrpcExractor {
     )
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   private def isProto3OptionalField(field: DescriptorProtos.FieldDescriptorProto, oneOfFields: Set[String]): Boolean =
     GrpcLabel.withValue(field.getLabel.toString.split("_").last.toLowerCase) == GrpcLabel.Optional &&
       oneOfFields(s"_${field.getName}")
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   private def getGrpcField(
       field: DescriptorProtos.FieldDescriptorProto,
       label: GrpcLabel,
@@ -203,8 +205,9 @@ object GrpcExractor {
     )
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   private def getGrpcType(field: DescriptorProtos.FieldDescriptorProto): GrpcType =
-    if (!primitiveTypes.isDefinedAt(field.getType.name()) || field.getTypeName != "") GrpcType.Custom
+    if (!primitiveTypes.isDefinedAt(field.getType.name()) || field.getTypeName.nonEmpty) GrpcType.Custom
     else GrpcType.Primitive
 
   private def getFieldType(field: DescriptorProtos.FieldDescriptorProto, custom: Boolean): String =

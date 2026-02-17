@@ -10,8 +10,8 @@ package object string {
      */
     def camel2Underscore: String =
       text.drop(1).foldLeft(text.headOption.map(ch => s"${ch.toLower}") getOrElse "") {
-        case (acc, c) if c.isUpper => acc + "_" + c.toLower
-        case (acc, c)              => acc + c
+        case (acc, c) if c.isUpper => acc + "_" + c.toLower.toString
+        case (acc, c)              => acc + c.toString
       }
 
     /**

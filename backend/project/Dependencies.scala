@@ -30,7 +30,7 @@ object Dependencies {
   val zio = Seq(
     "dev.zio" %% "zio"                 % Versions.zio,
     "dev.zio" %% "zio-managed"         % Versions.zio,
-    "dev.zio" %% "zio-interop-cats"    % "23.1.0.1",
+    "dev.zio" %% "zio-interop-cats"    % "23.1.0.13",
     //"dev.zio" %% "zio-interop-twitter" % "21.2.0.2.2",
     "dev.zio" %% "zio-test"            % Versions.zio % Test,
     "dev.zio" %% "zio-test-sbt"        % Versions.zio % Test
@@ -74,7 +74,8 @@ object Dependencies {
   ).map("com.dimafeng" %% _ % "0.44.1" % Test)
 
   lazy val refined = Seq(
-    "eu.timepit" %% "refined" % "0.11.3"
+    "eu.timepit" %% "refined"      % "0.11.3",
+    "eu.timepit" %% "refined-cats" % "0.11.3"
   )
 
   lazy val protobuf = Seq(

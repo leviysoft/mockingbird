@@ -39,8 +39,9 @@ final class ResourceManager(
         ZIO.foreachDiscard(errs)(recover)
       case CompoundError(errs) =>
         val recoverable = errs.filter(recover.isDefinedAt)
-        val fatal       = errs.find(!recover.isDefinedAt(_))
-        ZIO.foreachDiscard(recoverable)(recover) *> log.errorCause("Fatal error", fatal.get) *> ZIO.die(fatal.get)
+        val fatalOpt    = errs.find(!recover.isDefinedAt(_))
+        ZIO.foreachDiscard(recoverable)(recover) *>
+          fatalOpt.fold[URIO[WLD, Unit]](ZIO.unit)(f => log.errorCause("Fatal error", f) *> ZIO.die(f))
       case thr if recover.isDefinedAt(thr) =>
         recover(thr)
       case thr =>
@@ -60,8 +61,9 @@ final class ResourceManager(
         ZIO.foreachDiscard(errs)(recover)
       case CompoundError(errs) =>
         val recoverable = errs.filter(recover.isDefinedAt)
-        val fatal       = errs.find(!recover.isDefinedAt(_))
-        ZIO.foreachDiscard(recoverable)(recover) *> log.errorCause("Fatal error", fatal.get) *> ZIO.die(fatal.get)
+        val fatalOpt    = errs.find(!recover.isDefinedAt(_))
+        ZIO.foreachDiscard(recoverable)(recover) *>
+          fatalOpt.fold[URIO[WLD, Unit]](ZIO.unit)(f => log.errorCause("Fatal error", f) *> ZIO.die(f))
       case thr if recover.isDefinedAt(thr) =>
         recover(thr)
       case thr =>
@@ -94,8 +96,9 @@ final class ResourceManager(
         ZIO.foreachDiscard(errs)(recover)
       case CompoundError(errs) =>
         val recoverable = errs.filter(recover.isDefinedAt)
-        val fatal       = errs.find(!recover.isDefinedAt(_))
-        ZIO.foreachDiscard(recoverable)(recover) *> log.errorCause("Fatal error", fatal.get) *> ZIO.die(fatal.get)
+        val fatalOpt    = errs.find(!recover.isDefinedAt(_))
+        ZIO.foreachDiscard(recoverable)(recover) *>
+          fatalOpt.fold[URIO[WLD, Unit]](ZIO.unit)(f => log.errorCause("Fatal error", f) *> ZIO.die(f))
       case thr if recover.isDefinedAt(thr) =>
         recover(thr)
       case thr =>

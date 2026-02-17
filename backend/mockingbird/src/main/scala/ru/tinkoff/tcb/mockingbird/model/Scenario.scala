@@ -92,12 +92,10 @@ object Scenario extends CallbackChecker {
       sources: Set[SID[SourceConfiguration]],
       destinations: Set[SID[DestinationConfiguration]]
   ): Rule[Scenario] =
-    Vector(
-      destOutp,
-      (s: Scenario) => checkCallback(s.callback, destinations),
-      checkSourceId(sources),
-      checkDestinationId(destinations),
-      stateNonEmpty,
+    destOutp |+|
+      ((s: Scenario) => checkCallback(s.callback, destinations)) |+|
+      checkSourceId(sources) |+|
+      checkDestinationId(destinations) |+|
+      stateNonEmpty |+|
       persistNonEmpty
-    ).reduce(_ |+| _)
 }

@@ -150,7 +150,7 @@ class OpticSpec extends RefSpec with Matchers {
 
         val optic = JLens \ "value"
 
-        optic.modify(_.withNumber(jn => Json.fromInt(jn.toInt.get * 2)))(target) shouldBe
+        optic.modify(_.withNumber(jn => jn.toInt.fold(Json.Null)(n => Json.fromInt(n * 2))))(target) shouldBe
           json"""{"value": 4}"""
       }
 
@@ -159,7 +159,7 @@ class OpticSpec extends RefSpec with Matchers {
 
         val optic = (JLens \ "value").traverse
 
-        optic.modify(_.withNumber(jn => Json.fromInt(jn.toInt.get * 2)))(target) shouldBe
+        optic.modify(_.withNumber(jn => jn.toInt.fold(Json.Null)(n => Json.fromInt(n * 2))))(target) shouldBe
           json"""{"value": [2, 4, 6]}"""
       }
     }
@@ -171,7 +171,7 @@ class OpticSpec extends RefSpec with Matchers {
         val optic = JLens \ "value"
 
         optic.modifyOpt {
-          case Some(json) => json.withNumber(jn => Json.fromInt(jn.toInt.get * 2))
+          case Some(json) => json.withNumber(jn => jn.toInt.fold(Json.Null)(n => Json.fromInt(n * 2)))
           case None       => Json.fromInt(2)
         }(target) shouldBe
           json"""{"value": 4}"""
@@ -183,7 +183,7 @@ class OpticSpec extends RefSpec with Matchers {
         val optic = JLens \ "value"
 
         optic.modifyOpt {
-          case Some(json) => json.withNumber(jn => Json.fromInt(jn.toInt.get * 2))
+          case Some(json) => json.withNumber(jn => jn.toInt.fold(Json.Null)(n => Json.fromInt(n * 2)))
           case None       => Json.fromInt(2)
         }(target) shouldBe
           json"""{"value": 2}"""
@@ -196,7 +196,8 @@ class OpticSpec extends RefSpec with Matchers {
 
         val optic = JLens \ "outer"
 
-        optic.modifyObjectValues(_.withNumber(jn => Json.fromInt(jn.toInt.get * 2)))(target) shouldBe
+        optic
+          .modifyObjectValues(_.withNumber(jn => jn.toInt.fold(Json.Null)(n => Json.fromInt(n * 2))))(target) shouldBe
           json"""{"outer": {"inner": 84}}"""
       }
     }
@@ -208,7 +209,7 @@ class OpticSpec extends RefSpec with Matchers {
         val optic = JLens \ "outer"
 
         optic.modifyFields { case (key, value) =>
-          key -> value.withNumber(jn => Json.fromInt(jn.toInt.get * 2))
+          key -> value.withNumber(jn => jn.toInt.fold(Json.Null)(n => Json.fromInt(n * 2)))
         }(target) shouldBe json"""{"outer": {"inner": 84}}"""
       }
     }

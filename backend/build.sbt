@@ -6,7 +6,6 @@ ThisBuild / scalaVersion := "3.8.1"
 ThisBuild / evictionErrorLevel := Level.Debug
 
 ThisBuild / semanticdbEnabled := true
-ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 val utils = (project in file("utils"))
   .settings(Settings.common)
@@ -214,5 +213,5 @@ val root = (project in file("."))
     `edsl`
   )
   .settings(
-    run / aggregate := false,
+    run / aggregate := false
   )

@@ -2,17 +2,18 @@ package ru.tinkoff.tcb.bson.enumeratum
 
 import oolong.bson.*
 import org.mongodb.scala.bson.*
+import org.scalatest.TryValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
-class BsonEnumSpec extends AnyFunSpec with Matchers {
+class BsonEnumSpec extends AnyFunSpec with Matchers with TryValues {
   describe("BSON serdes") {
 
     describe("deserialisation") {
 
       it("should work with valid values") {
         val bsonValue: BsonValue = BsonString("A")
-        BsonDecoder[Dummy].fromBson(bsonValue).get shouldBe Dummy.A
+        BsonDecoder[Dummy].fromBson(bsonValue).success.value shouldBe Dummy.A
       }
 
       it("should fail with invalid values") {

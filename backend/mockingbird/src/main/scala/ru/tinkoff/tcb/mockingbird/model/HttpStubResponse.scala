@@ -64,13 +64,11 @@ object HttpStubResponse {
   given Schema[HttpStubResponse] = Schema.derived
 
   val headers: Property[HttpStubResponse, Map[String, String]] =
-    Vector(
-      EmptyResponse.prism >> EmptyResponse.headers,
-      RawResponse.prism >> RawResponse.headers,
-      JsonResponse.prism >> JsonResponse.headers,
-      XmlResponse.prism >> XmlResponse.headers,
-      BinaryResponse.prism >> BinaryResponse.headers
-    ).reduce[Property[HttpStubResponse, Map[String, String]]](_ orElse _)
+    (EmptyResponse.prism >> EmptyResponse.headers) orElse
+      (RawResponse.prism >> RawResponse.headers) orElse
+      (JsonResponse.prism >> JsonResponse.headers) orElse
+      (XmlResponse.prism >> XmlResponse.headers) orElse
+      (BinaryResponse.prism >> BinaryResponse.headers)
 
   val jsonBody: Property[HttpStubResponse, Json] = JsonResponse.prism >> JsonResponse.body
 

@@ -13,7 +13,7 @@ class RoundRobinSpec extends AnyFunSuite with Matchers with TryValues {
   implicit private val regexEquality: Equality[Regex] =
     (a: Regex, b: Any) =>
       b match {
-        case rb: Regex => a.regex == rb.regex
+        case rb: Regex => a.regex === rb.regex
         case _         => false
       }
 

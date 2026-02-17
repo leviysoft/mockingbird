@@ -61,6 +61,10 @@ object Mockingbird {
 
   private def zioLog: Logging[UIO] = new ZUniversalLogging(this.getClass.getName)
 
+  @SuppressWarnings(Array("org.wartremover.warts.Null"))
+  private def defaultKeyManagerFactory(): KeyManagerFactory =
+    KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm).tap(_.init(null, Array()))
+
   private def mongoLayer = ZLayer {
     for {
       config <- ZIO.service[MongoConfig]
@@ -127,10 +131,8 @@ object Mockingbird {
                     .some
                 )
             }
-            keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm).tap { kmf =>
-              kmf.init(null, Array())
-            }
-            trustManager = TrustSomeHostsManager.of(pc.insecureHosts.to(Set))
+            keyManagerFactory = defaultKeyManagerFactory()
+            trustManager      = TrustSomeHostsManager.of(pc.insecureHosts.to(Set))
             sslContext = SSLContext.getInstance("TLS").tap { sslc =>
               sslc.init(keyManagerFactory.getKeyManagers, Array(trustManager), new SecureRandom)
             }

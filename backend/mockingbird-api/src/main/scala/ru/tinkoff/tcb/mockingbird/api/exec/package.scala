@@ -64,7 +64,7 @@ package object exec {
           .map(_.map(part => part.copy[String](body = new String(part.body, StandardCharsets.UTF_8))))(
             _.map(part => part.copy(body = part.body.getBytes(StandardCharsets.UTF_8)))
           )
-          .map[RequestBody](MultipartRequestBody(_))(MultipartRequestBody.subset.getOption(_).get.value)
+          .map[RequestBody](MultipartRequestBody(_))(MultipartRequestBody.subset.getOption(_).fold(Seq.empty)(_.value))
       )
       .out(headers)
       .out(statusCode)

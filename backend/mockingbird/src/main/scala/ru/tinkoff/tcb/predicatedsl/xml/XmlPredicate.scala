@@ -34,6 +34,7 @@ abstract class XmlPredicate extends (NodeSeq => Boolean) {
 
   override def hashCode(): Int = definition.hashCode()
 
+  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   override def equals(obj: Any): Boolean = obj match {
     case xp: XmlPredicate => xp.definition == definition
     case _                => false
@@ -94,11 +95,11 @@ object XmlPredicate {
     (kwd, jv) =>
       (kwd, jv) match {
         case (Equals, JsonString(str)) =>
-          Validated.valid(_.exists(_.text == str))
+          Validated.valid(_.exists(_.text === str))
         case (Equals, JsonNumber(jnum)) =>
           Validated.valid(_.exists(n => jnum.toBigDecimal.contains(BigDecimal(n.text))))
         case (NotEq, JsonString(str)) =>
-          Validated.valid(_.exists(_.text != str))
+          Validated.valid(_.exists(n => n.text =!= str))
         case (NotEq, JsonNumber(jnum)) =>
           Validated.valid(_.exists(n => !jnum.toBigDecimal.contains(BigDecimal(n.text))))
         case (Greater, JsonNumber(jnum)) =>
@@ -112,11 +113,11 @@ object XmlPredicate {
         case (Rx, JsonString(str)) =>
           Validated.valid(_.exists(_.text.matches(str)))
         case (Size, JsonNumber(jnum)) if jnum.toInt.isDefined =>
-          Validated.valid(_.exists(_.text.length == jnum.toInt.get))
+          Validated.valid(_.exists(n => jnum.toInt.exists(n.text.length === _)))
         case (Exists, JsonBoolean(true))  => Validated.valid(_.isDefined)
         case (Exists, JsonBoolean(false)) => Validated.valid(_.isEmpty)
         case (Cdata, JsonDocument(JObject("==" -> JsonString(value)))) =>
-          Validated.valid(_.exists(_.text == value))
+          Validated.valid(_.exists(_.text === value))
         case (Cdata, JsonDocument(JObject("~=" -> JsonString(value)))) =>
           Validated.valid(_.exists(_.text.matches(value)))
         case (JCdata, spec) =>

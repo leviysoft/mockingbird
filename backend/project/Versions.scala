@@ -6,6 +6,6 @@ object Versions {
   val micrometer       = "1.8.5"
   val glass            = "0.3.0"
   val sttp             = "4.0.0-M13"
-  val zio              = "2.0.19"
+  val zio              = "2.1.24"
   val circe            = "0.14.10"
 }
