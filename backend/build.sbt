@@ -1,7 +1,7 @@
 import ProjectKeys._
 import sbt.Keys.concurrentRestrictions
 
-ThisBuild / scalaVersion := "3.8.1"
+ThisBuild / scalaVersion := "3.8.2"
 
 ThisBuild / evictionErrorLevel := Level.Debug
 
