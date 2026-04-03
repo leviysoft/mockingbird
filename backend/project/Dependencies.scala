@@ -91,6 +91,10 @@ object Dependencies {
     "io.github.mweirauch" % "micrometer-jvm-extras"          % "0.2.2"
   )
 
+  lazy val literally = Seq(
+    "org.typelevel" %% "literally" % "1.2.0"
+  )
+
   lazy val glass = Seq(
     "glass-core",
     "glass-macro",

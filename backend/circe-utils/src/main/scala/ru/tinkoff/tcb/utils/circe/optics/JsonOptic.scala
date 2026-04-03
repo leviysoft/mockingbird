@@ -3,6 +3,8 @@ package ru.tinkoff.tcb.utils.circe.optics
 import io.circe.ACursor
 import io.circe.Json
 
+import ru.tinkoff.tcb.utils.regex.literals.*
+
 final case class JsonOptic private[optics] (private val jsonPath: Seq[PathPart]) {
   def \(field: String): JsonOptic = new JsonOptic(jsonPath :+ Field(field))
   def \(index: Int): JsonOptic    = new JsonOptic(jsonPath :+ Index(index))
@@ -111,7 +113,7 @@ final case class JsonOptic private[optics] (private val jsonPath: Seq[PathPart])
 }
 
 object JsonOptic {
-  private val IndexPattern = """\[(\d+)\]""".r
+  private val IndexPattern = rx"""\[(\d+)\]"""
 
   def forPath(path: String*): JsonOptic = new JsonOptic(path.map(Field(_)))
   def forIndex(index: Int): JsonOptic   = new JsonOptic(Seq(Index(index)))

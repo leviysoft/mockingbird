@@ -7,6 +7,7 @@ import cats.instances.vector.*
 import io.circe.*
 
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
+import ru.tinkoff.tcb.utils.regex.literals.*
 
 package object circe {
   object JsonString {
@@ -71,7 +72,7 @@ package object circe {
       )
 
     def camelizeKeys: Json =
-      transformKeys(in => "_([a-z\\d])".r.replaceAllIn(in, _.group(1).toUpperCase)).result
+      transformKeys(in => rx"_([a-z\d])".replaceAllIn(in, _.group(1).toUpperCase)).result
 
     /**
      * Merges two Json objects

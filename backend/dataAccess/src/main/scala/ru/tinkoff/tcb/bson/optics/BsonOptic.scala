@@ -5,6 +5,8 @@ import scala.util.Try
 import oolong.bson.*
 import org.mongodb.scala.bson.*
 
+import ru.tinkoff.tcb.utils.regex.literals.*
+
 final case class BsonOptic private[optics] (private val BsonPath: Seq[Either[Int, String]]) {
   def \(field: String): BsonOptic = new BsonOptic(BsonPath :+ Right(field))
   def \(index: Int): BsonOptic    = new BsonOptic(BsonPath :+ Left(index))
@@ -84,7 +86,7 @@ final case class BsonOptic private[optics] (private val BsonPath: Seq[Either[Int
 }
 
 object BsonOptic {
-  private val Index = """\[(\d+)\]""".r
+  private val Index = rx"""\[(\d+)\]"""
 
   def forPath(path: String*): BsonOptic = new BsonOptic(path.map(Right(_)))
   def forIndex(index: Int): BsonOptic   = new BsonOptic(Seq(Left(index)))

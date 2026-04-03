@@ -10,16 +10,18 @@ ThisBuild / semanticdbEnabled := true
 val utils = (project in file("utils"))
   .settings(Settings.common)
   .settings(
-    libraryDependencies ++= Dependencies.cats ++ Dependencies.zio ++ Dependencies.scalatest ++ Dependencies.metrics
+    libraryDependencies ++= Dependencies.cats ++ Dependencies.zio ++ Dependencies.scalatest ++ Dependencies.metrics ++ Dependencies.literally
   )
 
 val circeUtils = (project in file("circe-utils"))
+  .dependsOn(utils)
   .settings(Settings.common)
   .settings(
     libraryDependencies ++= Dependencies.json ++ Dependencies.zio ++ Dependencies.scalatest
   )
 
 val dataAccess = (project in file("dataAccess"))
+  .dependsOn(utils)
   .settings(Settings.common)
   .settings(
     libraryDependencies ++= Dependencies.alleycats ++ Dependencies.cats ++ Dependencies.zio ++ Dependencies.mouse ++ Dependencies.oolong ++ Seq(

@@ -23,6 +23,7 @@ import ru.tinkoff.tcb.protocol.json.*
 import ru.tinkoff.tcb.protocol.schema.*
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.id.SID
+import ru.tinkoff.tcb.utils.regex.literals.*
 import ru.tinkoff.tcb.validation.Rule
 
 final case class GrpcStub(
@@ -45,7 +46,7 @@ final case class GrpcStub(
       Schema
 
 object GrpcStub {
-  private val indexRegex = "\\[([\\d]+)\\]".r
+  private val indexRegex = rx"""\[(\d+)\]"""
 
   inline given QueryMeta[GrpcStub] = queryMeta(_.id -> "_id")
 

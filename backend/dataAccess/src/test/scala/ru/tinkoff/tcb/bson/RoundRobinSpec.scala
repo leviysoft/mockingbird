@@ -3,6 +3,8 @@ package ru.tinkoff.tcb.bson
 import scala.util.matching.Regex
 
 import oolong.bson.*
+
+import ru.tinkoff.tcb.utils.regex.literals.*
 import oolong.bson.given
 import org.scalactic.Equality
 import org.scalatest.TryValues
@@ -18,7 +20,7 @@ class RoundRobinSpec extends AnyFunSuite with Matchers with TryValues {
       }
 
   test("Regex serialization") {
-    val group = "<(?<name>[a-zA-Z0-9]+)>".r
+    val group = rx"<(?<name>[a-zA-Z0-9]+)>"
 
     val sut = BsonDecoder[Regex].fromBson(group.bson)
 

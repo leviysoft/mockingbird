@@ -13,13 +13,14 @@ import ru.tinkoff.tcb.utils.circe.*
 import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.json.json2StringFolder
 import ru.tinkoff.tcb.utils.regex.OneOrMore
+import ru.tinkoff.tcb.utils.regex.literals.*
 import ru.tinkoff.tcb.utils.resource.Resource
 import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 import ru.tinkoff.tcb.utils.sandboxing.conversion.circe2js
 import ru.tinkoff.tcb.utils.transformation.xml.nodeTemplater
 
 package object json {
-  private val JORx = """\$([\:~])?\{([\p{L}\d\.\[\]\-_]+)\}""".r
+  private val JORx = rx"""\$$([\:~])?\{([\p{L}\d\.\[\]\-_]+)\}"""
 
   private object JORxs extends OneOrMore(JORx)
 
