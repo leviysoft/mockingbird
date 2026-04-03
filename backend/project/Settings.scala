@@ -49,6 +49,7 @@ object Settings {
       prelude(), // standart imports + zio
       // warning settings
       "-Wconf:any:v", // shows warning categories for nowarn (https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html)
+      "-Wconf:msg=match may not be exhaustive:e",
       "-Wunused:imports",
       "-Wunused:privates",
       "-Wvalue-discard"
