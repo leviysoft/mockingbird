@@ -61,7 +61,6 @@ object Settings {
       Wart.CaseClassPrivateApply,
       Wart.EitherProjectionPartial,
       Wart.Enumeration,
-      Wart.Equals,
       Wart.ExplicitImplicitTypes,
       Wart.FinalCaseClass,
       Wart.JavaConversions,

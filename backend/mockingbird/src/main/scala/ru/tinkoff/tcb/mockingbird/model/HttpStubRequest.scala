@@ -305,7 +305,6 @@ final case class JsonPart(headers: Map[String, String], body: Json) extends Requ
 }
 
 final case class XMLPart(headers: Map[String, String], body: XMLString.Type) extends RequestPart {
-  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   override def checkBody(value: String): Boolean = Try(SafeXML.loadString(value)).exists(_ == body.unwrap)
 
   override def extractJson(body: String): Option[Json] = None

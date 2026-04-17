@@ -31,7 +31,6 @@ trait GrpcStubResolver {
   )(scope: Scope): RIO[WLD, Option[(GrpcStub, Json, Option[PersistentState])]]
 }
 
-@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 class GrpcStubResolverImpl(
     stubDAO: GrpcStubDAO[Task],
     stateDAO: PersistentStateDAO[Task],

@@ -43,7 +43,6 @@ trait GrpcRequestHandler {
   def exec(stream: Stream[StatusException, Array[Byte]]): ZStream[WLD & RequestContext, Throwable, Array[Byte]]
 }
 
-@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 class GrpcRequestHandlerImpl(
     stateDAO: PersistentStateDAO[Task],
     stubDAO: GrpcStubDAO[Task],

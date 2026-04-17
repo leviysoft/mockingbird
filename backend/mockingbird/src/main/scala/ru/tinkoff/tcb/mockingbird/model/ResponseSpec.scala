@@ -59,7 +59,6 @@ final case class JsonResponseSpec(code: Option[Int], body: Option[Json]) extends
 }
 
 final case class XmlResponseSpec(code: Option[Int], body: Option[XMLString.Type]) extends ResponseSpec {
-  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   override def checkBody(data: String): Boolean =
     Try(SafeXML.loadString(data)).toOption.exists(nx => body.forall(_.unwrap == nx))
 }

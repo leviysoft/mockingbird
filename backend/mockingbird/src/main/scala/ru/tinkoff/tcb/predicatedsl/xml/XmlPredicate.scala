@@ -34,7 +34,6 @@ abstract class XmlPredicate extends (NodeSeq => Boolean) {
 
   override def hashCode(): Int = definition.hashCode()
 
-  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   override def equals(obj: Any): Boolean = obj match {
     case xp: XmlPredicate => xp.definition == definition
     case _                => false

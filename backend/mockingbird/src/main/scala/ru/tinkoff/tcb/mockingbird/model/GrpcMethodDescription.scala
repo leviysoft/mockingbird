@@ -103,7 +103,6 @@ object GrpcMethodDescription {
         b :+ (p.resolve(name) -> m)
     }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   def validate(methodDescription: GrpcMethodDescription)(
       requestClass: String,
       requestSchema: GrpcProtoDefinition,

@@ -25,7 +25,6 @@ import ru.tinkoff.tcb.utils.circe.optics.JsonOptic
 import ru.tinkoff.tcb.utils.id.SID
 import ru.tinkoff.tcb.utils.sandboxing.GraalJsSandbox
 
-@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 class ScenarioResolver(
     scenarioDAO: ScenarioDAO[Task],
     stateDAO: PersistentStateDAO[Task],

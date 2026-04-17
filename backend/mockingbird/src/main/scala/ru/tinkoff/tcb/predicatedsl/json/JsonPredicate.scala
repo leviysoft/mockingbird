@@ -31,7 +31,6 @@ abstract class JsonPredicate extends (Json => Boolean) {
 
   override def hashCode(): Int = definition.hashCode()
 
-  @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   override def equals(obj: Any): Boolean = obj match {
     case jp: JsonPredicate => jp.definition == definition
     case _                 => false

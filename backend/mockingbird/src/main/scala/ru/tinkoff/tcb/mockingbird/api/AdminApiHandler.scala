@@ -53,7 +53,6 @@ import ru.tinkoff.tcb.utils.id.SID
 import ru.tinkoff.tcb.utils.refinedchimney.*
 import ru.tinkoff.tcb.utils.xml.*
 
-@SuppressWarnings(Array("org.wartremover.warts.Equals"))
 final class AdminApiHandler(
     stubDAO: HttpStubDAO[Task],
     scenarioDAO: ScenarioDAO[Task],
